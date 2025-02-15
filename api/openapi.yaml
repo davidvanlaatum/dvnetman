@@ -1,0 +1,1107 @@
+openapi: 3.1.0
+info:
+  title: DVNetMan
+  description: DVNetMan
+  version: 1.0.0
+servers:
+  - url: /
+paths:
+  /api/v1/device:
+    get:
+      operationId: listDevices
+      parameters:
+        - name: page
+          in: query
+          description: Page number
+          schema:
+            type: integer
+          allowEmptyValue: true
+        - name: per_page
+          in: query
+          description: Number of items per page
+          schema:
+            type: integer
+          allowEmptyValue: true
+        - name: sort
+          in: query
+          description: Sort order
+          schema:
+            type: string
+          allowEmptyValue: true
+      responses:
+        "200":
+          description: List of device
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceSearchResults'
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/APIErrorModal'
+              example:
+                errors:
+                  - code: bad_request
+                    message: Bad request
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/APIErrorModal'
+              example:
+                errors:
+                  - code: internal_server_error
+                    message: Internal server error
+      tags:
+        - Device
+      security:
+        - bearerAuth: []
+    post:
+      operationId: createDevice
+      responses:
+        "200":
+          description: Create device
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Device'
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/APIErrorModal'
+              example:
+                errors:
+                  - code: bad_request
+                    message: Bad request
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/APIErrorModal'
+              example:
+                errors:
+                  - code: internal_server_error
+                    message: Internal server error
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Device'
+        required: true
+      tags:
+        - Device
+      security:
+        - bearerAuth: []
+  /api/v1/device/{id}:
+    delete:
+      operationId: deleteDevice
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: Delete device
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/APIErrorModal'
+              example:
+                errors:
+                  - code: bad_request
+                    message: Bad request
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/APIErrorModal'
+              example:
+                errors:
+                  - code: internal_server_error
+                    message: Internal server error
+      tags:
+        - Device
+      security:
+        - bearerAuth: []
+    get:
+      operationId: getDevice
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: If-None-Match
+          in: header
+          schema:
+            type: string
+        - name: If-Modified-Since
+          in: header
+          schema:
+            type: string
+            format: date-time
+      responses:
+        "200":
+          description: Get device
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Device'
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/APIErrorModal'
+              example:
+                errors:
+                  - code: bad_request
+                    message: Bad request
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/APIErrorModal'
+              example:
+                errors:
+                  - code: not_found
+                    message: Not found
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/APIErrorModal'
+              example:
+                errors:
+                  - code: internal_server_error
+                    message: Internal server error
+      tags:
+        - Device
+      security:
+        - bearerAuth: []
+    put:
+      operationId: updateDevice
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Update device
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Device'
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/APIErrorModal'
+              example:
+                errors:
+                  - code: bad_request
+                    message: Bad request
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/APIErrorModal'
+              example:
+                errors:
+                  - code: internal_server_error
+                    message: Internal server error
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Device'
+        required: true
+      tags:
+        - Device
+      security:
+        - bearerAuth: []
+  /api/v1/deviceType:
+    get:
+      operationId: listDeviceTypes
+      parameters:
+        - name: page
+          in: query
+          description: Page number
+          schema:
+            type: integer
+          allowEmptyValue: true
+        - name: per_page
+          in: query
+          description: Number of items per page
+          schema:
+            type: integer
+          allowEmptyValue: true
+        - name: sort
+          in: query
+          description: Sort order
+          schema:
+            type: string
+          allowEmptyValue: true
+      responses:
+        "200":
+          description: List of deviceType
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceTypeSearchResults'
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/APIErrorModal'
+              example:
+                errors:
+                  - code: bad_request
+                    message: Bad request
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/APIErrorModal'
+              example:
+                errors:
+                  - code: internal_server_error
+                    message: Internal server error
+      tags:
+        - Device
+      security:
+        - bearerAuth: []
+    post:
+      operationId: createDeviceType
+      responses:
+        "200":
+          description: Create deviceType
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceType'
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/APIErrorModal'
+              example:
+                errors:
+                  - code: bad_request
+                    message: Bad request
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/APIErrorModal'
+              example:
+                errors:
+                  - code: internal_server_error
+                    message: Internal server error
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceType'
+        required: true
+      tags:
+        - Device
+      security:
+        - bearerAuth: []
+  /api/v1/deviceType/{id}:
+    delete:
+      operationId: deleteDeviceType
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: Delete deviceType
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/APIErrorModal'
+              example:
+                errors:
+                  - code: bad_request
+                    message: Bad request
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/APIErrorModal'
+              example:
+                errors:
+                  - code: internal_server_error
+                    message: Internal server error
+      tags:
+        - Device
+      security:
+        - bearerAuth: []
+    get:
+      operationId: getDeviceType
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: If-None-Match
+          in: header
+          schema:
+            type: string
+        - name: If-Modified-Since
+          in: header
+          schema:
+            type: string
+            format: date-time
+      responses:
+        "200":
+          description: Get deviceType
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceType'
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/APIErrorModal'
+              example:
+                errors:
+                  - code: bad_request
+                    message: Bad request
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/APIErrorModal'
+              example:
+                errors:
+                  - code: not_found
+                    message: Not found
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/APIErrorModal'
+              example:
+                errors:
+                  - code: internal_server_error
+                    message: Internal server error
+      tags:
+        - Device
+      security:
+        - bearerAuth: []
+    put:
+      operationId: updateDeviceType
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Update deviceType
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceType'
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/APIErrorModal'
+              example:
+                errors:
+                  - code: bad_request
+                    message: Bad request
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/APIErrorModal'
+              example:
+                errors:
+                  - code: internal_server_error
+                    message: Internal server error
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceType'
+        required: true
+      tags:
+        - Device
+      security:
+        - bearerAuth: []
+  /api/v1/stats:
+    get:
+      operationId: GetStats
+      responses:
+        "200":
+          description: Stats
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Stats'
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/APIErrorModal'
+              example:
+                errors:
+                  - code: bad_request
+                    message: Bad request
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/APIErrorModal'
+              example:
+                errors:
+                  - code: internal_server_error
+                    message: Internal server error
+      tags:
+        - Stats
+      security:
+        - bearerAuth: []
+  /api/v1/user:
+    get:
+      operationId: listUsers
+      parameters:
+        - name: page
+          in: query
+          description: Page number
+          schema:
+            type: integer
+          allowEmptyValue: true
+        - name: per_page
+          in: query
+          description: Number of items per page
+          schema:
+            type: integer
+          allowEmptyValue: true
+        - name: sort
+          in: query
+          description: Sort order
+          schema:
+            type: string
+          allowEmptyValue: true
+      responses:
+        "200":
+          description: List of user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSearchResults'
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/APIErrorModal'
+              example:
+                errors:
+                  - code: bad_request
+                    message: Bad request
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/APIErrorModal'
+              example:
+                errors:
+                  - code: internal_server_error
+                    message: Internal server error
+      tags:
+        - User
+      security:
+        - bearerAuth: []
+    post:
+      operationId: createUser
+      responses:
+        "200":
+          description: Create user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/APIErrorModal'
+              example:
+                errors:
+                  - code: bad_request
+                    message: Bad request
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/APIErrorModal'
+              example:
+                errors:
+                  - code: internal_server_error
+                    message: Internal server error
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+        required: true
+      tags:
+        - User
+      security:
+        - bearerAuth: []
+  /api/v1/user/current:
+    get:
+      operationId: GetCurrentUser
+      responses:
+        "200":
+          description: Get current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/APIErrorModal'
+              example:
+                errors:
+                  - code: bad_request
+                    message: Bad request
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/APIErrorModal'
+              example:
+                errors:
+                  - code: internal_server_error
+                    message: Internal server error
+      tags:
+        - User
+      security:
+        - bearerAuth: []
+  /api/v1/user/{id}:
+    delete:
+      operationId: deleteUser
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: Delete user
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/APIErrorModal'
+              example:
+                errors:
+                  - code: bad_request
+                    message: Bad request
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/APIErrorModal'
+              example:
+                errors:
+                  - code: internal_server_error
+                    message: Internal server error
+      tags:
+        - User
+      security:
+        - bearerAuth: []
+    get:
+      operationId: getUser
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: If-None-Match
+          in: header
+          schema:
+            type: string
+        - name: If-Modified-Since
+          in: header
+          schema:
+            type: string
+            format: date-time
+      responses:
+        "200":
+          description: Get user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/APIErrorModal'
+              example:
+                errors:
+                  - code: bad_request
+                    message: Bad request
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/APIErrorModal'
+              example:
+                errors:
+                  - code: not_found
+                    message: Not found
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/APIErrorModal'
+              example:
+                errors:
+                  - code: internal_server_error
+                    message: Internal server error
+      tags:
+        - User
+      security:
+        - bearerAuth: []
+    put:
+      operationId: updateUser
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Update user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/APIErrorModal'
+              example:
+                errors:
+                  - code: bad_request
+                    message: Bad request
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/APIErrorModal'
+              example:
+                errors:
+                  - code: internal_server_error
+                    message: Internal server error
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+        required: true
+      tags:
+        - User
+      security:
+        - bearerAuth: []
+components:
+  schemas:
+    APIErrorModal:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorMessage'
+    Device:
+      type: object
+      properties:
+        created:
+          type: string
+          format: date-time
+        description:
+          type: string
+        deviceType:
+          $ref: '#/components/schemas/ObjectReference'
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        location:
+          $ref: '#/components/schemas/ObjectReference'
+        name:
+          type: string
+        ports:
+          type: array
+          items:
+            $ref: '#/components/schemas/DevicePort'
+        rack:
+          $ref: '#/components/schemas/ObjectReference'
+        rackFace:
+          type: string
+          enum:
+            - front
+            - rear
+        rackPosition:
+          type: number
+        site:
+          $ref: '#/components/schemas/ObjectReference'
+        status:
+          type: string
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/Tag'
+        updated:
+          type: string
+          format: date-time
+        version:
+          type: integer
+      required:
+        - version
+    DevicePort:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+    DeviceResult:
+      type: object
+      properties:
+        created:
+          type: string
+          format: date-time
+        description:
+          type: string
+        deviceType:
+          $ref: '#/components/schemas/ObjectReference'
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        location:
+          $ref: '#/components/schemas/ObjectReference'
+        name:
+          type: string
+        rack:
+          $ref: '#/components/schemas/ObjectReference'
+        site:
+          $ref: '#/components/schemas/ObjectReference'
+        status:
+          type: string
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/Tag'
+        updated:
+          type: string
+          format: date-time
+        version:
+          type: integer
+      required:
+        - id
+        - version
+    DeviceSearchResults:
+      type: object
+      properties:
+        count:
+          type: integer
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/DeviceResult'
+        next:
+          type: boolean
+      required:
+        - items
+        - count
+        - next
+    DeviceType:
+      type: object
+      properties:
+        created:
+          type: string
+          format: date-time
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        manufacturer:
+          $ref: '#/components/schemas/ObjectReference'
+        model:
+          type: string
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/Tag'
+        updated:
+          type: string
+          format: date-time
+        version:
+          type: integer
+      required:
+        - version
+    DeviceTypeResult:
+      type: object
+      properties:
+        created:
+          type: string
+          format: date-time
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        manufacturer:
+          $ref: '#/components/schemas/ObjectReference'
+        model:
+          type: string
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/Tag'
+        updated:
+          type: string
+          format: date-time
+        version:
+          type: integer
+      required:
+        - version
+    DeviceTypeSearchResults:
+      type: object
+      properties:
+        count:
+          type: integer
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/DeviceTypeResult'
+        next:
+          type: boolean
+      required:
+        - items
+        - count
+        - next
+    ErrorMessage:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+      required:
+        - code
+        - message
+    ObjectReference:
+      type: object
+      properties:
+        displayName:
+          type: string
+          readOnly: true
+        id:
+          type: string
+          format: uuid
+      required:
+        - id
+    Stats:
+      type: object
+      properties:
+        deviceCount:
+          type: integer
+        deviceTypeCount:
+          type: integer
+        userCount:
+          type: integer
+    Tag:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+    User:
+      type: object
+      properties:
+        email:
+          type: string
+        externalProvider:
+          type: string
+        id:
+          type: string
+          format: uuid
+        password:
+          type: string
+        username:
+          type: string
+    UserResult:
+      type: object
+      properties:
+        displayName:
+          type: string
+        id:
+          type: string
+          format: uuid
+    UserSearchResults:
+      type: object
+      properties:
+        count:
+          type: integer
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserResult'
+        next:
+          type: boolean
+      required:
+        - items
+        - count
+        - next

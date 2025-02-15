@@ -1,0 +1,25 @@
+root = true
+
+[{*.ts,*.tsx}]
+indent_style = space
+indent_size = 2
+end_of_line = cr
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+[{*.yml,*.yaml}]
+indent_style = space
+indent_size = 2
+end_of_line = cr
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+[*ignore]
+indent_style = space
+indent_size = 2
+end_of_line = cr
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true

@@ -1,0 +1,6 @@
+- devices
+    - type
+    - modules
+      - ports
+    - ports
+    - bays
