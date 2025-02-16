@@ -8,7 +8,8 @@
     "build": "tsc -b && vite build",
     "lint": "eslint",
     "preview": "vite preview",
-    "oauth2-mock": "oauth2-mock-server -p 8082"
+    "oauth2-mock": "oauth2-mock-server -p 8082",
+    "test": "vitest run --coverage"
   },
   "dependencies": {
     "bootstrap": "^5.3.3",
@@ -25,6 +26,7 @@
     "@types/react-dom": "^18.3.5",
     "@types/swagger-ui-react": "^4.18.3",
     "@vitejs/plugin-react-swc": "^3.5.0",
+    "@vitest/coverage-v8": "^3.0.5",
     "eslint": "^9.17.0",
     "eslint-config-prettier": "^10.0.1",
     "eslint-plugin-prettier": "^5.2.3",
