@@ -25,5 +25,8 @@ jobs:
       run: cd web && npm install && npm run build
     - name: Build
       run: go build -v ./...
+    - name: Missing tests
+      run: go run ./scripts
     - name: Test
       run: go test -v ./...
+    - uses: golangci/golangci-lint-action@v6

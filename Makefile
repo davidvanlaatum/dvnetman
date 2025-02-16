@@ -19,3 +19,7 @@ server:
 
 $(wildcard pkg/mongo/adapt/mock/*): $(wildcard pkg/mongo/adapt/*.go)
 	go tool mockery
+
+test:
+	go run ./scripts
+	go test ./...
