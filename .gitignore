@@ -1,1 +1,3 @@
-.idea/missing_test.goserver
+.idea/
+missing_test.go
+server
