@@ -1,1 +1,4 @@
-linters-settings:  govet:    disable:      - composites
+linters-settings:
+  govet:
+    disable:
+      - composites
