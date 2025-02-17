@@ -32,7 +32,9 @@ func (c *Converter) DeviceToOpenAPISearchResults(ctx context.Context, devices []
 		devices, func(device *modal.Device) *openapi.DeviceResult {
 			dev := &openapi.DeviceResult{
 				Id:         *(*uuid.UUID)(device.ID),
+				Name:       device.Name,
 				DeviceType: c.getDeviceTypeRef(device.DeviceType),
+				Version:    device.Version,
 			}
 			return dev
 		},

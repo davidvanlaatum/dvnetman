@@ -12,6 +12,7 @@ import (
 	"dvnetman/pkg/mongo/session"
 	"dvnetman/pkg/openapi"
 	"dvnetman/pkg/server/service"
+	"dvnetman/pkg/ymlutil"
 	"dvnetman/web"
 	"encoding/base64"
 	"github.com/felixge/httpsnoop"
@@ -24,6 +25,7 @@ import (
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+	"gopkg.in/yaml.v3"
 	"log"
 	"net"
 	"net/http"
@@ -108,6 +110,7 @@ func (s *Server) setupRouter() error {
 	router.Use(otelhttp.NewMiddleware("http"))
 	router.Use(logger.Middleware(s.log))
 	router.Use(mongosession.Middleware())
+	router.Use(handlers.CORS(handlers.AllowedOrigins([]string{"*"})))
 	router.Use(
 		func(handler http.Handler) http.Handler {
 			return http.HandlerFunc(
@@ -121,15 +124,7 @@ func (s *Server) setupRouter() error {
 	router.Use(handlers.CompressHandler)
 	router.Use(handlers.ProxyHeaders)
 	s.auth.AddRoutes(router)
-	router.Methods("GET").Path("/api/openapi.yaml").HandlerFunc(
-		func(w http.ResponseWriter, r *http.Request) {
-			w.Header().Set("Content-Type", "application/x-yaml")
-			w.Header().Set("Content-Length", strconv.FormatUint(uint64(len(api.OpenapiYAML)), 10))
-			if _, err := w.Write(api.OpenapiYAML); err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-			}
-		},
-	).Name("OpenAPI")
+	router.Methods("GET").Path("/api/openapi.yaml").HandlerFunc(s.openapiSpec).Name("OpenAPI")
 	apiRouter := openapi.NewRouter(s.service)
 	router.PathPrefix("/api").Handler(apiRouter)
 	router.PathPrefix("/ui/").Handler(web.NewUI().GetRouter())
@@ -161,6 +156,27 @@ func (s *Server) setupRouter() error {
 	s.router = router
 	s.otel.attach(router)
 	return nil
+}
+
+func (s *Server) openapiSpec(w http.ResponseWriter, r *http.Request) {
+	x := &yaml.Node{}
+	if err := yaml.Unmarshal(api.OpenapiYAML, x); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	ymlutil.Walk(
+		x, func(n *yaml.Node, path []string) {
+			if len(path) == 3 && path[0] == "servers" && path[2] == "url" {
+				n.Value = "http://" + r.Host
+			}
+		},
+	)
+	if b, err := yaml.Marshal(x); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	} else {
+		w.Header().Set("Content-Type", "application/x-yaml")
+		w.Header().Set("Content-Length", strconv.FormatUint(uint64(len(b)), 10))
+		_, _ = w.Write(b)
+	}
 }
 
 func (s *Server) getMongoDatabase() mongoadapt.MongoDatabase {
