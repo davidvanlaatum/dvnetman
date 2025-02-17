@@ -8,7 +8,7 @@ charset = utf-8
 insert_final_newline = true
 trim_trailing_whitespace = true
 
-[{*.ts,*.tsx}]
+[{*.ts,*.tsx,*.js,*.jsx}]
 indent_style = space
 indent_size = 2
 end_of_line = lf
@@ -31,3 +31,13 @@ end_of_line = lf
 charset = utf-8
 trim_trailing_whitespace = true
 insert_final_newline = true
+
+[{*.go,Makefile,.gitmodules,go.mod,go.sum}]
+indent_style = tab
+
+[*.md]
+indent_style = tab
+trim_trailing_whitespace = false
+
+[*.json]
+insert_final_newline = false
