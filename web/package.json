@@ -9,7 +9,8 @@
     "lint": "eslint",
     "preview": "vite preview",
     "oauth2-mock": "oauth2-mock-server -p 8082",
-    "test": "vitest run --coverage"
+    "test": "vitest run --coverage",
+    "e2e-tests": "playwright test"
   },
   "dependencies": {
     "bootstrap": "^5.3.3",
@@ -24,6 +25,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",
+    "@playwright/test": "^1.50.1",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.2.0",
     "@testing-library/user-event": "^14.6.1",
