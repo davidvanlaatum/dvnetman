@@ -8,6 +8,9 @@ import (
 type UUID uuid.UUID
 
 func (u *UUID) MarshalBSONValue() (byte, []byte, error) {
+	if u == nil {
+		return byte(bson.TypeNull), nil, nil
+	}
 	t, b, err := bson.MarshalValue((*uuid.UUID)(u).String())
 	return byte(t), b, err
 }
@@ -27,3 +30,7 @@ func (u *UUID) UnmarshalBSONValue(typ byte, data []byte) error {
 
 var _ bson.ValueMarshaler = (*UUID)(nil)
 var _ bson.ValueUnmarshaler = (*UUID)(nil)
+
+func ConvertUUID(u uuid.UUID) UUID {
+	return UUID(u)
+}

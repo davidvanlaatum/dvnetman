@@ -24,6 +24,47 @@ func BuildDeviceType(api *OpenAPI) {
 					},
 				},
 			),
+			SearchParams: []openapi.Parameter{
+				{
+					Name:        "ids",
+					In:          "query",
+					Description: "IDs of the device types",
+					Schema: &openapi.Schema{
+						Type: "array",
+						Items: &openapi.Schema{
+							Type:   "string",
+							Format: "uuid",
+						},
+					},
+				},
+				{
+					Name:        "model",
+					In:          "query",
+					Description: "Model of the device type",
+					Schema: &openapi.Schema{
+						Type: "string",
+					},
+				},
+				{
+					Name:        "modelRegex",
+					In:          "query",
+					Description: "Model of the device type",
+					Schema: &openapi.Schema{
+						Type: "string",
+					},
+				},
+				{
+					Name:        "fields",
+					In:          "query",
+					Description: "Fields to return",
+					Schema: &openapi.Schema{
+						Type: "array",
+						Items: &openapi.Schema{
+							Type: "string",
+						},
+					},
+				},
+			},
 			GetModal: addCommonProps(
 				&openapi.Schema{
 					Type: "object",

@@ -5,6 +5,9 @@ import (
 )
 
 func MapTo[T any, R any](in []T, f func(T) R) []R {
+	if in == nil {
+		return nil
+	}
 	out := make([]R, len(in))
 	for i, v := range in {
 		out[i] = f(v)

@@ -186,7 +186,8 @@ func NewSpec(log logger.Logger) *OpenAPI {
 					Format: "uuid",
 				},
 				"name": {
-					Type: "string",
+					Type:     "string",
+					ReadOnly: true,
 				},
 			},
 		},

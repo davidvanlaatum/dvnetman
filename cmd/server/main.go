@@ -28,7 +28,7 @@ func main() {
 		log.Error().Err(err).Msg("failed to load config")
 	} else {
 		var s = server.NewServer(cfg, log)
-		if err = s.Start(ctx); err != nil && !errors.Is(err, context.Canceled) {
+		if err = s.Start(log.Context(ctx)); err != nil && !errors.Is(err, context.Canceled) {
 			log.Fatal().Err(err).Msg("failed to start server")
 		}
 	}

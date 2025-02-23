@@ -1,4 +1,4 @@
-import './App.css'
+import './App.scss'
 import { BrowserRouter as Router, Route, Routes } from 'react-router'
 import { Nav, Navbar, NavDropdown } from 'react-bootstrap'
 import { lazy, Suspense } from 'react'
@@ -6,9 +6,10 @@ import { ApiProvider } from './ApiContext.tsx'
 
 const About = lazy(() => import('./About.tsx'))
 const Swagger = lazy(() => import('./Swagger.tsx'))
-const DeviceAdd = lazy(() => import('./device/DeviceAdd.tsx'))
-const DeviceDetail = lazy(() => import('./device/DeviceDetail.tsx'))
-const DeviceSearch = lazy(() => import('./device/DeviceSearch.tsx'))
+const DeviceAdd = lazy(() => import('./pages/device/DeviceAdd.tsx'))
+const DeviceDetail = lazy(() => import('./pages/device/DeviceDetail.tsx'))
+const DeviceSearch = lazy(() => import('./pages/device/DeviceSearch.tsx'))
+const Index = lazy(() => import('./Index.tsx'))
 
 function App() {
   const basePath = import.meta.env.BASE_URL
@@ -48,7 +49,7 @@ function App() {
         </Navbar>
         <Suspense fallback={<div>Loading...</div>}>
           <Routes>
-            <Route path={`${basePath}/`} Component={About} />
+            <Route path={`${basePath}/`} Component={Index} />
             <Route path={`${basePath}/about`} Component={About} />
             <Route path={`${basePath}/swagger`} Component={Swagger} />
             <Route path={`${basePath}/device/add`} Component={DeviceAdd} />

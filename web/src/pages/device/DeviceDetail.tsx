@@ -1,9 +1,9 @@
 import { useParams } from 'react-router'
 import { useEffect, useRef, useState } from 'react'
-import { Device } from '../api'
-import { Container } from 'react-bootstrap'
-import { useApi } from '../ApiContext.tsx'
-import ErrorPage from '../ErrorPage.tsx'
+import { Device } from '@src/api'
+import { Breadcrumb } from 'react-bootstrap'
+import { useApi } from '../../ApiContext.tsx'
+import ErrorPage from '../../ErrorPage.tsx'
 
 function DeviceDetail() {
   const { uuid } = useParams<{ uuid: string }>()
@@ -11,6 +11,7 @@ function DeviceDetail() {
   const loading = useRef(false)
   const [error, setError] = useState<Error | null>(null)
   const api = useApi()
+  const basePath = import.meta.env.BASE_URL
 
   useEffect(() => {
     async function fetchDevice() {
@@ -39,7 +40,12 @@ function DeviceDetail() {
   }
 
   return (
-    <Container>
+    <div>
+      <Breadcrumb>
+        <Breadcrumb.Item href={basePath}>Home</Breadcrumb.Item>
+        <Breadcrumb.Item href={`${basePath}/device/search`}>Device</Breadcrumb.Item>
+        <Breadcrumb.Item active>Detail</Breadcrumb.Item>
+      </Breadcrumb>
       <h1>Device Detail</h1>
       {device && (
         <div>
@@ -48,7 +54,7 @@ function DeviceDetail() {
           <p>Type: {device.deviceType?.displayName}</p>
         </div>
       )}
-    </Container>
+    </div>
   )
 }
 

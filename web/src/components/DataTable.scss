@@ -1,0 +1,37 @@
+.data-table-sorter {
+  border: none;
+  padding: 0 0;
+  background-color: unset;
+  text-align: start;
+}
+
+.data-table-sorter > .sort-dir {
+  visibility: hidden;
+  opacity: 0.2;
+}
+
+.data-table-column:hover > div > * > .data-table-sorter > .sort-dir {
+  visibility: visible;
+}
+
+.data-table-sorted > .sort-dir {
+  visibility: visible;
+  opacity: 1;
+}
+
+.data-table-column > div {
+  display: flex;
+  flex-direction: row;
+}
+
+.data-table-column > div > * {
+  padding-left: .5em;
+}
+
+.data-table-column > div > *:first-child {
+  padding-left: 0;
+}
+
+.data-table-column > div > .fill {
+  flex-grow: 1;
+}

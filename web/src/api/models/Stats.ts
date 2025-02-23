@@ -37,6 +37,12 @@ export interface Stats {
      * @type {number}
      * @memberof Stats
      */
+    manufacturerCount?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof Stats
+     */
     userCount?: number;
 }
 
@@ -59,6 +65,7 @@ export function StatsFromJSONTyped(json: any, ignoreDiscriminator: boolean): Sta
         
         'deviceCount': json['deviceCount'] == null ? undefined : json['deviceCount'],
         'deviceTypeCount': json['deviceTypeCount'] == null ? undefined : json['deviceTypeCount'],
+        'manufacturerCount': json['manufacturerCount'] == null ? undefined : json['manufacturerCount'],
         'userCount': json['userCount'] == null ? undefined : json['userCount'],
     };
 }
@@ -76,6 +83,7 @@ export function StatsToJSONTyped(value?: Stats | null, ignoreDiscriminator: bool
         
         'deviceCount': value['deviceCount'],
         'deviceTypeCount': value['deviceTypeCount'],
+        'manufacturerCount': value['manufacturerCount'],
         'userCount': value['userCount'],
     };
 }

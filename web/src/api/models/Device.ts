@@ -47,7 +47,7 @@ export interface Device {
      * @type {Date}
      * @memberof Device
      */
-    created?: Date;
+    readonly created?: Date;
     /**
      * 
      * @type {string}
@@ -65,7 +65,7 @@ export interface Device {
      * @type {string}
      * @memberof Device
      */
-    readonly id?: string;
+    readonly id: string;
     /**
      * 
      * @type {ObjectReference}
@@ -125,7 +125,7 @@ export interface Device {
      * @type {Date}
      * @memberof Device
      */
-    updated?: Date;
+    readonly updated?: Date;
     /**
      * 
      * @type {number}
@@ -149,6 +149,7 @@ export type DeviceRackFaceEnum = typeof DeviceRackFaceEnum[keyof typeof DeviceRa
  * Check if a given object implements the Device interface.
  */
 export function instanceOfDevice(value: object): value is Device {
+    if (!('id' in value) || value['id'] === undefined) return false;
     if (!('version' in value) || value['version'] === undefined) return false;
     return true;
 }
@@ -166,7 +167,7 @@ export function DeviceFromJSONTyped(json: any, ignoreDiscriminator: boolean): De
         'created': json['created'] == null ? undefined : (new Date(json['created'])),
         'description': json['description'] == null ? undefined : json['description'],
         'deviceType': json['deviceType'] == null ? undefined : ObjectReferenceFromJSON(json['deviceType']),
-        'id': json['id'] == null ? undefined : json['id'],
+        'id': json['id'],
         'location': json['location'] == null ? undefined : ObjectReferenceFromJSON(json['location']),
         'name': json['name'] == null ? undefined : json['name'],
         'ports': json['ports'] == null ? undefined : ((json['ports'] as Array<any>).map(DevicePortFromJSON)),
@@ -185,14 +186,13 @@ export function DeviceToJSON(json: any): Device {
     return DeviceToJSONTyped(json, false);
 }
 
-export function DeviceToJSONTyped(value?: Omit<Device, 'id'> | null, ignoreDiscriminator: boolean = false): any {
+export function DeviceToJSONTyped(value?: Omit<Device, 'created'|'id'|'updated'> | null, ignoreDiscriminator: boolean = false): any {
     if (value == null) {
         return value;
     }
 
     return {
         
-        'created': value['created'] == null ? undefined : ((value['created']).toISOString()),
         'description': value['description'],
         'deviceType': ObjectReferenceToJSON(value['deviceType']),
         'location': ObjectReferenceToJSON(value['location']),
@@ -204,7 +204,6 @@ export function DeviceToJSONTyped(value?: Omit<Device, 'id'> | null, ignoreDiscr
         'site': ObjectReferenceToJSON(value['site']),
         'status': value['status'],
         'tags': value['tags'] == null ? undefined : ((value['tags'] as Array<any>).map(TagToJSON)),
-        'updated': value['updated'] == null ? undefined : ((value['updated']).toISOString()),
         'version': value['version'],
     };
 }

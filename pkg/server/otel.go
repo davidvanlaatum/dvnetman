@@ -136,3 +136,15 @@ func (o *otelServer) shutdown(ctx context.Context) {
 		o.log.Error().Msgf("Failed to shutdown Prometheus meter provider: %v", err)
 	}
 }
+
+func traceIDHeaderMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(
+		func(w http.ResponseWriter, r *http.Request) {
+			t := trace.SpanContextFromContext(r.Context())
+			if t.IsValid() {
+				w.Header().Set("X-Trace-ID", t.TraceID().String())
+			}
+			next.ServeHTTP(w, r)
+		},
+	)
+}

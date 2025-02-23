@@ -54,6 +54,8 @@ type MongoCollection interface {
 	FindOne(ctx context.Context, filter interface{}, opts ...options.Lister[options.FindOneOptions]) *mongo.SingleResult
 	// Find see https://pkg.go.dev/go.mongodb.org/mongo-driver/v2/mongo#Collection.Find
 	Find(ctx context.Context, filter interface{}, opts ...options.Lister[options.FindOptions]) (MongoCursor, error)
+	// CountDocuments see https://pkg.go.dev/go.mongodb.org/mongo-driver/v2/mongo#Collection.CountDocuments
+	CountDocuments(ctx context.Context, filter interface{}, opts ...options.Lister[options.CountOptions]) (int64, error)
 }
 
 type MongoIndexView interface {

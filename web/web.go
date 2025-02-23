@@ -2,6 +2,7 @@ package web
 
 import (
 	"embed"
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"io/fs"
 	"net/http"
@@ -40,6 +41,7 @@ func NewUI() *UI {
 			http.ServeFileFS(w, req, assets, "/index.html")
 		},
 	)
+	router.Use(handlers.CompressHandler)
 	return &UI{router}
 }
 

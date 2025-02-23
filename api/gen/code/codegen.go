@@ -95,7 +95,7 @@ func (c *CodeGen) generateAPIMethod(path, method string, e openapi.Endpoint) (er
 	}
 	for _, p := range e.Parameters {
 		t := c.determineGoTypeFor(p.Schema)
-		if !p.Required {
+		if !p.Required && t.name != "array" {
 			t.pointer = true
 		}
 		f.params = append(
@@ -468,8 +468,22 @@ func (c *CodeGen) renderAPIFuncQueryParam(p *APIFuncParam) func(g *Group) {
 			g.Id("opts").Dot(p.name).Op("=").Add(
 				ptr(Id("x")),
 			)
+		} else if p.goType.name == "array" && p.goType.nested.name == "string" {
+			g.Id("opts").Dot(p.name).Op("=").Append(Id("opts").Dot(p.name), ptr(Id("v")).Op("..."))
+		} else if p.goType.name == "array" && p.goType.nested.name == "UUID" {
+			g.If(
+				List(Id("opts").Dot(p.name), Err()).Op("=").Qual(utilsPkg, "MapErr").Call(Id("v"), Qual(uuidPkg, "Parse")),
+				Err().Op("!=").Nil(),
+			).BlockFunc(
+				func(g *Group) {
+					g.Id("h").Dot("service").Dot("ErrorHandler").Call(
+						Id("w"), Id("r"), Qual(errorsPkg, "WithStack").Call(Id("NewQueryParamError").Call(Lit(p.wireName), Err())),
+					)
+					g.Return()
+				},
+			)
 		} else {
-			panic(errors.Errorf("Unhandled query param type %s", p.goType.name))
+			panic(errors.Errorf("Unhandled query param type %s: %s", p.goType.name, p.goType.GoString()))
 		}
 	}
 }

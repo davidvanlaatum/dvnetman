@@ -1,19 +1,20 @@
 /// <reference types="vitest" />
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react-swc'
+import tsconfigPaths from 'vite-tsconfig-paths'
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), tsconfigPaths()],
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:8080',
-        changeOrigin: true,
+        target: 'http://127.0.0.1:8080',
+        changeOrigin: false,
       },
       '/auth': {
-        target: 'http://localhost:8080',
-        changeOrigin: true,
+        target: 'http://127.0.0.1:8080',
+        changeOrigin: false,
       },
     },
   },
@@ -25,6 +26,9 @@ export default defineConfig({
     coverage: {
       reporter: ['text', 'json', 'html'],
     },
+    environment: 'jsdom',
+    globals: true,
+    setupFiles: 'test/setup.ts',
   },
   base: '/ui',
 })

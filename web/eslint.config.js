@@ -6,7 +6,7 @@ import tseslint from 'typescript-eslint'
 import eslintPluginPrettier from 'eslint-plugin-prettier'
 
 export default tseslint.config(
-  { ignores: ['dist', 'src/api'] },
+  { ignores: ['dist', 'src/api', 'coverage'] },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ['**/*.{ts,tsx}'],

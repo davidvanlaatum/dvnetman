@@ -31,7 +31,7 @@ export interface Tag {
      * @type {string}
      * @memberof Tag
      */
-    name?: string;
+    readonly name?: string;
 }
 
 /**
@@ -60,7 +60,7 @@ export function TagToJSON(json: any): Tag {
     return TagToJSONTyped(json, false);
 }
 
-export function TagToJSONTyped(value?: Tag | null, ignoreDiscriminator: boolean = false): any {
+export function TagToJSONTyped(value?: Omit<Tag, 'name'> | null, ignoreDiscriminator: boolean = false): any {
     if (value == null) {
         return value;
     }
@@ -68,7 +68,6 @@ export function TagToJSONTyped(value?: Tag | null, ignoreDiscriminator: boolean 
     return {
         
         'id': value['id'],
-        'name': value['name'],
     };
 }
 

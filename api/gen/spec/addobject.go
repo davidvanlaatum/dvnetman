@@ -12,12 +12,14 @@ func addCommonProps(s *openapi.Schema) *openapi.Schema {
 		ReadOnly: true,
 	}
 	s.Properties["created"] = openapi.Schema{
-		Type:   "string",
-		Format: dateTime,
+		Type:     "string",
+		Format:   dateTime,
+		ReadOnly: true,
 	}
 	s.Properties["updated"] = openapi.Schema{
-		Type:   "string",
-		Format: dateTime,
+		Type:     "string",
+		Format:   dateTime,
+		ReadOnly: true,
 	}
 	s.Properties["tags"] = openapi.Schema{
 		Type: "array",
@@ -28,16 +30,17 @@ func addCommonProps(s *openapi.Schema) *openapi.Schema {
 	s.Properties["version"] = openapi.Schema{
 		Type: "integer",
 	}
-	s.Required = append(s.Required, "version")
+	s.Required = append(s.Required, "id", "version")
 	return s
 }
 
 type AddObjectOpts struct {
-	Name        string
-	SearchModal *openapi.Schema
-	GetModal    *openapi.Schema
-	Additional  map[string]*openapi.Schema
-	Tags        []string
+	Name         string
+	SearchModal  *openapi.Schema
+	SearchParams []openapi.Parameter
+	GetModal     *openapi.Schema
+	Additional   map[string]*openapi.Schema
+	Tags         []string
 }
 
 func (o *OpenAPI) AddObject(opts AddObjectOpts) {
@@ -71,38 +74,38 @@ func (o *OpenAPI) AddObject(opts AddObjectOpts) {
 			Path:      basePath,
 			Operation: "list" + utils.UCFirst(opts.Name) + "s",
 			Tags:      opts.Tags,
-			Parameters: []openapi.Parameter{
-				{
-					Name:            "page",
-					In:              "query",
-					Required:        false,
-					Description:     "Page number",
-					AllowEmptyValue: true,
-					Schema: &openapi.Schema{
-						Type: "integer",
+			Parameters: append(
+				[]openapi.Parameter{
+					{
+						Name:        "page",
+						In:          "query",
+						Required:    false,
+						Description: "Page number",
+						Schema: &openapi.Schema{
+							Type: "integer",
+						},
+					},
+					{
+						Name:        "per_page",
+						In:          "query",
+						Required:    false,
+						Description: "Number of items per page",
+						Schema: &openapi.Schema{
+							Type: "integer",
+						},
+					},
+					{
+						Name:        "sort",
+						In:          "query",
+						Required:    false,
+						Description: "Sort order",
+						Schema: &openapi.Schema{
+							Type: "string",
+						},
 					},
 				},
-				{
-					Name:            "per_page",
-					In:              "query",
-					Required:        false,
-					Description:     "Number of items per page",
-					AllowEmptyValue: true,
-					Schema: &openapi.Schema{
-						Type: "integer",
-					},
-				},
-				{
-					Name:            "sort",
-					In:              "query",
-					Required:        false,
-					Description:     "Sort order",
-					AllowEmptyValue: true,
-					Schema: &openapi.Schema{
-						Type: "string",
-					},
-				},
-			},
+				opts.SearchParams...,
+			),
 			Responses: map[string]openapi.Response{
 				"200": {
 					Description: "List of " + opts.Name,
@@ -155,10 +158,9 @@ func (o *OpenAPI) AddObject(opts AddObjectOpts) {
 			Tags:      opts.Tags,
 			Parameters: []openapi.Parameter{
 				{
-					Name:            "id",
-					In:              "path",
-					Required:        true,
-					AllowEmptyValue: false,
+					Name:     "id",
+					In:       "path",
+					Required: true,
 					Schema: &openapi.Schema{
 						Type:   "string",
 						Format: "uuid",
@@ -203,10 +205,9 @@ func (o *OpenAPI) AddObject(opts AddObjectOpts) {
 			Tags:      opts.Tags,
 			Parameters: []openapi.Parameter{
 				{
-					Name:            "id",
-					In:              "path",
-					Required:        true,
-					AllowEmptyValue: false,
+					Name:     "id",
+					In:       "path",
+					Required: true,
 					Schema: &openapi.Schema{
 						Type:   "string",
 						Format: "uuid",
@@ -245,10 +246,9 @@ func (o *OpenAPI) AddObject(opts AddObjectOpts) {
 			Tags:      opts.Tags,
 			Parameters: []openapi.Parameter{
 				{
-					Name:            "id",
-					In:              "path",
-					Required:        true,
-					AllowEmptyValue: false,
+					Name:     "id",
+					In:       "path",
+					Required: true,
 					Schema: &openapi.Schema{
 						Type:   "string",
 						Format: "uuid",

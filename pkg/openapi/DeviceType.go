@@ -9,7 +9,7 @@ import (
 
 type DeviceType struct {
 	Created      *time.Time       `json:"created,omitzero"`
-	Id           *uuid.UUID       `json:"id,omitzero"`
+	Id           uuid.UUID        `json:"id"`
 	Manufacturer *ObjectReference `json:"manufacturer,omitzero"`
 	Model        *string          `json:"model,omitzero"`
 	Tags         []*Tag           `json:"tags,omitzero"`

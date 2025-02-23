@@ -15,9 +15,15 @@ import (
 )
 
 type ListDevicesOpts struct {
-	Page    *int
-	PerPage *int
-	Sort    *string
+	Page       *int
+	PerPage    *int
+	Sort       *string
+	Ids        []uuid.UUID
+	Name       *string
+	NameRegex  *string
+	Status     *string
+	Fields     []string
+	DeviceType []uuid.UUID
 }
 type CreateDeviceOpts struct {
 	Body *Device
@@ -35,9 +41,13 @@ type UpdateDeviceOpts struct {
 	Body *Device
 }
 type ListDeviceTypesOpts struct {
-	Page    *int
-	PerPage *int
-	Sort    *string
+	Page       *int
+	PerPage    *int
+	Sort       *string
+	Ids        []uuid.UUID
+	Model      *string
+	ModelRegex *string
+	Fields     []string
 }
 type CreateDeviceTypeOpts struct {
 	Body *DeviceType
@@ -53,6 +63,26 @@ type GetDeviceTypeOpts struct {
 type UpdateDeviceTypeOpts struct {
 	Id   uuid.UUID
 	Body *DeviceType
+}
+type ListManufacturersOpts struct {
+	Page    *int
+	PerPage *int
+	Sort    *string
+}
+type CreateManufacturerOpts struct {
+	Body *Manufacturer
+}
+type DeleteManufacturerOpts struct {
+	Id uuid.UUID
+}
+type GetManufacturerOpts struct {
+	Id              uuid.UUID
+	IfNoneMatch     *string
+	IfModifiedSince *time.Time
+}
+type UpdateManufacturerOpts struct {
+	Id   uuid.UUID
+	Body *Manufacturer
 }
 type ListUsersOpts struct {
 	Page    *int
@@ -77,20 +107,25 @@ type UpdateUserOpts struct {
 type API interface {
 	CreateDevice(ctx context.Context, opts *CreateDeviceOpts) (res *Response, err error)
 	CreateDeviceType(ctx context.Context, opts *CreateDeviceTypeOpts) (res *Response, err error)
+	CreateManufacturer(ctx context.Context, opts *CreateManufacturerOpts) (res *Response, err error)
 	CreateUser(ctx context.Context, opts *CreateUserOpts) (res *Response, err error)
 	DeleteDevice(ctx context.Context, opts *DeleteDeviceOpts) (res *Response, err error)
 	DeleteDeviceType(ctx context.Context, opts *DeleteDeviceTypeOpts) (res *Response, err error)
+	DeleteManufacturer(ctx context.Context, opts *DeleteManufacturerOpts) (res *Response, err error)
 	DeleteUser(ctx context.Context, opts *DeleteUserOpts) (res *Response, err error)
 	GetCurrentUser(ctx context.Context) (res *Response, err error)
 	GetDevice(ctx context.Context, opts *GetDeviceOpts) (res *Response, err error)
 	GetDeviceType(ctx context.Context, opts *GetDeviceTypeOpts) (res *Response, err error)
+	GetManufacturer(ctx context.Context, opts *GetManufacturerOpts) (res *Response, err error)
 	GetStats(ctx context.Context) (res *Response, err error)
 	GetUser(ctx context.Context, opts *GetUserOpts) (res *Response, err error)
 	ListDeviceTypes(ctx context.Context, opts *ListDeviceTypesOpts) (res *Response, err error)
 	ListDevices(ctx context.Context, opts *ListDevicesOpts) (res *Response, err error)
+	ListManufacturers(ctx context.Context, opts *ListManufacturersOpts) (res *Response, err error)
 	ListUsers(ctx context.Context, opts *ListUsersOpts) (res *Response, err error)
 	UpdateDevice(ctx context.Context, opts *UpdateDeviceOpts) (res *Response, err error)
 	UpdateDeviceType(ctx context.Context, opts *UpdateDeviceTypeOpts) (res *Response, err error)
+	UpdateManufacturer(ctx context.Context, opts *UpdateManufacturerOpts) (res *Response, err error)
 	UpdateUser(ctx context.Context, opts *UpdateUserOpts) (res *Response, err error)
 	ErrorHandler(w http.ResponseWriter, r *http.Request, err error)
 	WriteErrorHandler(w http.ResponseWriter, r *http.Request, err error)
@@ -151,6 +186,24 @@ func (h *apiHandler) ListDevices(w http.ResponseWriter, r *http.Request) {
 			opts.PerPage = utils.ToPtr(x)
 		case "sort":
 			opts.Sort = utils.ToPtr(v[0])
+		case "ids":
+			if opts.Ids, err = utils.MapErr(v, uuid.Parse); err != nil {
+				h.service.ErrorHandler(w, r, errors.WithStack(NewQueryParamError("ids", err)))
+				return
+			}
+		case "name":
+			opts.Name = utils.ToPtr(v[0])
+		case "nameRegex":
+			opts.NameRegex = utils.ToPtr(v[0])
+		case "status":
+			opts.Status = utils.ToPtr(v[0])
+		case "fields":
+			opts.Fields = append(opts.Fields, v...)
+		case "deviceType":
+			if opts.DeviceType, err = utils.MapErr(v, uuid.Parse); err != nil {
+				h.service.ErrorHandler(w, r, errors.WithStack(NewQueryParamError("deviceType", err)))
+				return
+			}
 		}
 	}
 	if res, err = h.service.ListDevices(r.Context(), opts); err != nil {
@@ -269,6 +322,17 @@ func (h *apiHandler) ListDeviceTypes(w http.ResponseWriter, r *http.Request) {
 			opts.PerPage = utils.ToPtr(x)
 		case "sort":
 			opts.Sort = utils.ToPtr(v[0])
+		case "ids":
+			if opts.Ids, err = utils.MapErr(v, uuid.Parse); err != nil {
+				h.service.ErrorHandler(w, r, errors.WithStack(NewQueryParamError("ids", err)))
+				return
+			}
+		case "model":
+			opts.Model = utils.ToPtr(v[0])
+		case "modelRegex":
+			opts.ModelRegex = utils.ToPtr(v[0])
+		case "fields":
+			opts.Fields = append(opts.Fields, v...)
 		}
 	}
 	if res, err = h.service.ListDeviceTypes(r.Context(), opts); err != nil {
@@ -360,6 +424,124 @@ func (h *apiHandler) UpdateDeviceType(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if res, err = h.service.UpdateDeviceType(r.Context(), opts); err != nil {
+		h.service.ErrorHandler(w, r, err)
+	} else if err = res.Write(r, w); err != nil {
+		h.service.WriteErrorHandler(w, r, err)
+	}
+}
+func (h *apiHandler) ListManufacturers(w http.ResponseWriter, r *http.Request) {
+	var res *Response
+	var err error
+	opts := &ListManufacturersOpts{}
+	for k, v := range r.URL.Query() {
+		switch k {
+		case "page":
+			var x int
+			if x, err = strconv.Atoi(v[0]); err != nil {
+				h.service.ErrorHandler(w, r, errors.WithStack(NewQueryParamError("page", err)))
+				return
+			}
+			opts.Page = utils.ToPtr(x)
+		case "per_page":
+			var x int
+			if x, err = strconv.Atoi(v[0]); err != nil {
+				h.service.ErrorHandler(w, r, errors.WithStack(NewQueryParamError("per_page", err)))
+				return
+			}
+			opts.PerPage = utils.ToPtr(x)
+		case "sort":
+			opts.Sort = utils.ToPtr(v[0])
+		}
+	}
+	if res, err = h.service.ListManufacturers(r.Context(), opts); err != nil {
+		h.service.ErrorHandler(w, r, err)
+	} else if err = res.Write(r, w); err != nil {
+		h.service.WriteErrorHandler(w, r, err)
+	}
+}
+func (h *apiHandler) CreateManufacturer(w http.ResponseWriter, r *http.Request) {
+	var res *Response
+	var err error
+	opts := &CreateManufacturerOpts{}
+	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields()
+	if err = decoder.Decode(&opts.Body); err != nil {
+		h.service.ErrorHandler(w, r, errors.WithStack(NewBodyParamError(err)))
+		return
+	}
+	if decoder.More() {
+		h.service.ErrorHandler(w, r, errors.WithStack(NewBodyParamError(errors.New("unexpected data after body"))))
+		return
+	}
+	if res, err = h.service.CreateManufacturer(r.Context(), opts); err != nil {
+		h.service.ErrorHandler(w, r, err)
+	} else if err = res.Write(r, w); err != nil {
+		h.service.WriteErrorHandler(w, r, err)
+	}
+}
+func (h *apiHandler) DeleteManufacturer(w http.ResponseWriter, r *http.Request) {
+	var res *Response
+	var err error
+	opts := &DeleteManufacturerOpts{}
+	vars := mux.Vars(r)
+	if opts.Id, err = uuid.Parse(vars["id"]); err != nil {
+		h.service.ErrorHandler(w, r, errors.WithStack(NewPathParamError("Id", err)))
+		return
+	}
+	if res, err = h.service.DeleteManufacturer(r.Context(), opts); err != nil {
+		h.service.ErrorHandler(w, r, err)
+	} else if err = res.Write(r, w); err != nil {
+		h.service.WriteErrorHandler(w, r, err)
+	}
+}
+func (h *apiHandler) GetManufacturer(w http.ResponseWriter, r *http.Request) {
+	var res *Response
+	var err error
+	opts := &GetManufacturerOpts{}
+	vars := mux.Vars(r)
+	if opts.Id, err = uuid.Parse(vars["id"]); err != nil {
+		h.service.ErrorHandler(w, r, errors.WithStack(NewPathParamError("Id", err)))
+		return
+	}
+	for k, v := range r.Header {
+		switch k {
+		case "If-None-Match":
+			opts.IfNoneMatch = utils.ToPtr(v[0])
+		case "If-Modified-Since":
+			var t time.Time
+			if t, err = time.Parse(time.RFC1123, v[0]); err != nil {
+				h.service.ErrorHandler(w, r, errors.WithStack(NewQueryParamError("If-Modified-Since", err)))
+				return
+			}
+			opts.IfModifiedSince = utils.ToPtr(t)
+		}
+	}
+	if res, err = h.service.GetManufacturer(r.Context(), opts); err != nil {
+		h.service.ErrorHandler(w, r, err)
+	} else if err = res.Write(r, w); err != nil {
+		h.service.WriteErrorHandler(w, r, err)
+	}
+}
+func (h *apiHandler) UpdateManufacturer(w http.ResponseWriter, r *http.Request) {
+	var res *Response
+	var err error
+	opts := &UpdateManufacturerOpts{}
+	vars := mux.Vars(r)
+	if opts.Id, err = uuid.Parse(vars["id"]); err != nil {
+		h.service.ErrorHandler(w, r, errors.WithStack(NewPathParamError("Id", err)))
+		return
+	}
+	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields()
+	if err = decoder.Decode(&opts.Body); err != nil {
+		h.service.ErrorHandler(w, r, errors.WithStack(NewBodyParamError(err)))
+		return
+	}
+	if decoder.More() {
+		h.service.ErrorHandler(w, r, errors.WithStack(NewBodyParamError(errors.New("unexpected data after body"))))
+		return
+	}
+	if res, err = h.service.UpdateManufacturer(r.Context(), opts); err != nil {
 		h.service.ErrorHandler(w, r, err)
 	} else if err = res.Write(r, w); err != nil {
 		h.service.WriteErrorHandler(w, r, err)
@@ -514,6 +696,11 @@ func NewRouter(service API) (router *mux.Router) {
 	router.Methods("DELETE").Path("/api/v1/deviceType/{id}").Name("DeleteDeviceType").HandlerFunc(handler.DeleteDeviceType)
 	router.Methods("GET").Path("/api/v1/deviceType/{id}").Name("GetDeviceType").HandlerFunc(handler.GetDeviceType)
 	router.Methods("PUT").Path("/api/v1/deviceType/{id}").Name("UpdateDeviceType").HandlerFunc(handler.UpdateDeviceType)
+	router.Methods("GET").Path("/api/v1/manufacturer").Name("ListManufacturers").HandlerFunc(handler.ListManufacturers)
+	router.Methods("POST").Path("/api/v1/manufacturer").Name("CreateManufacturer").HandlerFunc(handler.CreateManufacturer)
+	router.Methods("DELETE").Path("/api/v1/manufacturer/{id}").Name("DeleteManufacturer").HandlerFunc(handler.DeleteManufacturer)
+	router.Methods("GET").Path("/api/v1/manufacturer/{id}").Name("GetManufacturer").HandlerFunc(handler.GetManufacturer)
+	router.Methods("PUT").Path("/api/v1/manufacturer/{id}").Name("UpdateManufacturer").HandlerFunc(handler.UpdateManufacturer)
 	router.Methods("GET").Path("/api/v1/stats").Name("GetStats").HandlerFunc(handler.GetStats)
 	router.Methods("GET").Path("/api/v1/user").Name("ListUsers").HandlerFunc(handler.ListUsers)
 	router.Methods("POST").Path("/api/v1/user").Name("CreateUser").HandlerFunc(handler.CreateUser)

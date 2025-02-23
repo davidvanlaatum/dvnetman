@@ -140,6 +140,65 @@ func (_c *MockAPI_CreateDeviceType_Call) RunAndReturn(run func(context.Context, 
 	return _c
 }
 
+// CreateManufacturer provides a mock function with given fields: ctx, opts
+func (_m *MockAPI) CreateManufacturer(ctx context.Context, opts *CreateManufacturerOpts) (*Response, error) {
+	ret := _m.Called(ctx, opts)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CreateManufacturer")
+	}
+
+	var r0 *Response
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *CreateManufacturerOpts) (*Response, error)); ok {
+		return rf(ctx, opts)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *CreateManufacturerOpts) *Response); ok {
+		r0 = rf(ctx, opts)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*Response)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *CreateManufacturerOpts) error); ok {
+		r1 = rf(ctx, opts)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockAPI_CreateManufacturer_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CreateManufacturer'
+type MockAPI_CreateManufacturer_Call struct {
+	*mock.Call
+}
+
+// CreateManufacturer is a helper method to define mock.On call
+//   - ctx context.Context
+//   - opts *CreateManufacturerOpts
+func (_e *MockAPI_Expecter) CreateManufacturer(ctx interface{}, opts interface{}) *MockAPI_CreateManufacturer_Call {
+	return &MockAPI_CreateManufacturer_Call{Call: _e.mock.On("CreateManufacturer", ctx, opts)}
+}
+
+func (_c *MockAPI_CreateManufacturer_Call) Run(run func(ctx context.Context, opts *CreateManufacturerOpts)) *MockAPI_CreateManufacturer_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(*CreateManufacturerOpts))
+	})
+	return _c
+}
+
+func (_c *MockAPI_CreateManufacturer_Call) Return(res *Response, err error) *MockAPI_CreateManufacturer_Call {
+	_c.Call.Return(res, err)
+	return _c
+}
+
+func (_c *MockAPI_CreateManufacturer_Call) RunAndReturn(run func(context.Context, *CreateManufacturerOpts) (*Response, error)) *MockAPI_CreateManufacturer_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // CreateUser provides a mock function with given fields: ctx, opts
 func (_m *MockAPI) CreateUser(ctx context.Context, opts *CreateUserOpts) (*Response, error) {
 	ret := _m.Called(ctx, opts)
@@ -313,6 +372,65 @@ func (_c *MockAPI_DeleteDeviceType_Call) Return(res *Response, err error) *MockA
 }
 
 func (_c *MockAPI_DeleteDeviceType_Call) RunAndReturn(run func(context.Context, *DeleteDeviceTypeOpts) (*Response, error)) *MockAPI_DeleteDeviceType_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// DeleteManufacturer provides a mock function with given fields: ctx, opts
+func (_m *MockAPI) DeleteManufacturer(ctx context.Context, opts *DeleteManufacturerOpts) (*Response, error) {
+	ret := _m.Called(ctx, opts)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeleteManufacturer")
+	}
+
+	var r0 *Response
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *DeleteManufacturerOpts) (*Response, error)); ok {
+		return rf(ctx, opts)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *DeleteManufacturerOpts) *Response); ok {
+		r0 = rf(ctx, opts)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*Response)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *DeleteManufacturerOpts) error); ok {
+		r1 = rf(ctx, opts)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockAPI_DeleteManufacturer_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeleteManufacturer'
+type MockAPI_DeleteManufacturer_Call struct {
+	*mock.Call
+}
+
+// DeleteManufacturer is a helper method to define mock.On call
+//   - ctx context.Context
+//   - opts *DeleteManufacturerOpts
+func (_e *MockAPI_Expecter) DeleteManufacturer(ctx interface{}, opts interface{}) *MockAPI_DeleteManufacturer_Call {
+	return &MockAPI_DeleteManufacturer_Call{Call: _e.mock.On("DeleteManufacturer", ctx, opts)}
+}
+
+func (_c *MockAPI_DeleteManufacturer_Call) Run(run func(ctx context.Context, opts *DeleteManufacturerOpts)) *MockAPI_DeleteManufacturer_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(*DeleteManufacturerOpts))
+	})
+	return _c
+}
+
+func (_c *MockAPI_DeleteManufacturer_Call) Return(res *Response, err error) *MockAPI_DeleteManufacturer_Call {
+	_c.Call.Return(res, err)
+	return _c
+}
+
+func (_c *MockAPI_DeleteManufacturer_Call) RunAndReturn(run func(context.Context, *DeleteManufacturerOpts) (*Response, error)) *MockAPI_DeleteManufacturer_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -587,6 +705,65 @@ func (_c *MockAPI_GetDeviceType_Call) RunAndReturn(run func(context.Context, *Ge
 	return _c
 }
 
+// GetManufacturer provides a mock function with given fields: ctx, opts
+func (_m *MockAPI) GetManufacturer(ctx context.Context, opts *GetManufacturerOpts) (*Response, error) {
+	ret := _m.Called(ctx, opts)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetManufacturer")
+	}
+
+	var r0 *Response
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *GetManufacturerOpts) (*Response, error)); ok {
+		return rf(ctx, opts)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *GetManufacturerOpts) *Response); ok {
+		r0 = rf(ctx, opts)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*Response)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *GetManufacturerOpts) error); ok {
+		r1 = rf(ctx, opts)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockAPI_GetManufacturer_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetManufacturer'
+type MockAPI_GetManufacturer_Call struct {
+	*mock.Call
+}
+
+// GetManufacturer is a helper method to define mock.On call
+//   - ctx context.Context
+//   - opts *GetManufacturerOpts
+func (_e *MockAPI_Expecter) GetManufacturer(ctx interface{}, opts interface{}) *MockAPI_GetManufacturer_Call {
+	return &MockAPI_GetManufacturer_Call{Call: _e.mock.On("GetManufacturer", ctx, opts)}
+}
+
+func (_c *MockAPI_GetManufacturer_Call) Run(run func(ctx context.Context, opts *GetManufacturerOpts)) *MockAPI_GetManufacturer_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(*GetManufacturerOpts))
+	})
+	return _c
+}
+
+func (_c *MockAPI_GetManufacturer_Call) Return(res *Response, err error) *MockAPI_GetManufacturer_Call {
+	_c.Call.Return(res, err)
+	return _c
+}
+
+func (_c *MockAPI_GetManufacturer_Call) RunAndReturn(run func(context.Context, *GetManufacturerOpts) (*Response, error)) *MockAPI_GetManufacturer_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetStats provides a mock function with given fields: ctx
 func (_m *MockAPI) GetStats(ctx context.Context) (*Response, error) {
 	ret := _m.Called(ctx)
@@ -822,6 +999,65 @@ func (_c *MockAPI_ListDevices_Call) RunAndReturn(run func(context.Context, *List
 	return _c
 }
 
+// ListManufacturers provides a mock function with given fields: ctx, opts
+func (_m *MockAPI) ListManufacturers(ctx context.Context, opts *ListManufacturersOpts) (*Response, error) {
+	ret := _m.Called(ctx, opts)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ListManufacturers")
+	}
+
+	var r0 *Response
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *ListManufacturersOpts) (*Response, error)); ok {
+		return rf(ctx, opts)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *ListManufacturersOpts) *Response); ok {
+		r0 = rf(ctx, opts)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*Response)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *ListManufacturersOpts) error); ok {
+		r1 = rf(ctx, opts)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockAPI_ListManufacturers_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListManufacturers'
+type MockAPI_ListManufacturers_Call struct {
+	*mock.Call
+}
+
+// ListManufacturers is a helper method to define mock.On call
+//   - ctx context.Context
+//   - opts *ListManufacturersOpts
+func (_e *MockAPI_Expecter) ListManufacturers(ctx interface{}, opts interface{}) *MockAPI_ListManufacturers_Call {
+	return &MockAPI_ListManufacturers_Call{Call: _e.mock.On("ListManufacturers", ctx, opts)}
+}
+
+func (_c *MockAPI_ListManufacturers_Call) Run(run func(ctx context.Context, opts *ListManufacturersOpts)) *MockAPI_ListManufacturers_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(*ListManufacturersOpts))
+	})
+	return _c
+}
+
+func (_c *MockAPI_ListManufacturers_Call) Return(res *Response, err error) *MockAPI_ListManufacturers_Call {
+	_c.Call.Return(res, err)
+	return _c
+}
+
+func (_c *MockAPI_ListManufacturers_Call) RunAndReturn(run func(context.Context, *ListManufacturersOpts) (*Response, error)) *MockAPI_ListManufacturers_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // ListUsers provides a mock function with given fields: ctx, opts
 func (_m *MockAPI) ListUsers(ctx context.Context, opts *ListUsersOpts) (*Response, error) {
 	ret := _m.Called(ctx, opts)
@@ -995,6 +1231,65 @@ func (_c *MockAPI_UpdateDeviceType_Call) Return(res *Response, err error) *MockA
 }
 
 func (_c *MockAPI_UpdateDeviceType_Call) RunAndReturn(run func(context.Context, *UpdateDeviceTypeOpts) (*Response, error)) *MockAPI_UpdateDeviceType_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// UpdateManufacturer provides a mock function with given fields: ctx, opts
+func (_m *MockAPI) UpdateManufacturer(ctx context.Context, opts *UpdateManufacturerOpts) (*Response, error) {
+	ret := _m.Called(ctx, opts)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateManufacturer")
+	}
+
+	var r0 *Response
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *UpdateManufacturerOpts) (*Response, error)); ok {
+		return rf(ctx, opts)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *UpdateManufacturerOpts) *Response); ok {
+		r0 = rf(ctx, opts)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*Response)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *UpdateManufacturerOpts) error); ok {
+		r1 = rf(ctx, opts)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockAPI_UpdateManufacturer_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpdateManufacturer'
+type MockAPI_UpdateManufacturer_Call struct {
+	*mock.Call
+}
+
+// UpdateManufacturer is a helper method to define mock.On call
+//   - ctx context.Context
+//   - opts *UpdateManufacturerOpts
+func (_e *MockAPI_Expecter) UpdateManufacturer(ctx interface{}, opts interface{}) *MockAPI_UpdateManufacturer_Call {
+	return &MockAPI_UpdateManufacturer_Call{Call: _e.mock.On("UpdateManufacturer", ctx, opts)}
+}
+
+func (_c *MockAPI_UpdateManufacturer_Call) Run(run func(ctx context.Context, opts *UpdateManufacturerOpts)) *MockAPI_UpdateManufacturer_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(*UpdateManufacturerOpts))
+	})
+	return _c
+}
+
+func (_c *MockAPI_UpdateManufacturer_Call) Return(res *Response, err error) *MockAPI_UpdateManufacturer_Call {
+	_c.Call.Return(res, err)
+	return _c
+}
+
+func (_c *MockAPI_UpdateManufacturer_Call) RunAndReturn(run func(context.Context, *UpdateManufacturerOpts) (*Response, error)) *MockAPI_UpdateManufacturer_Call {
 	_c.Call.Return(run)
 	return _c
 }

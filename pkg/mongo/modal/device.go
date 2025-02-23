@@ -163,3 +163,10 @@ func (db *DBClient) SaveDevice(ctx context.Context, device *Device) error {
 func (db *DBClient) DeleteDevice(ctx context.Context, device *Device) error {
 	return deleteObj(ctx, db, &device)
 }
+
+func (db *DBClient) CountDevices(
+	ctx context.Context, filter interface{}, opts ...options.Lister[options.CountOptions],
+) (int64, error) {
+	t := &Device{}
+	return count(ctx, db, &t, filter, opts...)
+}

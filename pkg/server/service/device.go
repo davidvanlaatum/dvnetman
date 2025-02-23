@@ -5,8 +5,8 @@ import (
 	"dvnetman/pkg/mongo/modal"
 	"dvnetman/pkg/openapi"
 	"dvnetman/pkg/server/dto"
+	"dvnetman/pkg/utils"
 	"github.com/pkg/errors"
-	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 	"net/http"
 )
@@ -41,6 +41,7 @@ func (s *Service) UpdateDevice(ctx context.Context, opts *openapi.UpdateDeviceOp
 	if err = c.UpdateDeviceFromOpenAPI(ctx, opts.Body, mod); err != nil {
 		return
 	}
+	res = &openapi.Response{}
 	if err = s.db.SaveDevice(ctx, mod); err != nil {
 		return
 	}
@@ -71,10 +72,17 @@ func (s *Service) ListDevices(ctx context.Context, opts *openapi.ListDevicesOpts
 	if opts.PerPage != nil && *opts.PerPage > 0 {
 		size = int64(*opts.PerPage)
 	}
+	search := filter{}
+	search.inUUID("id", utils.MapTo(opts.Ids, modal.ConvertUUID))
+	search.inUUID("device_type", utils.MapTo(opts.DeviceType, modal.ConvertUUID))
+	search.equalsStr("name", opts.Name)
+	search.regex("name", opts.NameRegex, "i")
 	var devices []*modal.Device
-	if devices, err = s.db.ListDevices(
-		ctx, bson.M{}, options.Find().SetLimit(size+1).SetSkip(page*size),
-	); err != nil {
+	findOpts := options.Find().SetLimit(size + 1).SetSkip(page * size)
+	if findOpts, err = s.setProjection(opts.Fields, []string{"name", "device_type", "status"}, findOpts); err != nil {
+		return
+	}
+	if devices, err = s.db.ListDevices(ctx, search, findOpts); err != nil {
 		return
 	}
 	rt := &openapi.DeviceSearchResults{}

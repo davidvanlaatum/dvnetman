@@ -10,7 +10,7 @@ import (
 
 func (c *Converter) DeviceToOpenAPI(ctx context.Context, device *modal.Device) (dev *openapi.Device, err error) {
 	dev = &openapi.Device{
-		Id:           c.cloneUUID((*uuid.UUID)(device.ID)),
+		Id:           *c.cloneUUID((*uuid.UUID)(device.ID)),
 		Name:         device.Name,
 		Description:  device.Description,
 		RackPosition: utils.ConvertPtr(device.RackPosition, func(x int) float64 { return float64(x) / 2 }),

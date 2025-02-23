@@ -1,14 +1,15 @@
 import { Button, Container, Form } from 'react-bootstrap'
 import { FormEvent, useState } from 'react'
-import { Device, DeviceTypeResult, DeviceTypeSearchResults } from '../api'
+import { Device, DeviceTypeResult, DeviceTypeSearchResults } from '@src/api'
 import { AsyncTypeahead } from 'react-bootstrap-typeahead'
 import { Option } from 'react-bootstrap-typeahead/types/types'
-import { useApi } from '../ApiContext.tsx'
+import { useApi } from '../../ApiContext.tsx'
 import { useNavigate } from 'react-router'
 
 function DeviceAdd() {
   const api = useApi()
   const [device, setDevice] = useState<Device>({
+    id: '',
     version: 0,
   })
   const [deviceTypeOptions, setDeviceTypeOptions] = useState<DeviceTypeSearchResults>()
@@ -16,8 +17,7 @@ function DeviceAdd() {
   const navigate = useNavigate()
   const basePath = import.meta.env.BASE_URL
 
-  async function lookupDeviceTypes(query: string) {
-    console.log('loading', query)
+  async function lookupDeviceTypes(/*query: string*/) {
     setDeviceTypeLoading(true)
     try {
       const response = await api.deviceApi.listDeviceTypes(/*{ q: query }*/)

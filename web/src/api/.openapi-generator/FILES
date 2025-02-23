@@ -1,4 +1,5 @@
 apis/DeviceApi.ts
+apis/ManufacturerApi.ts
 apis/StatsApi.ts
 apis/UserApi.ts
 apis/index.ts
@@ -12,6 +13,9 @@ models/DeviceType.ts
 models/DeviceTypeResult.ts
 models/DeviceTypeSearchResults.ts
 models/ErrorMessage.ts
+models/Manufacturer.ts
+models/ManufacturerResult.ts
+models/ManufacturerSearchResults.ts
 models/ObjectReference.ts
 models/Stats.ts
 models/Tag.ts

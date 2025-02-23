@@ -26,7 +26,6 @@ import (
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"gopkg.in/yaml.v3"
-	"log"
 	"net"
 	"net/http"
 	"strconv"
@@ -43,6 +42,7 @@ type Server struct {
 	store      sessions.Store
 	auth       *auth.Auth
 	otel       *otelServer
+	client     *modal.DBClient
 }
 
 func NewServer(cfg *config.Config, log logger.Logger) *Server {
@@ -89,7 +89,14 @@ func (s *Server) connectToMongo(ctx context.Context) (err error) {
 	}
 
 	if err = s.db.Ping(ctx, nil); err != nil {
-		err = errors.WithMessage(err, "failed to ping MongoDB")
+		if err = errors.WithMessage(err, "failed to ping MongoDB"); err != nil {
+			return
+		}
+	}
+
+	s.client = modal.NewDBClient(s.getMongoDatabase())
+	if err = s.client.Init(ctx); err != nil {
+		return errors.WithMessage(err, "failed to initialize database client")
 	}
 	return
 }
@@ -103,25 +110,29 @@ func (s *Server) disconnectFromMongo() {
 	}
 }
 
+func accessLogMiddleware(handler http.Handler) http.Handler {
+	return http.HandlerFunc(
+		func(w http.ResponseWriter, r *http.Request) {
+			m := httpsnoop.CaptureMetrics(handler, w, r)
+			logger.Ctx(r.Context()).Info().
+				Key("code", m.Code).
+				Key("duration", m.Duration).
+				Key("written", m.Written).
+				Msg("request")
+		},
+	)
+}
+
 func (s *Server) setupRouter() error {
-	s.service = service.NewService(modal.NewDBClient(s.getMongoDatabase()))
+	s.service = service.NewService(s.client)
 	router := mux.NewRouter()
 	router.Use(handlers.RecoveryHandler(handlers.PrintRecoveryStack(true)))
 	router.Use(otelhttp.NewMiddleware("http"))
+	router.Use(traceIDHeaderMiddleware)
 	router.Use(logger.Middleware(s.log))
 	router.Use(mongosession.Middleware())
 	router.Use(handlers.CORS(handlers.AllowedOrigins([]string{"*"})))
-	router.Use(
-		func(handler http.Handler) http.Handler {
-			return http.HandlerFunc(
-				func(w http.ResponseWriter, r *http.Request) {
-					m := httpsnoop.CaptureMetrics(handler, w, r)
-					logger.Ctx(r.Context()).Info().Key("code", m.Code).Key("duration", m.Duration).Msg("request")
-				},
-			)
-		},
-	)
-	router.Use(handlers.CompressHandler)
+	router.Use(accessLogMiddleware)
 	router.Use(handlers.ProxyHeaders)
 	s.auth.AddRoutes(router)
 	router.Methods("GET").Path("/api/openapi.yaml").HandlerFunc(s.openapiSpec).Name("OpenAPI")
@@ -142,20 +153,24 @@ func (s *Server) setupRouter() error {
 				l.Key("path", path)
 			}
 			l.Msg("Route")
+			router.NotFoundHandler = http.HandlerFunc(s.notFound)
+			router.MethodNotAllowedHandler = http.HandlerFunc(s.methodNotAllowed)
 			return nil
 		},
-	)
-	router.NotFoundHandler = handlers.LoggingHandler(
-		log.Writer(), http.HandlerFunc(
-			func(w http.ResponseWriter, r *http.Request) {
-				log.Printf("Not found: %s", r.URL.Path)
-				http.Error(w, "Not found", http.StatusNotFound)
-			},
-		),
 	)
 	s.router = router
 	s.otel.attach(router)
 	return nil
+}
+
+func (s *Server) notFound(w http.ResponseWriter, r *http.Request) {
+	logger.Ctx(r.Context()).Warn().Key("path", r.URL.Path).Msg("Not found")
+	http.Error(w, "Not found", http.StatusNotFound)
+}
+
+func (s *Server) methodNotAllowed(w http.ResponseWriter, r *http.Request) {
+	logger.Ctx(r.Context()).Warn().Key("path", r.URL.Path).Key("method", r.Method).Msg("Method not allowed")
+	http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 }
 
 func (s *Server) openapiSpec(w http.ResponseWriter, r *http.Request) {
@@ -206,27 +221,6 @@ func (s *Server) setupAuth() (err error) {
 	}
 	return nil
 }
-
-//func (s *Server) errorHandler(w http.ResponseWriter, _ *http.Request, err error, _ *openapi.ImplResponse) {
-//	var res *openapi.ImplResponse
-//	for _, conv := range errorConverters {
-//		if res = conv(err); res != nil {
-//			break
-//		}
-//	}
-//	if res == nil {
-//		s.log.Error().Msgf("Unhandled error %v (%T)", err, errors.Unwrap(err))
-//		res = &openapi.ImplResponse{
-//			Code: http.StatusInternalServerError,
-//			Body: openapi.Error{
-//				Errors: []openapi.ErrorMessage{
-//					{Code: "UNKNOWN", Message: err.Error()},
-//				},
-//			},
-//		}
-//	}
-//	_ = openapi.EncodeJSONResponse(res.Body, &res.Code, res.Headers, w)
-//}
 
 func (s *Server) stopHTTP() {
 	if s.httpServer != nil {

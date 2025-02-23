@@ -33,11 +33,11 @@ import {
 } from '../models/index';
 
 export interface CreateDeviceRequest {
-    device: Omit<Device, 'id'>;
+    device: Omit<Device, 'created'|'id'|'updated'>;
 }
 
 export interface CreateDeviceTypeRequest {
-    deviceType: Omit<DeviceType, 'id'>;
+    deviceType: Omit<DeviceType, 'created'|'id'|'updated'>;
 }
 
 export interface DeleteDeviceRequest {
@@ -64,22 +64,32 @@ export interface ListDeviceTypesRequest {
     page?: number;
     perPage?: number;
     sort?: string;
+    ids?: Array<string>;
+    model?: string;
+    modelRegex?: string;
+    fields?: Array<string>;
 }
 
 export interface ListDevicesRequest {
     page?: number;
     perPage?: number;
     sort?: string;
+    ids?: Array<string>;
+    name?: string;
+    nameRegex?: string;
+    status?: string;
+    fields?: Array<string>;
+    deviceType?: Array<string>;
 }
 
 export interface UpdateDeviceRequest {
     id: string;
-    device: Omit<Device, 'id'>;
+    device: Omit<Device, 'created'|'id'|'updated'>;
 }
 
 export interface UpdateDeviceTypeRequest {
     id: string;
-    deviceType: Omit<DeviceType, 'id'>;
+    deviceType: Omit<DeviceType, 'created'|'id'|'updated'>;
 }
 
 /**
@@ -176,6 +186,10 @@ export interface DeviceApiInterface {
      * @param {number} [page] Page number
      * @param {number} [perPage] Number of items per page
      * @param {string} [sort] Sort order
+     * @param {Array<string>} [ids] IDs of the device types
+     * @param {string} [model] Model of the device type
+     * @param {string} [modelRegex] Model of the device type
+     * @param {Array<string>} [fields] Fields to return
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof DeviceApiInterface
@@ -191,6 +205,12 @@ export interface DeviceApiInterface {
      * @param {number} [page] Page number
      * @param {number} [perPage] Number of items per page
      * @param {string} [sort] Sort order
+     * @param {Array<string>} [ids] IDs of the devices
+     * @param {string} [name] Name of the device
+     * @param {string} [nameRegex] Name of the device
+     * @param {string} [status] Status of the device
+     * @param {Array<string>} [fields] Fields to return
+     * @param {Array<string>} [deviceType] 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof DeviceApiInterface
@@ -459,6 +479,22 @@ export class DeviceApi extends runtime.BaseAPI implements DeviceApiInterface {
             queryParameters['sort'] = requestParameters['sort'];
         }
 
+        if (requestParameters['ids'] != null) {
+            queryParameters['ids'] = requestParameters['ids'];
+        }
+
+        if (requestParameters['model'] != null) {
+            queryParameters['model'] = requestParameters['model'];
+        }
+
+        if (requestParameters['modelRegex'] != null) {
+            queryParameters['modelRegex'] = requestParameters['modelRegex'];
+        }
+
+        if (requestParameters['fields'] != null) {
+            queryParameters['fields'] = requestParameters['fields'];
+        }
+
         const headerParameters: runtime.HTTPHeaders = {};
 
         const response = await this.request({
@@ -493,6 +529,30 @@ export class DeviceApi extends runtime.BaseAPI implements DeviceApiInterface {
 
         if (requestParameters['sort'] != null) {
             queryParameters['sort'] = requestParameters['sort'];
+        }
+
+        if (requestParameters['ids'] != null) {
+            queryParameters['ids'] = requestParameters['ids'];
+        }
+
+        if (requestParameters['name'] != null) {
+            queryParameters['name'] = requestParameters['name'];
+        }
+
+        if (requestParameters['nameRegex'] != null) {
+            queryParameters['nameRegex'] = requestParameters['nameRegex'];
+        }
+
+        if (requestParameters['status'] != null) {
+            queryParameters['status'] = requestParameters['status'];
+        }
+
+        if (requestParameters['fields'] != null) {
+            queryParameters['fields'] = requestParameters['fields'];
+        }
+
+        if (requestParameters['deviceType'] != null) {
+            queryParameters['deviceType'] = requestParameters['deviceType'];
         }
 
         const headerParameters: runtime.HTTPHeaders = {};

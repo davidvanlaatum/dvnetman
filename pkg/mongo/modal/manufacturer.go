@@ -8,7 +8,7 @@ import (
 )
 
 type Manufacturer struct {
-	Base
+	Base `bson:",inline"`
 	Name string `bson:"name"`
 }
 
@@ -19,6 +19,10 @@ func init() {
 			Indexes: []mongo.IndexModel{
 				{
 					Keys:    bson.D{{"id", int32(1)}},
+					Options: options.Index().SetUnique(true),
+				},
+				{
+					Keys:    bson.D{{"name", int32(1)}},
 					Options: options.Index().SetUnique(true),
 				},
 			},
@@ -52,4 +56,11 @@ func (db *DBClient) SaveManufacturer(ctx context.Context, manufacturer *Manufact
 
 func (db *DBClient) DeleteManufacturer(ctx context.Context, manufacturer *Manufacturer) error {
 	return deleteObj(ctx, db, &manufacturer)
+}
+
+func (db *DBClient) CountManufacturers(
+	ctx context.Context, filter interface{}, opts ...options.Lister[options.CountOptions],
+) (int64, error) {
+	t := &Manufacturer{}
+	return count(ctx, db, &t, filter, opts...)
 }

@@ -41,7 +41,7 @@ func (c *Converter) DeviceTypeToOpenAPI(ctx context.Context, dt *modal.DeviceTyp
 	dev *openapi.DeviceType, err error,
 ) {
 	dev = &openapi.DeviceType{
-		Id:           c.cloneUUID((*uuid.UUID)(dt.ID)),
+		Id:           *c.cloneUUID((*uuid.UUID)(dt.ID)),
 		Manufacturer: c.getManufacturerRef(dt.Manufacturer),
 		Model:        utils.ToPtr(dt.Model),
 	}
@@ -49,4 +49,31 @@ func (c *Converter) DeviceTypeToOpenAPI(ctx context.Context, dt *modal.DeviceTyp
 		return
 	}
 	return
+}
+
+func (c *Converter) DeviceTypeToOpenAPISearchResults(
+	ctx context.Context, types []*modal.DeviceType,
+) (res []*openapi.DeviceTypeResult, err error) {
+	res = utils.MapTo(
+		types, func(dt *modal.DeviceType) *openapi.DeviceTypeResult {
+			return &openapi.DeviceTypeResult{
+				Id:           *(*uuid.UUID)(dt.ID),
+				Manufacturer: c.getManufacturerRef(dt.Manufacturer),
+				Model:        utils.ToPtr(dt.Model),
+				Version:      dt.Version,
+			}
+		},
+	)
+	if err = c.resolveQueue(ctx); err != nil {
+		return
+	}
+	return
+}
+
+func (c *Converter) UpdateDeviceTypeFromOpenAPI(
+	ctx context.Context, body *openapi.DeviceType, mod *modal.DeviceType,
+) error {
+	mod.Model = *body.Model
+	mod.Manufacturer = c.checkManufacturerRefExists(body.Manufacturer)
+	return c.resolveQueue(ctx)
 }

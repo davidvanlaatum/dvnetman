@@ -273,3 +273,10 @@ func deleteObj[T baseInterface](ctx context.Context, db *DBClient, document *T) 
 	}
 	return nil
 }
+
+func count[T baseInterface](
+	ctx context.Context, db *DBClient, document *T, filter interface{}, opts ...options.Lister[options.CountOptions],
+) (int64, error) {
+	c, err := collection(db, *document).CountDocuments(ctx, filter, opts...)
+	return c, errors.Wrap(err, "failed to count documents")
+}

@@ -26,7 +26,7 @@ jobs:
     - name: Build
       run: go build -v ./...
     - name: Missing tests
-      run: go run ./scripts
+      run: go run ./scripts/no-tests
     - name: Test
       run: go test -v ./...
     - uses: golangci/golangci-lint-action@v6

@@ -11,7 +11,7 @@ type Device struct {
 	Created      *time.Time       `json:"created,omitzero"`
 	Description  *string          `json:"description,omitzero"`
 	DeviceType   *ObjectReference `json:"deviceType,omitzero"`
-	Id           *uuid.UUID       `json:"id,omitzero"`
+	Id           uuid.UUID        `json:"id"`
 	Location     *ObjectReference `json:"location,omitzero"`
 	Name         *string          `json:"name,omitzero"`
 	Ports        []*DevicePort    `json:"ports,omitzero"`

@@ -12,6 +12,10 @@ type GoType struct {
 	pointer bool
 }
 
+func (t *GoType) GoString() string {
+	return t.ToCode().GoString()
+}
+
 func (t *GoType) ToCode() *Statement {
 	p := func(c *Statement) *Statement {
 		if t.pointer {

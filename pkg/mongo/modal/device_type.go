@@ -44,6 +44,13 @@ func init() {
 					Keys:    bson.D{{"id", int32(1)}},
 					Options: options.Index().SetUnique(true),
 				},
+				{
+					Keys:    bson.D{{"manufacturer", int32(1)}, {"model", int32(1)}},
+					Options: options.Index().SetUnique(true),
+				},
+				{
+					Keys: bson.D{{"modal", int32(1)}},
+				},
 			},
 		},
 	)
@@ -75,4 +82,11 @@ func (db *DBClient) SaveDeviceType(ctx context.Context, device *DeviceType) erro
 
 func (db *DBClient) DeleteDeviceType(ctx context.Context, device *DeviceType) error {
 	return deleteObj(ctx, db, &device)
+}
+
+func (db *DBClient) CountDeviceTypes(
+	ctx context.Context, filter interface{}, opts ...options.Lister[options.CountOptions],
+) (int64, error) {
+	t := &DeviceType{}
+	return count(ctx, db, &t, filter, opts...)
 }

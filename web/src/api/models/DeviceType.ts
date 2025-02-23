@@ -40,13 +40,13 @@ export interface DeviceType {
      * @type {Date}
      * @memberof DeviceType
      */
-    created?: Date;
+    readonly created?: Date;
     /**
      * 
      * @type {string}
      * @memberof DeviceType
      */
-    readonly id?: string;
+    readonly id: string;
     /**
      * 
      * @type {ObjectReference}
@@ -70,7 +70,7 @@ export interface DeviceType {
      * @type {Date}
      * @memberof DeviceType
      */
-    updated?: Date;
+    readonly updated?: Date;
     /**
      * 
      * @type {number}
@@ -83,6 +83,7 @@ export interface DeviceType {
  * Check if a given object implements the DeviceType interface.
  */
 export function instanceOfDeviceType(value: object): value is DeviceType {
+    if (!('id' in value) || value['id'] === undefined) return false;
     if (!('version' in value) || value['version'] === undefined) return false;
     return true;
 }
@@ -98,7 +99,7 @@ export function DeviceTypeFromJSONTyped(json: any, ignoreDiscriminator: boolean)
     return {
         
         'created': json['created'] == null ? undefined : (new Date(json['created'])),
-        'id': json['id'] == null ? undefined : json['id'],
+        'id': json['id'],
         'manufacturer': json['manufacturer'] == null ? undefined : ObjectReferenceFromJSON(json['manufacturer']),
         'model': json['model'] == null ? undefined : json['model'],
         'tags': json['tags'] == null ? undefined : ((json['tags'] as Array<any>).map(TagFromJSON)),
@@ -111,18 +112,16 @@ export function DeviceTypeToJSON(json: any): DeviceType {
     return DeviceTypeToJSONTyped(json, false);
 }
 
-export function DeviceTypeToJSONTyped(value?: Omit<DeviceType, 'id'> | null, ignoreDiscriminator: boolean = false): any {
+export function DeviceTypeToJSONTyped(value?: Omit<DeviceType, 'created'|'id'|'updated'> | null, ignoreDiscriminator: boolean = false): any {
     if (value == null) {
         return value;
     }
 
     return {
         
-        'created': value['created'] == null ? undefined : ((value['created']).toISOString()),
         'manufacturer': ObjectReferenceToJSON(value['manufacturer']),
         'model': value['model'],
         'tags': value['tags'] == null ? undefined : ((value['tags'] as Array<any>).map(TagToJSON)),
-        'updated': value['updated'] == null ? undefined : ((value['updated']).toISOString()),
         'version': value['version'],
     };
 }

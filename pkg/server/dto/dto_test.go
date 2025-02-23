@@ -75,7 +75,7 @@ func TestConverter_DeviceToOpenAPI(t *testing.T) {
 				Name: utils.ToPtr("test name"),
 			},
 			expected: &openapi.Device{
-				Id:      &testUUID1,
+				Id:      testUUID1,
 				Name:    utils.ToPtr("test name"),
 				Version: 1,
 			},
@@ -89,7 +89,7 @@ func TestConverter_DeviceToOpenAPI(t *testing.T) {
 				DeviceType: (*modal.UUID)(&testUUID2),
 			},
 			expected: &openapi.Device{
-				Id: &testUUID1,
+				Id: testUUID1,
 				DeviceType: &openapi.ObjectReference{
 					Id:          testUUID2,
 					DisplayName: utils.ToPtr("test manufacturer test device type"),
@@ -134,7 +134,7 @@ func TestConverter_UpdateDeviceFromOpenAPI(t *testing.T) {
 		{
 			name: "id should not be updated",
 			in: &openapi.Device{
-				Id: &testUUID1,
+				Id: testUUID1,
 			},
 			existing: &modal.Device{
 				Base: modal.Base{

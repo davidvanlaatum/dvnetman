@@ -40,7 +40,7 @@ export interface DeviceResult {
      * @type {Date}
      * @memberof DeviceResult
      */
-    created?: Date;
+    readonly created?: Date;
     /**
      * 
      * @type {string}
@@ -100,7 +100,7 @@ export interface DeviceResult {
      * @type {Date}
      * @memberof DeviceResult
      */
-    updated?: Date;
+    readonly updated?: Date;
     /**
      * 
      * @type {number}
@@ -147,14 +147,13 @@ export function DeviceResultToJSON(json: any): DeviceResult {
     return DeviceResultToJSONTyped(json, false);
 }
 
-export function DeviceResultToJSONTyped(value?: Omit<DeviceResult, 'id'> | null, ignoreDiscriminator: boolean = false): any {
+export function DeviceResultToJSONTyped(value?: Omit<DeviceResult, 'created'|'id'|'updated'> | null, ignoreDiscriminator: boolean = false): any {
     if (value == null) {
         return value;
     }
 
     return {
         
-        'created': value['created'] == null ? undefined : ((value['created']).toISOString()),
         'description': value['description'],
         'deviceType': ObjectReferenceToJSON(value['deviceType']),
         'location': ObjectReferenceToJSON(value['location']),
@@ -163,7 +162,6 @@ export function DeviceResultToJSONTyped(value?: Omit<DeviceResult, 'id'> | null,
         'site': ObjectReferenceToJSON(value['site']),
         'status': value['status'],
         'tags': value['tags'] == null ? undefined : ((value['tags'] as Array<any>).map(TagToJSON)),
-        'updated': value['updated'] == null ? undefined : ((value['updated']).toISOString()),
         'version': value['version'],
     };
 }
