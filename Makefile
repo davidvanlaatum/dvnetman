@@ -26,7 +26,10 @@ test-go:
 test-js:
 	cd web && npm run test
 
-test: test-go test-js
+test-playwright:
+	cd web && npm run e2e-tests
+
+test: test-go test-js test-playwright
 
 lint-js:
 	cd web && npm run lint
