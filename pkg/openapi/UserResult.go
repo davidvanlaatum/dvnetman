@@ -5,6 +5,9 @@ package openapi
 import uuid "github.com/google/uuid"
 
 type UserResult struct {
-	DisplayName *string    `json:"displayName,omitzero"`
-	Id          *uuid.UUID `json:"id,omitzero"`
+	Email     *string   `json:"email,omitzero"`
+	FirstName *string   `json:"firstName,omitzero"`
+	Id        uuid.UUID `json:"id"`
+	LastName  *string   `json:"lastName,omitzero"`
+	Username  *string   `json:"username,omitzero"`
 }

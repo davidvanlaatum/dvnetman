@@ -21,8 +21,10 @@ describe('<TypeToFindDeviceType />', () => {
   it('should render correctly', async () => {
     const fetch = new FakeFetch()
     fetch.expectDeviceTypeSearch({
-      modelRegex: ['abc'],
-      fields: ['model', 'manufacturer'],
+      requestBody: {
+        modelRegex: 'abc',
+        fields: ['model', 'manufacturer'],
+      },
       body: {
         items: [{ id: '1', model: 'abc', manufacturer: { id: 'm1', displayName: 'def' }, version: 1 }],
         count: 1,
@@ -50,8 +52,10 @@ describe('<TypeToFindDeviceType />', () => {
       resolve = r
     })
     fetch.expectDeviceTypeSearch({
-      ids: ['1'],
-      fields: ['model', 'manufacturer'],
+      requestBody: {
+        ids: ['1'],
+        fields: ['model', 'manufacturer'],
+      },
       callback: async () => p,
     })
     render(

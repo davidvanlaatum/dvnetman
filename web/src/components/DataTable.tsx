@@ -1,4 +1,4 @@
-import { Dropdown, FormCheck, Table } from 'react-bootstrap'
+import { Dropdown, FormCheck, Spinner, Table } from 'react-bootstrap'
 import 'bootstrap-icons/font/bootstrap-icons.css'
 import { FC, ReactNode, useEffect, useState } from 'react'
 import './DataTable.scss'
@@ -26,9 +26,10 @@ export interface DataTableProps {
   selectable?: boolean
   selected?: string[]
   onSelect?: (selected: string[]) => void
+  loading?: boolean
 }
 
-export const DataTable: FC<DataTableProps> = ({ columns, data, onSort, selectable, selected, onSelect }) => {
+export const DataTable: FC<DataTableProps> = ({ columns, data, onSort, selectable, selected, onSelect, loading }) => {
   const [sortColumn, setSortColumn] = useState<string | null>(null)
   const [sortDir, setSortDir] = useState<boolean>(true)
   const [renderData, setRenderData] = useState<DataTableRow[]>(data)
@@ -103,6 +104,52 @@ export const DataTable: FC<DataTableProps> = ({ columns, data, onSort, selectabl
     }
   }
 
+  function renderBody(): ReactNode {
+    if (loading) {
+      return (
+        <tbody>
+          <tr>
+            <td colSpan={columns.length}>
+              <Spinner size="sm" /> Loading...
+            </td>
+          </tr>
+        </tbody>
+      )
+    }
+    return (
+      <tbody>
+        {renderData.map((row) => (
+          <tr key={row.id}>{columns.map((column, index) => renderBodyCell(row, column, index))}</tr>
+        ))}
+      </tbody>
+    )
+  }
+
+  function renderBodyCell(row: DataTableRow, column: DataTableColumnProps, index: number) {
+    let value: ReactNode
+    if (column.render) {
+      value = column.render(row)
+    } else if (column.getDisplayValue) {
+      value = column.getDisplayValue(row)
+    } else {
+      value = row[column.id]
+    }
+    return (
+      <td key={column.id} className={'data-table-column'}>
+        <div>
+          {selectable && index == 0 && (
+            <FormCheck
+              className={'float-start'}
+              checked={selected?.includes(row.id)}
+              onChange={(e) => onSelected(e.target.checked, row)}
+            />
+          )}
+          {value}
+        </div>
+      </td>
+    )
+  }
+
   return (
     <Table striped bordered hover>
       <thead>
@@ -146,36 +193,7 @@ export const DataTable: FC<DataTableProps> = ({ columns, data, onSort, selectabl
           })}
         </tr>
       </thead>
-      <tbody>
-        {renderData.map((row) => (
-          <tr key={row.id}>
-            {columns.map((column, index) => {
-              let value: ReactNode
-              if (column.render) {
-                value = column.render(row)
-              } else if (column.getDisplayValue) {
-                value = column.getDisplayValue(row)
-              } else {
-                value = row[column.id]
-              }
-              return (
-                <td key={column.id} className={'data-table-column'}>
-                  <div>
-                    {selectable && index == 0 && (
-                      <FormCheck
-                        className={'float-start'}
-                        checked={selected?.includes(row.id)}
-                        onChange={(e) => onSelected(e.target.checked, row)}
-                      />
-                    )}
-                    {value}
-                  </div>
-                </td>
-              )
-            })}
-          </tr>
-        ))}
-      </tbody>
+      {renderBody()}
     </Table>
   )
 }

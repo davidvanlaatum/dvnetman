@@ -11,58 +11,32 @@ func BuildDevice(api *OpenAPI) {
 		AddObjectOpts{
 			Name: "device",
 			Tags: []string{"Device"},
-			SearchParams: []openapi.Parameter{
-				{
-					Name:        "ids",
-					In:          "query",
-					Description: "IDs of the devices",
-					Schema: &openapi.Schema{
+			SearchBody: &openapi.Schema{
+				Type: "object",
+				Properties: map[string]openapi.Schema{
+					"ids": {
 						Type: "array",
 						Items: &openapi.Schema{
 							Type:   "string",
 							Format: "uuid",
 						},
 					},
-				},
-				{
-					Name:        "name",
-					In:          "query",
-					Description: "Name of the device",
-					Schema: &openapi.Schema{
+					"name": {
 						Type: "string",
 					},
-				},
-				{
-					Name:        "nameRegex",
-					In:          "query",
-					Description: "Name of the device",
-					Schema: &openapi.Schema{
+					"nameRegex": {
 						Type: "string",
 					},
-				},
-				{
-					Name:        "status",
-					In:          "query",
-					Description: "Status of the device",
-					Schema: &openapi.Schema{
+					"status": {
 						Type: "string",
 					},
-				},
-				{
-					Name:        "fields",
-					In:          "query",
-					Description: "Fields to return",
-					Schema: &openapi.Schema{
+					"fields": {
 						Type: "array",
 						Items: &openapi.Schema{
 							Type: "string",
 						},
 					},
-				},
-				{
-					Name: "deviceType",
-					In:   "query",
-					Schema: &openapi.Schema{
+					"deviceType": {
 						Type: "array",
 						Items: &openapi.Schema{
 							Type:   "string",

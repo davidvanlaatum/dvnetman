@@ -1,30 +1,97 @@
-import { DeviceTypeSearchResults } from '@src/api'
+import { DeviceSearchBody, DeviceSearchResults, DeviceTypeSearchBody, DeviceTypeSearchResults } from '@src/api'
 import { assert, onTestFinished } from 'vitest'
 import { isEqual } from 'lodash'
 import { APIErrorModal } from '@src/api/models/APIErrorModal.ts'
 
-export interface ExpectedResponse<T> {
-  body?: T | APIErrorModal | Response | Error
+export interface ExpectedRequest<Req, Res> {
+  url: URL
+  method: string
+  requestBody?: Req
+  headers?: Headers
+  seenCount?: number
+  body?: Res | APIErrorModal | Response | Error
   status?: number
-  callback?: (url: URL, init: RequestInit, log: string[]) => Promise<T | Response | APIErrorModal | Error>
+  callback?: (url: URL, init: RequestInit, log: string[]) => Promise<Res | Response | APIErrorModal | Error>
 }
 
-export interface ExpectedDeviceTypeSearch extends ExpectedResponse<DeviceTypeSearchResults> {
-  modelRegex?: string[]
-  ids?: string[]
-  fields?: string[]
-  seenCount?: number
+export type ExpectedDeviceTypeSearch = ExpectedRequest<DeviceTypeSearchBody, DeviceTypeSearchResults>
+
+export type ExpectedDeviceSearch = ExpectedRequest<DeviceSearchBody, DeviceSearchResults>
+
+async function getBodyAsJson<T>(init: RequestInit): Promise<T | null> {
+  if (!init.body) {
+    return null
+  } else {
+    return new Response(init.body).json()
+  }
+}
+
+function headersMatch(expected: Headers, actual: Headers): boolean {
+  for (const [key, value] of expected.entries()) {
+    if (actual.get(key) !== value) {
+      return false
+    }
+  }
+  return true
 }
 
 export class FakeFetch {
   private readonly unexpectedCalls: string[] = []
-  private readonly expectedDeviceTypeSearches: ExpectedDeviceTypeSearch[] = []
+  private readonly expectedRequests: ExpectedRequest<any, any>[] = []
+  // private readonly expectedDeviceTypeSearches: ExpectedDeviceTypeSearch[] = []
+  // private readonly expectedDeviceSearches: ExpectedDeviceSearch[] = []
 
-  public expectDeviceTypeSearch(expected: ExpectedDeviceTypeSearch) {
-    this.expectedDeviceTypeSearches.push(expected)
+  private async findMatchingRequest(
+    url: URL,
+    init: RequestInit,
+    log: string[],
+  ): Promise<ExpectedRequest<any, any> | null> {
+    const body = await getBodyAsJson(init)
+    for (const v of this.expectedRequests) {
+      if (v.url.href !== url.href) {
+        log.push('url mismatch ' + v.url.href + ' ' + url.href)
+        continue
+      }
+      if (v.method !== init.method) {
+        log.push('method mismatch ' + v.method + ' ' + init.method)
+        continue
+      }
+      if (v.headers && !headersMatch(v.headers, new Headers(init.headers))) {
+        log.push('headers mismatch')
+        continue
+      }
+      if (v.requestBody && !isEqual(v.requestBody, body)) {
+        log.push('request body mismatch ' + JSON.stringify(v.requestBody) + ' ' + JSON.stringify(body))
+        continue
+      }
+      v.seenCount = (v.seenCount ?? 0) + 1
+      return v
+    }
+    return null
   }
 
-  private async response<T>(res: ExpectedResponse<T>, url: URL, init: RequestInit, log: string[]): Promise<Response> {
+  public expectDeviceTypeSearch(expected: Omit<ExpectedDeviceTypeSearch, 'url' | 'method'>) {
+    this.expectedRequests.push({
+      url: new URL('http://localhost/api/v1/deviceType/search'),
+      method: 'POST',
+      ...expected,
+    })
+  }
+
+  public expectDeviceSearch(expected: Omit<ExpectedDeviceSearch, 'url' | 'method'>) {
+    this.expectedRequests.push({
+      url: new URL('http://localhost/api/v1/device/search'),
+      method: 'POST',
+      ...expected,
+    })
+  }
+
+  private async response<Req, Res>(
+    res: ExpectedRequest<Req, Res>,
+    url: URL,
+    init: RequestInit,
+    log: string[],
+  ): Promise<Response> {
     const x = { body: res.body, status: res.status }
     if (res.callback) {
       const r = await res.callback(url, init, log)
@@ -39,39 +106,14 @@ export class FakeFetch {
     })
   }
 
-  private async deviceType(url: URL, init: RequestInit, log: string[]): Promise<Response | null> {
-    if (url.pathname == '/api/v1/deviceType' && init?.method == 'GET') {
-      const modelRegex = url.searchParams.getAll('modelRegex')
-      const fields = url.searchParams.getAll('fields')
-      for (const v of this.expectedDeviceTypeSearches) {
-        if (v.modelRegex && !isEqual(v.modelRegex, modelRegex)) {
-          log.push('modelRegex mismatch')
-          continue
-        }
-        if (v.fields && !isEqual(v.fields, fields)) {
-          log.push('fields mismatch')
-          continue
-        }
-        if (v.ids && !isEqual(v.ids, url.searchParams.getAll('ids'))) {
-          log.push('ids mismatch')
-          continue
-        }
-        v.seenCount = (v.seenCount ?? 0) + 1
-        return this.response(v, url, init, log)
-      }
-      log.push('unexpected device type search')
-    }
-    return null
-  }
-
   get fetch(): (input: RequestInfo, init?: RequestInit) => Promise<Response> {
     onTestFinished(() => {
       if (this.unexpectedCalls.length > 0) {
         assert.fail(this.unexpectedCalls.join('\n'))
       }
-      for (const v of this.expectedDeviceTypeSearches) {
+      for (const v of this.expectedRequests) {
         if (v.seenCount === undefined) {
-          assert.fail('expected device type search not called')
+          assert.fail('expected request not called')
         }
       }
     })
@@ -80,14 +122,14 @@ export class FakeFetch {
       const url = new URL(input as string)
       const log: string[] = []
       let response: Response | null = null
-      if (url.pathname.startsWith('/api/v1/deviceType')) {
-        response = await this.deviceType(url, init as RequestInit, log)
-      } else {
-        log.push('unknown path')
+      const res = await this.findMatchingRequest(url, init as RequestInit, log)
+      if (res) {
+        response = await this.response(res, url, init as RequestInit, log)
       }
       if (response) {
         return response
       }
+      console.error('unexpected fetch', input, init, log)
       this.unexpectedCalls.push(init?.method + ' ' + (input as string) + ': ' + log.join(', '))
       return new Response(
         JSON.stringify({
@@ -97,6 +139,7 @@ export class FakeFetch {
               message: 'not found',
             },
           ],
+          log: log,
         }),
         {
           status: 404,

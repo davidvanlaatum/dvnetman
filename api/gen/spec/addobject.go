@@ -36,6 +36,7 @@ func addCommonProps(s *openapi.Schema) *openapi.Schema {
 
 type AddObjectOpts struct {
 	Name         string
+	SearchBody   *openapi.Schema
 	SearchModal  *openapi.Schema
 	SearchParams []openapi.Parameter
 	GetModal     *openapi.Schema
@@ -46,6 +47,7 @@ type AddObjectOpts struct {
 func (o *OpenAPI) AddObject(opts AddObjectOpts) {
 	var basePath = "/api/v1/" + opts.Name
 	var idPath = basePath + "/{id}"
+	searchBodySchema := o.AddSchema(utils.UCFirst(opts.Name)+"SearchBody", opts.SearchBody)
 	resultSchema := o.AddSchema(utils.UCFirst(opts.Name)+"Result", opts.SearchModal)
 	resultsSchema := o.AddSchema(
 		utils.UCFirst(opts.Name)+"SearchResults", &openapi.Schema{
@@ -70,8 +72,8 @@ func (o *OpenAPI) AddObject(opts AddObjectOpts) {
 	modalSchema := o.AddSchema(utils.UCFirst(opts.Name), opts.GetModal)
 	o.AddEndpoint(
 		AddEndpointOpts{
-			Method:    "get",
-			Path:      basePath,
+			Method:    "post",
+			Path:      basePath + "/search",
 			Operation: "list" + utils.UCFirst(opts.Name) + "s",
 			Tags:      opts.Tags,
 			Parameters: append(
@@ -106,6 +108,15 @@ func (o *OpenAPI) AddObject(opts AddObjectOpts) {
 				},
 				opts.SearchParams...,
 			),
+			RequestBody: &openapi.RequestBody{
+				Content: map[string]openapi.Content{
+					json: {
+						Schema: openapi.Schema{
+							Ref: searchBodySchema,
+						},
+					},
+				},
+			},
 			Responses: map[string]openapi.Response{
 				"200": {
 					Description: "List of " + opts.Name,

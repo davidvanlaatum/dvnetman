@@ -48,7 +48,7 @@ func (s *Service) UpdateManufacturer(ctx context.Context, opts *openapi.UpdateMa
 	if err = s.db.SaveManufacturer(ctx, mod); err != nil {
 		return
 	}
-	res.Code = http.StatusAccepted
+	res.Code = http.StatusOK
 	return
 }
 

@@ -7,96 +7,6 @@ servers:
   - url: /
 paths:
   /api/v1/device:
-    get:
-      operationId: listDevices
-      parameters:
-        - name: page
-          in: query
-          description: Page number
-          schema:
-            type: integer
-        - name: per_page
-          in: query
-          description: Number of items per page
-          schema:
-            type: integer
-        - name: sort
-          in: query
-          description: Sort order
-          schema:
-            type: string
-        - name: ids
-          in: query
-          description: IDs of the devices
-          schema:
-            type: array
-            items:
-              type: string
-              format: uuid
-        - name: name
-          in: query
-          description: Name of the device
-          schema:
-            type: string
-        - name: nameRegex
-          in: query
-          description: Name of the device
-          schema:
-            type: string
-        - name: status
-          in: query
-          description: Status of the device
-          schema:
-            type: string
-        - name: fields
-          in: query
-          description: Fields to return
-          schema:
-            type: array
-            items:
-              type: string
-        - name: deviceType
-          in: query
-          schema:
-            type: array
-            items:
-              type: string
-              format: uuid
-      responses:
-        "200":
-          description: List of device
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DeviceSearchResults'
-        "400":
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                type: object
-                items:
-                  $ref: '#/components/schemas/APIErrorModal'
-              example:
-                errors:
-                  - code: bad_request
-                    message: Bad request
-        "500":
-          description: Internal server error
-          content:
-            application/json:
-              schema:
-                type: object
-                items:
-                  $ref: '#/components/schemas/APIErrorModal'
-              example:
-                errors:
-                  - code: internal_server_error
-                    message: Internal server error
-      tags:
-        - Device
-      security:
-        - bearerAuth: []
     post:
       operationId: createDevice
       responses:
@@ -136,6 +46,65 @@ paths:
             schema:
               $ref: '#/components/schemas/Device'
         required: true
+      tags:
+        - Device
+      security:
+        - bearerAuth: []
+  /api/v1/device/search:
+    post:
+      operationId: listDevices
+      parameters:
+        - name: page
+          in: query
+          description: Page number
+          schema:
+            type: integer
+        - name: per_page
+          in: query
+          description: Number of items per page
+          schema:
+            type: integer
+        - name: sort
+          in: query
+          description: Sort order
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of device
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceSearchResults'
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/APIErrorModal'
+              example:
+                errors:
+                  - code: bad_request
+                    message: Bad request
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/APIErrorModal'
+              example:
+                errors:
+                  - code: internal_server_error
+                    message: Internal server error
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceSearchBody'
       tags:
         - Device
       security:
@@ -297,84 +266,6 @@ paths:
       security:
         - bearerAuth: []
   /api/v1/deviceType:
-    get:
-      operationId: listDeviceTypes
-      parameters:
-        - name: page
-          in: query
-          description: Page number
-          schema:
-            type: integer
-        - name: per_page
-          in: query
-          description: Number of items per page
-          schema:
-            type: integer
-        - name: sort
-          in: query
-          description: Sort order
-          schema:
-            type: string
-        - name: ids
-          in: query
-          description: IDs of the device types
-          schema:
-            type: array
-            items:
-              type: string
-              format: uuid
-        - name: model
-          in: query
-          description: Model of the device type
-          schema:
-            type: string
-        - name: modelRegex
-          in: query
-          description: Model of the device type
-          schema:
-            type: string
-        - name: fields
-          in: query
-          description: Fields to return
-          schema:
-            type: array
-            items:
-              type: string
-      responses:
-        "200":
-          description: List of deviceType
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DeviceTypeSearchResults'
-        "400":
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                type: object
-                items:
-                  $ref: '#/components/schemas/APIErrorModal'
-              example:
-                errors:
-                  - code: bad_request
-                    message: Bad request
-        "500":
-          description: Internal server error
-          content:
-            application/json:
-              schema:
-                type: object
-                items:
-                  $ref: '#/components/schemas/APIErrorModal'
-              example:
-                errors:
-                  - code: internal_server_error
-                    message: Internal server error
-      tags:
-        - Device
-      security:
-        - bearerAuth: []
     post:
       operationId: createDeviceType
       responses:
@@ -414,6 +305,65 @@ paths:
             schema:
               $ref: '#/components/schemas/DeviceType'
         required: true
+      tags:
+        - Device
+      security:
+        - bearerAuth: []
+  /api/v1/deviceType/search:
+    post:
+      operationId: listDeviceTypes
+      parameters:
+        - name: page
+          in: query
+          description: Page number
+          schema:
+            type: integer
+        - name: per_page
+          in: query
+          description: Number of items per page
+          schema:
+            type: integer
+        - name: sort
+          in: query
+          description: Sort order
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of deviceType
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceTypeSearchResults'
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/APIErrorModal'
+              example:
+                errors:
+                  - code: bad_request
+                    message: Bad request
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/APIErrorModal'
+              example:
+                errors:
+                  - code: internal_server_error
+                    message: Internal server error
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceTypeSearchBody'
       tags:
         - Device
       security:
@@ -575,7 +525,51 @@ paths:
       security:
         - bearerAuth: []
   /api/v1/manufacturer:
-    get:
+    post:
+      operationId: createManufacturer
+      responses:
+        "200":
+          description: Create manufacturer
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Manufacturer'
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/APIErrorModal'
+              example:
+                errors:
+                  - code: bad_request
+                    message: Bad request
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/APIErrorModal'
+              example:
+                errors:
+                  - code: internal_server_error
+                    message: Internal server error
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Manufacturer'
+        required: true
+      tags:
+        - Manufacturer
+      security:
+        - bearerAuth: []
+  /api/v1/manufacturer/search:
+    post:
       operationId: listManufacturers
       parameters:
         - name: page
@@ -624,49 +618,11 @@ paths:
                 errors:
                   - code: internal_server_error
                     message: Internal server error
-      tags:
-        - Manufacturer
-      security:
-        - bearerAuth: []
-    post:
-      operationId: createManufacturer
-      responses:
-        "200":
-          description: Create manufacturer
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Manufacturer'
-        "400":
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                type: object
-                items:
-                  $ref: '#/components/schemas/APIErrorModal'
-              example:
-                errors:
-                  - code: bad_request
-                    message: Bad request
-        "500":
-          description: Internal server error
-          content:
-            application/json:
-              schema:
-                type: object
-                items:
-                  $ref: '#/components/schemas/APIErrorModal'
-              example:
-                errors:
-                  - code: internal_server_error
-                    message: Internal server error
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Manufacturer'
-        required: true
+              $ref: '#/components/schemas/ManufacturerSearchBody'
       tags:
         - Manufacturer
       security:
@@ -866,59 +822,6 @@ paths:
       security:
         - bearerAuth: []
   /api/v1/user:
-    get:
-      operationId: listUsers
-      parameters:
-        - name: page
-          in: query
-          description: Page number
-          schema:
-            type: integer
-        - name: per_page
-          in: query
-          description: Number of items per page
-          schema:
-            type: integer
-        - name: sort
-          in: query
-          description: Sort order
-          schema:
-            type: string
-      responses:
-        "200":
-          description: List of user
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserSearchResults'
-        "400":
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                type: object
-                items:
-                  $ref: '#/components/schemas/APIErrorModal'
-              example:
-                errors:
-                  - code: bad_request
-                    message: Bad request
-        "500":
-          description: Internal server error
-          content:
-            application/json:
-              schema:
-                type: object
-                items:
-                  $ref: '#/components/schemas/APIErrorModal'
-              example:
-                errors:
-                  - code: internal_server_error
-                    message: Internal server error
-      tags:
-        - User
-      security:
-        - bearerAuth: []
     post:
       operationId: createUser
       responses:
@@ -996,6 +899,65 @@ paths:
                 errors:
                   - code: internal_server_error
                     message: Internal server error
+      tags:
+        - User
+      security:
+        - bearerAuth: []
+  /api/v1/user/search:
+    post:
+      operationId: listUsers
+      parameters:
+        - name: page
+          in: query
+          description: Page number
+          schema:
+            type: integer
+        - name: per_page
+          in: query
+          description: Number of items per page
+          schema:
+            type: integer
+        - name: sort
+          in: query
+          description: Sort order
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSearchResults'
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/APIErrorModal'
+              example:
+                errors:
+                  - code: bad_request
+                    message: Bad request
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/APIErrorModal'
+              example:
+                errors:
+                  - code: internal_server_error
+                    message: Internal server error
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserSearchBody'
       tags:
         - User
       security:
@@ -1262,6 +1224,29 @@ components:
         - id
         - id
         - version
+    DeviceSearchBody:
+      type: object
+      properties:
+        deviceType:
+          type: array
+          items:
+            type: string
+            format: uuid
+        fields:
+          type: array
+          items:
+            type: string
+        ids:
+          type: array
+          items:
+            type: string
+            format: uuid
+        name:
+          type: string
+        nameRegex:
+          type: string
+        status:
+          type: string
     DeviceSearchResults:
       type: object
       properties:
@@ -1333,6 +1318,27 @@ components:
       required:
         - id
         - version
+    DeviceTypeSearchBody:
+      type: object
+      properties:
+        fields:
+          type: array
+          items:
+            type: string
+        ids:
+          type: array
+          items:
+            type: string
+            format: uuid
+        manufacturer:
+          type: array
+          items:
+            type: string
+            format: uuid
+        model:
+          type: string
+        modelRegex:
+          type: string
     DeviceTypeSearchResults:
       type: object
       properties:
@@ -1414,6 +1420,22 @@ components:
         - name
         - id
         - version
+    ManufacturerSearchBody:
+      type: object
+      properties:
+        fields:
+          type: array
+          items:
+            type: string
+        ids:
+          type: array
+          items:
+            type: string
+            format: uuid
+        name:
+          type: string
+        nameRegex:
+          type: string
     ManufacturerSearchResults:
       type: object
       properties:
@@ -1463,25 +1485,89 @@ components:
     User:
       type: object
       properties:
+        created:
+          type: string
+          format: date-time
+          readOnly: true
         email:
+          type: string
+          format: email
+        externalID:
           type: string
         externalProvider:
           type: string
+        firstName:
+          type: string
         id:
           type: string
           format: uuid
+          readOnly: true
+        lastName:
+          type: string
         password:
           type: string
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/Tag'
+        updated:
+          type: string
+          format: date-time
+          readOnly: true
         username:
           type: string
+        version:
+          type: integer
+      required:
+        - id
+        - version
     UserResult:
       type: object
       properties:
-        displayName:
+        email:
+          type: string
+        firstName:
           type: string
         id:
           type: string
           format: uuid
+        lastName:
+          type: string
+        username:
+          type: string
+      required:
+        - id
+    UserSearchBody:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        fields:
+          type: array
+          items:
+            type: string
+        firstName:
+          type: string
+        firstNameRegex:
+          type: string
+        fullName:
+          type: string
+        fullNameRegex:
+          type: string
+        ids:
+          type: array
+          items:
+            type: string
+            format: uuid
+        lastName:
+          type: string
+        lastNameRegex:
+          type: string
+        username:
+          type: string
+        usernameRegex:
+          type: string
     UserSearchResults:
       type: object
       properties:

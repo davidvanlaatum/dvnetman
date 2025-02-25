@@ -31,6 +31,52 @@ func BuildUser(api *OpenAPI) {
 		AddObjectOpts{
 			Name: "user",
 			Tags: []string{"User"},
+			SearchBody: &openapi.Schema{
+				Type: "object",
+				Properties: map[string]openapi.Schema{
+					"ids": {
+						Type: "array",
+						Items: &openapi.Schema{
+							Type:   "string",
+							Format: "uuid",
+						},
+					},
+					"firstName": {
+						Type: "string",
+					},
+					"firstNameRegex": {
+						Type: "string",
+					},
+					"lastName": {
+						Type: "string",
+					},
+					"lastNameRegex": {
+						Type: "string",
+					},
+					"fullName": {
+						Type: "string",
+					},
+					"fullNameRegex": {
+						Type: "string",
+					},
+					"email": {
+						Type:   "string",
+						Format: "email",
+					},
+					"username": {
+						Type: "string",
+					},
+					"usernameRegex": {
+						Type: "string",
+					},
+					"fields": {
+						Type: "array",
+						Items: &openapi.Schema{
+							Type: "string",
+						},
+					},
+				},
+			},
 			SearchModal: &openapi.Schema{
 				Type: "object",
 				Properties: map[string]openapi.Schema{
@@ -38,32 +84,50 @@ func BuildUser(api *OpenAPI) {
 						Type:   "string",
 						Format: "uuid",
 					},
-					"displayName": {
+					"firstName": {
 						Type: "string",
 					},
-				},
-			},
-			GetModal: &openapi.Schema{
-				Type: "object",
-				Properties: map[string]openapi.Schema{
-					"id": {
-						Type:   "string",
-						Format: "uuid",
-					},
-					"username": {
+					"lastName": {
 						Type: "string",
 					},
 					"email": {
 						Type: "string",
 					},
-					"password": {
-						Type: "string",
-					},
-					"externalProvider": {
+					"username": {
 						Type: "string",
 					},
 				},
+				Required: []string{"id"},
 			},
+			GetModal: addCommonProps(
+				&openapi.Schema{
+					Type: "object",
+					Properties: map[string]openapi.Schema{
+						"username": {
+							Type: "string",
+						},
+						"firstName": {
+							Type: "string",
+						},
+						"lastName": {
+							Type: "string",
+						},
+						"email": {
+							Type:   "string",
+							Format: "email",
+						},
+						"password": {
+							Type: "string",
+						},
+						"externalProvider": {
+							Type: "string",
+						},
+						"externalID": {
+							Type: "string",
+						},
+					},
+				},
+			),
 		},
 	)
 }

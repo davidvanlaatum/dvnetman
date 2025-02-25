@@ -191,7 +191,7 @@ func listBy[T baseInterface](
 		*result = nil
 		return errors.Wrap(err, "failed to find document")
 	}
-	*result = nil
+	*result = (*result)[:0]
 	if err = c.All(ctx, result); err != nil {
 		return errors.Wrap(err, "failed to get documents")
 	}

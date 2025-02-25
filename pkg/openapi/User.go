@@ -2,12 +2,22 @@
 
 package openapi
 
-import uuid "github.com/google/uuid"
+import (
+	uuid "github.com/google/uuid"
+	"time"
+)
 
 type User struct {
+	Created          *time.Time `json:"created,omitzero"`
 	Email            *string    `json:"email,omitzero"`
+	ExternalID       *string    `json:"externalID,omitzero"`
 	ExternalProvider *string    `json:"externalProvider,omitzero"`
-	Id               *uuid.UUID `json:"id,omitzero"`
+	FirstName        *string    `json:"firstName,omitzero"`
+	Id               uuid.UUID  `json:"id"`
+	LastName         *string    `json:"lastName,omitzero"`
 	Password         *string    `json:"password,omitzero"`
+	Tags             []*Tag     `json:"tags,omitzero"`
+	Updated          *time.Time `json:"updated,omitzero"`
 	Username         *string    `json:"username,omitzero"`
+	Version          int        `json:"version"`
 }

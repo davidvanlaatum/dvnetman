@@ -1,16 +1,16 @@
-import { ListDevicesRequest } from '@src/api'
+import { DeviceSearchBody } from '@src/api'
 import { ChangeEvent, FC, FormEvent, Fragment, useEffect, useState } from 'react'
 import { Button, ButtonGroup, Col, Form, Row } from 'react-bootstrap'
 import { TypeToFindDeviceType } from '@src/components/deviceType/TypeToFindDeviceType.tsx'
 import { isEqual } from 'lodash'
 
 interface DeviceSearchFiltersProps {
-  onSearch: (query: ListDevicesRequest) => void
-  searchOpts?: ListDevicesRequest
+  onSearch: (query: DeviceSearchBody) => void
+  searchOpts?: DeviceSearchBody
 }
 
 export const DeviceSearchFilters: FC<DeviceSearchFiltersProps> = ({ onSearch, searchOpts }) => {
-  const [searchOptsState, setSearchOptsState] = useState<ListDevicesRequest>()
+  const [searchOptsState, setSearchOptsState] = useState<DeviceSearchBody>()
 
   useEffect(() => {
     setSearchOptsState((current) => {
@@ -28,7 +28,7 @@ export const DeviceSearchFilters: FC<DeviceSearchFiltersProps> = ({ onSearch, se
 
   function onNameChange(e: ChangeEvent<HTMLInputElement>) {
     setSearchOptsState((current) => {
-      const newValue: ListDevicesRequest = { ...current, nameRegex: e.target.value }
+      const newValue: DeviceSearchBody = { ...current, nameRegex: e.target.value }
       if (isEqual(newValue, current)) {
         return current
       } else if (newValue.nameRegex === '') {
@@ -40,7 +40,7 @@ export const DeviceSearchFilters: FC<DeviceSearchFiltersProps> = ({ onSearch, se
 
   function onDeviceTypeChange(deviceType: string[]) {
     setSearchOptsState((current) => {
-      const newValue: ListDevicesRequest = { ...current, deviceType }
+      const newValue: DeviceSearchBody = { ...current, deviceType }
       if (isEqual(newValue, current)) {
         return current
       } else if (newValue.deviceType?.length === 0) {

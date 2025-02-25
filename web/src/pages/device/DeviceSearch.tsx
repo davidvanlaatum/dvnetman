@@ -1,19 +1,34 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Accordion, Breadcrumb, Spinner } from 'react-bootstrap'
+import { Accordion, Breadcrumb } from 'react-bootstrap'
 import { useApi } from '@src/ApiContext.tsx'
-import { Device, ListDevicesRequest } from '@src/api'
+import { Device, DeviceSearchBody, ListDevicesRequest } from '@src/api'
 import { DataTable, DataTableColumnProps, DataTableRow } from '@src/components/DataTable.tsx'
 import { useSearchParams } from 'react-router'
 import { URLSearchParamsEqual } from '@src/utils/urlsearchparams.ts'
 import { DeviceSearchFilters } from '@src/components/device/DeviceSearchFilters.tsx'
-import { isEqual } from 'lodash'
 
 function searchOptsToParams(opts: ListDevicesRequest): URLSearchParams {
   const params = new URLSearchParams()
-  if (opts.deviceType) {
-    opts.deviceType.forEach((v) => params.append('deviceTypeId', v))
+  if (opts.deviceSearchBody?.deviceType) {
+    opts.deviceSearchBody.deviceType.forEach((v) => params.append('deviceTypeId', v))
+  }
+  if (opts.deviceSearchBody?.nameRegex) {
+    params.set('nameRegex', opts.deviceSearchBody.nameRegex)
   }
   return params
+}
+
+function paramsToSearchOpts(params: URLSearchParams): ListDevicesRequest {
+  const opts: ListDevicesRequest = {}
+  const searchOpts: DeviceSearchBody = {}
+  if (params.has('nameRegex')) {
+    searchOpts.nameRegex = params.get('nameRegex') as string
+  }
+  if (params.has('deviceTypeId')) {
+    searchOpts.deviceType = params.getAll('deviceTypeId')
+  }
+  opts.deviceSearchBody = searchOpts
+  return opts
 }
 
 function DeviceSearch() {
@@ -22,50 +37,27 @@ function DeviceSearch() {
   const loading = useRef(false)
   const [devices, setDevices] = useState<Device[] | null>(null)
   const [selected, setSelected] = useState<string[]>([])
-  const [searchOpts, setSearchOpts] = useState<ListDevicesRequest>()
 
   const performSearch = useCallback(
     (opts: ListDevicesRequest) => {
-      setParams((current) => {
-        const newParams = searchOptsToParams(opts)
-        if (URLSearchParamsEqual(newParams, current)) {
-          loading.current = true
-          api.deviceApi.listDevices(opts).then((response) => {
-            setDevices(response.items)
-            loading.current = false
-          })
-          return current
-        }
-        return newParams
+      const newParams = searchOptsToParams(opts)
+      if (!URLSearchParamsEqual(newParams, params)) {
+        setParams(newParams)
+        return
+      }
+      loading.current = true
+      api.deviceApi.listDevices(opts).then((response) => {
+        setDevices(response.items)
+        loading.current = false
       })
     },
-    [api.deviceApi, setParams],
+    [api.deviceApi, params, setParams],
   )
 
   useEffect(() => {
-    setSearchOpts((current) => {
-      const newOpts: ListDevicesRequest = {}
-      if (params.has('name')) {
-        newOpts.nameRegex = params.get('name') as string
-      }
-      if (params.has('deviceTypeId')) {
-        newOpts.deviceType = params.getAll('deviceTypeId')
-      }
-      if (isEqual(newOpts, current)) {
-        return current
-      }
-      performSearch(newOpts)
-      return newOpts
-    })
+    performSearch(paramsToSearchOpts(params))
   }, [params, performSearch])
 
-  if (loading.current) {
-    return (
-      <div>
-        <Spinner />
-      </div>
-    )
-  }
   const basePath = import.meta.env.BASE_URL
   const columns: DataTableColumnProps[] = [
     {
@@ -94,20 +86,23 @@ function DeviceSearch() {
         <Accordion.Item eventKey="0">
           <Accordion.Header as={'div'}>Filters</Accordion.Header>
           <Accordion.Body>
-            <DeviceSearchFilters onSearch={performSearch} searchOpts={searchOpts} />
+            <DeviceSearchFilters
+              onSearch={(opts) => performSearch({ deviceSearchBody: opts })}
+              searchOpts={paramsToSearchOpts(params)?.deviceSearchBody}
+            />
           </Accordion.Body>
         </Accordion.Item>
       </Accordion>
-      <DataTable
-        columns={columns}
-        data={(devices as DataTableRow[]) || []}
-        selectable={true}
-        onSelect={(selected) => {
-          setSelected(selected)
-          setSearchOpts({ ...searchOpts, deviceType: selected })
-        }}
-        selected={selected}
-      />
+      {((devices?.length ?? 0) > 0 && (
+        <DataTable
+          columns={columns}
+          data={(devices as DataTableRow[]) || []}
+          selectable={true}
+          onSelect={(selected) => setSelected(selected)}
+          selected={selected}
+          loading={loading.current}
+        />
+      )) || <div>No devices found</div>}
       {import.meta.env.DEV && (
         <details>
           <summary>Debug</summary>

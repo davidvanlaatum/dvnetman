@@ -541,7 +541,7 @@ func (c *CodeGen) determineGoTypeFor(schema *openapi.Schema) *GoType {
 			return &GoType{pkg: "time", name: "Time"}
 		} else if schema.Format == "uuid" {
 			return &GoType{pkg: "github.com/google/uuid", name: "UUID"}
-		} else if schema.Format != "" {
+		} else if schema.Format != "" && schema.Format != "email" {
 			panic(errors.Errorf("Unhandled format %s", schema.Format))
 		} else if schema.Enum != nil {
 			return &GoType{name: "enum"}
@@ -563,6 +563,16 @@ func (c *CodeGen) determineGoTypeFor(schema *openapi.Schema) *GoType {
 	}
 }
 
+func (c *CodeGen) isBasicType(t *GoType) bool {
+	if t.name == "string" || t.name == "int" || t.name == "bool" || t.name == "float64" {
+		return true
+	}
+	if t.pkg == uuidPkg && t.name == "UUID" {
+		return true
+	}
+	return false
+}
+
 func (c *CodeGen) generateModals(api *openapi.OpenAPI) (err error) {
 	c.modals = map[string]*Modal{}
 	c.enums = map[string]*Enum{}
@@ -578,7 +588,7 @@ func (c *CodeGen) generateModals(api *openapi.OpenAPI) (err error) {
 			if t.name != "array" && !f.required {
 				t.pointer = true
 			}
-			if t.name == "array" {
+			if t.name == "array" && !c.isBasicType(t.nested) {
 				t.nested.pointer = true
 			}
 			x.fields = append(x.fields, f)

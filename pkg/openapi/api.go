@@ -14,19 +14,14 @@ import (
 	"time"
 )
 
-type ListDevicesOpts struct {
-	Page       *int
-	PerPage    *int
-	Sort       *string
-	Ids        []uuid.UUID
-	Name       *string
-	NameRegex  *string
-	Status     *string
-	Fields     []string
-	DeviceType []uuid.UUID
-}
 type CreateDeviceOpts struct {
 	Body *Device
+}
+type ListDevicesOpts struct {
+	Page    *int
+	PerPage *int
+	Sort    *string
+	Body    *DeviceSearchBody
 }
 type DeleteDeviceOpts struct {
 	Id uuid.UUID
@@ -40,17 +35,14 @@ type UpdateDeviceOpts struct {
 	Id   uuid.UUID
 	Body *Device
 }
-type ListDeviceTypesOpts struct {
-	Page       *int
-	PerPage    *int
-	Sort       *string
-	Ids        []uuid.UUID
-	Model      *string
-	ModelRegex *string
-	Fields     []string
-}
 type CreateDeviceTypeOpts struct {
 	Body *DeviceType
+}
+type ListDeviceTypesOpts struct {
+	Page    *int
+	PerPage *int
+	Sort    *string
+	Body    *DeviceTypeSearchBody
 }
 type DeleteDeviceTypeOpts struct {
 	Id uuid.UUID
@@ -64,13 +56,14 @@ type UpdateDeviceTypeOpts struct {
 	Id   uuid.UUID
 	Body *DeviceType
 }
+type CreateManufacturerOpts struct {
+	Body *Manufacturer
+}
 type ListManufacturersOpts struct {
 	Page    *int
 	PerPage *int
 	Sort    *string
-}
-type CreateManufacturerOpts struct {
-	Body *Manufacturer
+	Body    *ManufacturerSearchBody
 }
 type DeleteManufacturerOpts struct {
 	Id uuid.UUID
@@ -84,13 +77,14 @@ type UpdateManufacturerOpts struct {
 	Id   uuid.UUID
 	Body *Manufacturer
 }
+type CreateUserOpts struct {
+	Body *User
+}
 type ListUsersOpts struct {
 	Page    *int
 	PerPage *int
 	Sort    *string
-}
-type CreateUserOpts struct {
-	Body *User
+	Body    *UserSearchBody
 }
 type DeleteUserOpts struct {
 	Id uuid.UUID
@@ -164,10 +158,40 @@ type apiHandler struct {
 	service API
 }
 
+func (h *apiHandler) CreateDevice(w http.ResponseWriter, r *http.Request) {
+	var res *Response
+	var err error
+	opts := &CreateDeviceOpts{}
+	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields()
+	if err = decoder.Decode(&opts.Body); err != nil {
+		h.service.ErrorHandler(w, r, errors.WithStack(NewBodyParamError(err)))
+		return
+	}
+	if decoder.More() {
+		h.service.ErrorHandler(w, r, errors.WithStack(NewBodyParamError(errors.New("unexpected data after body"))))
+		return
+	}
+	if res, err = h.service.CreateDevice(r.Context(), opts); err != nil {
+		h.service.ErrorHandler(w, r, err)
+	} else if err = res.Write(r, w); err != nil {
+		h.service.WriteErrorHandler(w, r, err)
+	}
+}
 func (h *apiHandler) ListDevices(w http.ResponseWriter, r *http.Request) {
 	var res *Response
 	var err error
 	opts := &ListDevicesOpts{}
+	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields()
+	if err = decoder.Decode(&opts.Body); err != nil {
+		h.service.ErrorHandler(w, r, errors.WithStack(NewBodyParamError(err)))
+		return
+	}
+	if decoder.More() {
+		h.service.ErrorHandler(w, r, errors.WithStack(NewBodyParamError(errors.New("unexpected data after body"))))
+		return
+	}
 	for k, v := range r.URL.Query() {
 		switch k {
 		case "page":
@@ -186,47 +210,9 @@ func (h *apiHandler) ListDevices(w http.ResponseWriter, r *http.Request) {
 			opts.PerPage = utils.ToPtr(x)
 		case "sort":
 			opts.Sort = utils.ToPtr(v[0])
-		case "ids":
-			if opts.Ids, err = utils.MapErr(v, uuid.Parse); err != nil {
-				h.service.ErrorHandler(w, r, errors.WithStack(NewQueryParamError("ids", err)))
-				return
-			}
-		case "name":
-			opts.Name = utils.ToPtr(v[0])
-		case "nameRegex":
-			opts.NameRegex = utils.ToPtr(v[0])
-		case "status":
-			opts.Status = utils.ToPtr(v[0])
-		case "fields":
-			opts.Fields = append(opts.Fields, v...)
-		case "deviceType":
-			if opts.DeviceType, err = utils.MapErr(v, uuid.Parse); err != nil {
-				h.service.ErrorHandler(w, r, errors.WithStack(NewQueryParamError("deviceType", err)))
-				return
-			}
 		}
 	}
 	if res, err = h.service.ListDevices(r.Context(), opts); err != nil {
-		h.service.ErrorHandler(w, r, err)
-	} else if err = res.Write(r, w); err != nil {
-		h.service.WriteErrorHandler(w, r, err)
-	}
-}
-func (h *apiHandler) CreateDevice(w http.ResponseWriter, r *http.Request) {
-	var res *Response
-	var err error
-	opts := &CreateDeviceOpts{}
-	decoder := json.NewDecoder(r.Body)
-	decoder.DisallowUnknownFields()
-	if err = decoder.Decode(&opts.Body); err != nil {
-		h.service.ErrorHandler(w, r, errors.WithStack(NewBodyParamError(err)))
-		return
-	}
-	if decoder.More() {
-		h.service.ErrorHandler(w, r, errors.WithStack(NewBodyParamError(errors.New("unexpected data after body"))))
-		return
-	}
-	if res, err = h.service.CreateDevice(r.Context(), opts); err != nil {
 		h.service.ErrorHandler(w, r, err)
 	} else if err = res.Write(r, w); err != nil {
 		h.service.WriteErrorHandler(w, r, err)
@@ -300,10 +286,40 @@ func (h *apiHandler) UpdateDevice(w http.ResponseWriter, r *http.Request) {
 		h.service.WriteErrorHandler(w, r, err)
 	}
 }
+func (h *apiHandler) CreateDeviceType(w http.ResponseWriter, r *http.Request) {
+	var res *Response
+	var err error
+	opts := &CreateDeviceTypeOpts{}
+	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields()
+	if err = decoder.Decode(&opts.Body); err != nil {
+		h.service.ErrorHandler(w, r, errors.WithStack(NewBodyParamError(err)))
+		return
+	}
+	if decoder.More() {
+		h.service.ErrorHandler(w, r, errors.WithStack(NewBodyParamError(errors.New("unexpected data after body"))))
+		return
+	}
+	if res, err = h.service.CreateDeviceType(r.Context(), opts); err != nil {
+		h.service.ErrorHandler(w, r, err)
+	} else if err = res.Write(r, w); err != nil {
+		h.service.WriteErrorHandler(w, r, err)
+	}
+}
 func (h *apiHandler) ListDeviceTypes(w http.ResponseWriter, r *http.Request) {
 	var res *Response
 	var err error
 	opts := &ListDeviceTypesOpts{}
+	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields()
+	if err = decoder.Decode(&opts.Body); err != nil {
+		h.service.ErrorHandler(w, r, errors.WithStack(NewBodyParamError(err)))
+		return
+	}
+	if decoder.More() {
+		h.service.ErrorHandler(w, r, errors.WithStack(NewBodyParamError(errors.New("unexpected data after body"))))
+		return
+	}
 	for k, v := range r.URL.Query() {
 		switch k {
 		case "page":
@@ -322,40 +338,9 @@ func (h *apiHandler) ListDeviceTypes(w http.ResponseWriter, r *http.Request) {
 			opts.PerPage = utils.ToPtr(x)
 		case "sort":
 			opts.Sort = utils.ToPtr(v[0])
-		case "ids":
-			if opts.Ids, err = utils.MapErr(v, uuid.Parse); err != nil {
-				h.service.ErrorHandler(w, r, errors.WithStack(NewQueryParamError("ids", err)))
-				return
-			}
-		case "model":
-			opts.Model = utils.ToPtr(v[0])
-		case "modelRegex":
-			opts.ModelRegex = utils.ToPtr(v[0])
-		case "fields":
-			opts.Fields = append(opts.Fields, v...)
 		}
 	}
 	if res, err = h.service.ListDeviceTypes(r.Context(), opts); err != nil {
-		h.service.ErrorHandler(w, r, err)
-	} else if err = res.Write(r, w); err != nil {
-		h.service.WriteErrorHandler(w, r, err)
-	}
-}
-func (h *apiHandler) CreateDeviceType(w http.ResponseWriter, r *http.Request) {
-	var res *Response
-	var err error
-	opts := &CreateDeviceTypeOpts{}
-	decoder := json.NewDecoder(r.Body)
-	decoder.DisallowUnknownFields()
-	if err = decoder.Decode(&opts.Body); err != nil {
-		h.service.ErrorHandler(w, r, errors.WithStack(NewBodyParamError(err)))
-		return
-	}
-	if decoder.More() {
-		h.service.ErrorHandler(w, r, errors.WithStack(NewBodyParamError(errors.New("unexpected data after body"))))
-		return
-	}
-	if res, err = h.service.CreateDeviceType(r.Context(), opts); err != nil {
 		h.service.ErrorHandler(w, r, err)
 	} else if err = res.Write(r, w); err != nil {
 		h.service.WriteErrorHandler(w, r, err)
@@ -429,10 +414,40 @@ func (h *apiHandler) UpdateDeviceType(w http.ResponseWriter, r *http.Request) {
 		h.service.WriteErrorHandler(w, r, err)
 	}
 }
+func (h *apiHandler) CreateManufacturer(w http.ResponseWriter, r *http.Request) {
+	var res *Response
+	var err error
+	opts := &CreateManufacturerOpts{}
+	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields()
+	if err = decoder.Decode(&opts.Body); err != nil {
+		h.service.ErrorHandler(w, r, errors.WithStack(NewBodyParamError(err)))
+		return
+	}
+	if decoder.More() {
+		h.service.ErrorHandler(w, r, errors.WithStack(NewBodyParamError(errors.New("unexpected data after body"))))
+		return
+	}
+	if res, err = h.service.CreateManufacturer(r.Context(), opts); err != nil {
+		h.service.ErrorHandler(w, r, err)
+	} else if err = res.Write(r, w); err != nil {
+		h.service.WriteErrorHandler(w, r, err)
+	}
+}
 func (h *apiHandler) ListManufacturers(w http.ResponseWriter, r *http.Request) {
 	var res *Response
 	var err error
 	opts := &ListManufacturersOpts{}
+	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields()
+	if err = decoder.Decode(&opts.Body); err != nil {
+		h.service.ErrorHandler(w, r, errors.WithStack(NewBodyParamError(err)))
+		return
+	}
+	if decoder.More() {
+		h.service.ErrorHandler(w, r, errors.WithStack(NewBodyParamError(errors.New("unexpected data after body"))))
+		return
+	}
 	for k, v := range r.URL.Query() {
 		switch k {
 		case "page":
@@ -454,26 +469,6 @@ func (h *apiHandler) ListManufacturers(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	if res, err = h.service.ListManufacturers(r.Context(), opts); err != nil {
-		h.service.ErrorHandler(w, r, err)
-	} else if err = res.Write(r, w); err != nil {
-		h.service.WriteErrorHandler(w, r, err)
-	}
-}
-func (h *apiHandler) CreateManufacturer(w http.ResponseWriter, r *http.Request) {
-	var res *Response
-	var err error
-	opts := &CreateManufacturerOpts{}
-	decoder := json.NewDecoder(r.Body)
-	decoder.DisallowUnknownFields()
-	if err = decoder.Decode(&opts.Body); err != nil {
-		h.service.ErrorHandler(w, r, errors.WithStack(NewBodyParamError(err)))
-		return
-	}
-	if decoder.More() {
-		h.service.ErrorHandler(w, r, errors.WithStack(NewBodyParamError(errors.New("unexpected data after body"))))
-		return
-	}
-	if res, err = h.service.CreateManufacturer(r.Context(), opts); err != nil {
 		h.service.ErrorHandler(w, r, err)
 	} else if err = res.Write(r, w); err != nil {
 		h.service.WriteErrorHandler(w, r, err)
@@ -556,36 +551,6 @@ func (h *apiHandler) GetStats(w http.ResponseWriter, r *http.Request) {
 		h.service.WriteErrorHandler(w, r, err)
 	}
 }
-func (h *apiHandler) ListUsers(w http.ResponseWriter, r *http.Request) {
-	var res *Response
-	var err error
-	opts := &ListUsersOpts{}
-	for k, v := range r.URL.Query() {
-		switch k {
-		case "page":
-			var x int
-			if x, err = strconv.Atoi(v[0]); err != nil {
-				h.service.ErrorHandler(w, r, errors.WithStack(NewQueryParamError("page", err)))
-				return
-			}
-			opts.Page = utils.ToPtr(x)
-		case "per_page":
-			var x int
-			if x, err = strconv.Atoi(v[0]); err != nil {
-				h.service.ErrorHandler(w, r, errors.WithStack(NewQueryParamError("per_page", err)))
-				return
-			}
-			opts.PerPage = utils.ToPtr(x)
-		case "sort":
-			opts.Sort = utils.ToPtr(v[0])
-		}
-	}
-	if res, err = h.service.ListUsers(r.Context(), opts); err != nil {
-		h.service.ErrorHandler(w, r, err)
-	} else if err = res.Write(r, w); err != nil {
-		h.service.WriteErrorHandler(w, r, err)
-	}
-}
 func (h *apiHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	var res *Response
 	var err error
@@ -610,6 +575,46 @@ func (h *apiHandler) GetCurrentUser(w http.ResponseWriter, r *http.Request) {
 	var res *Response
 	var err error
 	if res, err = h.service.GetCurrentUser(r.Context()); err != nil {
+		h.service.ErrorHandler(w, r, err)
+	} else if err = res.Write(r, w); err != nil {
+		h.service.WriteErrorHandler(w, r, err)
+	}
+}
+func (h *apiHandler) ListUsers(w http.ResponseWriter, r *http.Request) {
+	var res *Response
+	var err error
+	opts := &ListUsersOpts{}
+	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields()
+	if err = decoder.Decode(&opts.Body); err != nil {
+		h.service.ErrorHandler(w, r, errors.WithStack(NewBodyParamError(err)))
+		return
+	}
+	if decoder.More() {
+		h.service.ErrorHandler(w, r, errors.WithStack(NewBodyParamError(errors.New("unexpected data after body"))))
+		return
+	}
+	for k, v := range r.URL.Query() {
+		switch k {
+		case "page":
+			var x int
+			if x, err = strconv.Atoi(v[0]); err != nil {
+				h.service.ErrorHandler(w, r, errors.WithStack(NewQueryParamError("page", err)))
+				return
+			}
+			opts.Page = utils.ToPtr(x)
+		case "per_page":
+			var x int
+			if x, err = strconv.Atoi(v[0]); err != nil {
+				h.service.ErrorHandler(w, r, errors.WithStack(NewQueryParamError("per_page", err)))
+				return
+			}
+			opts.PerPage = utils.ToPtr(x)
+		case "sort":
+			opts.Sort = utils.ToPtr(v[0])
+		}
+	}
+	if res, err = h.service.ListUsers(r.Context(), opts); err != nil {
 		h.service.ErrorHandler(w, r, err)
 	} else if err = res.Write(r, w); err != nil {
 		h.service.WriteErrorHandler(w, r, err)
@@ -686,25 +691,25 @@ func (h *apiHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 func NewRouter(service API) (router *mux.Router) {
 	router = mux.NewRouter().StrictSlash(true)
 	handler := &apiHandler{service: service}
-	router.Methods("GET").Path("/api/v1/device").Name("ListDevices").HandlerFunc(handler.ListDevices)
 	router.Methods("POST").Path("/api/v1/device").Name("CreateDevice").HandlerFunc(handler.CreateDevice)
+	router.Methods("POST").Path("/api/v1/device/search").Name("ListDevices").HandlerFunc(handler.ListDevices)
 	router.Methods("DELETE").Path("/api/v1/device/{id}").Name("DeleteDevice").HandlerFunc(handler.DeleteDevice)
 	router.Methods("GET").Path("/api/v1/device/{id}").Name("GetDevice").HandlerFunc(handler.GetDevice)
 	router.Methods("PUT").Path("/api/v1/device/{id}").Name("UpdateDevice").HandlerFunc(handler.UpdateDevice)
-	router.Methods("GET").Path("/api/v1/deviceType").Name("ListDeviceTypes").HandlerFunc(handler.ListDeviceTypes)
 	router.Methods("POST").Path("/api/v1/deviceType").Name("CreateDeviceType").HandlerFunc(handler.CreateDeviceType)
+	router.Methods("POST").Path("/api/v1/deviceType/search").Name("ListDeviceTypes").HandlerFunc(handler.ListDeviceTypes)
 	router.Methods("DELETE").Path("/api/v1/deviceType/{id}").Name("DeleteDeviceType").HandlerFunc(handler.DeleteDeviceType)
 	router.Methods("GET").Path("/api/v1/deviceType/{id}").Name("GetDeviceType").HandlerFunc(handler.GetDeviceType)
 	router.Methods("PUT").Path("/api/v1/deviceType/{id}").Name("UpdateDeviceType").HandlerFunc(handler.UpdateDeviceType)
-	router.Methods("GET").Path("/api/v1/manufacturer").Name("ListManufacturers").HandlerFunc(handler.ListManufacturers)
 	router.Methods("POST").Path("/api/v1/manufacturer").Name("CreateManufacturer").HandlerFunc(handler.CreateManufacturer)
+	router.Methods("POST").Path("/api/v1/manufacturer/search").Name("ListManufacturers").HandlerFunc(handler.ListManufacturers)
 	router.Methods("DELETE").Path("/api/v1/manufacturer/{id}").Name("DeleteManufacturer").HandlerFunc(handler.DeleteManufacturer)
 	router.Methods("GET").Path("/api/v1/manufacturer/{id}").Name("GetManufacturer").HandlerFunc(handler.GetManufacturer)
 	router.Methods("PUT").Path("/api/v1/manufacturer/{id}").Name("UpdateManufacturer").HandlerFunc(handler.UpdateManufacturer)
 	router.Methods("GET").Path("/api/v1/stats").Name("GetStats").HandlerFunc(handler.GetStats)
-	router.Methods("GET").Path("/api/v1/user").Name("ListUsers").HandlerFunc(handler.ListUsers)
 	router.Methods("POST").Path("/api/v1/user").Name("CreateUser").HandlerFunc(handler.CreateUser)
 	router.Methods("GET").Path("/api/v1/user/current").Name("GetCurrentUser").HandlerFunc(handler.GetCurrentUser)
+	router.Methods("POST").Path("/api/v1/user/search").Name("ListUsers").HandlerFunc(handler.ListUsers)
 	router.Methods("DELETE").Path("/api/v1/user/{id}").Name("DeleteUser").HandlerFunc(handler.DeleteUser)
 	router.Methods("GET").Path("/api/v1/user/{id}").Name("GetUser").HandlerFunc(handler.GetUser)
 	router.Methods("PUT").Path("/api/v1/user/{id}").Name("UpdateUser").HandlerFunc(handler.UpdateUser)

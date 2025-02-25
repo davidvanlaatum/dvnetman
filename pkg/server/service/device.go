@@ -45,7 +45,7 @@ func (s *Service) UpdateDevice(ctx context.Context, opts *openapi.UpdateDeviceOp
 	if err = s.db.SaveDevice(ctx, mod); err != nil {
 		return
 	}
-	res.Code = http.StatusAccepted
+	res.Code = http.StatusOK
 	return
 }
 
@@ -73,13 +73,16 @@ func (s *Service) ListDevices(ctx context.Context, opts *openapi.ListDevicesOpts
 		size = int64(*opts.PerPage)
 	}
 	search := filter{}
-	search.inUUID("id", utils.MapTo(opts.Ids, modal.ConvertUUID))
-	search.inUUID("device_type", utils.MapTo(opts.DeviceType, modal.ConvertUUID))
-	search.equalsStr("name", opts.Name)
-	search.regex("name", opts.NameRegex, "i")
+	search.inUUID("id", utils.MapTo(opts.Body.Ids, modal.ConvertUUID))
+	search.inUUID("device_type", utils.MapTo(opts.Body.DeviceType, modal.ConvertUUID))
+	search.equalsStr("name", opts.Body.Name)
+	search.regex("name", opts.Body.NameRegex, "i")
+	search.equalsStr("status", opts.Body.Status)
 	var devices []*modal.Device
 	findOpts := options.Find().SetLimit(size + 1).SetSkip(page * size)
-	if findOpts, err = s.setProjection(opts.Fields, []string{"name", "device_type", "status"}, findOpts); err != nil {
+	if findOpts, err = s.setProjection(
+		opts.Body.Fields, []string{"name", "device_type", "status"}, findOpts,
+	); err != nil {
 		return
 	}
 	if devices, err = s.db.ListDevices(ctx, search, findOpts); err != nil {

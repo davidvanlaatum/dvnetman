@@ -11,6 +11,30 @@ func BuildManufacturer(api *OpenAPI) {
 		AddObjectOpts{
 			Name: "manufacturer",
 			Tags: []string{"Manufacturer"},
+			SearchBody: &openapi.Schema{
+				Type: "object",
+				Properties: map[string]openapi.Schema{
+					"ids": {
+						Type: "array",
+						Items: &openapi.Schema{
+							Type:   "string",
+							Format: "uuid",
+						},
+					},
+					"name": {
+						Type: "string",
+					},
+					"nameRegex": {
+						Type: "string",
+					},
+					"fields": {
+						Type: "array",
+						Items: &openapi.Schema{
+							Type: "string",
+						},
+					},
+				},
+			},
 			SearchModal: addCommonProps(
 				&openapi.Schema{
 					Type: "object",

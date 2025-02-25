@@ -8,9 +8,11 @@ ifeq ($(shell uname),Darwin)
 else
 	sed -i '1s;^;// @ts-nocheck\n;' web/src/api/*/*.ts
 endif
+	git add web/src/api
 
 api/openapi.yaml: $(wildcard api/gen/*.go) $(wildcard api/gen/openapi/*.go) $(wildcard api/gen/code/*.go) $(wildcard api/gen/spec/*.go)
 	go run ./api/gen
+	git add api/openapi.yaml pkg/openapi
 
 server:
 	cd web && npm install && npm run build
@@ -39,9 +41,8 @@ lint-go:
 
 lint: lint-go lint-js
 
-on-commit: test lint
+on-commit: all test lint
 	go run ./scripts/extra-files web/src/api/.openapi-generator/FILES web/src/api
-
 
 add-commit:
 	echo 'make on-commit' > .git/hooks/pre-commit

@@ -8,6 +8,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -77,6 +78,14 @@ func (r *responseBuilder) build() *http.Response {
 	return r.res
 }
 
+func toJSONReadCloser(data interface{}) io.ReadCloser {
+	b, err := json.Marshal(data)
+	if err != nil {
+		panic(err)
+	}
+	return &BufferCloser{strings.NewReader(string(b))}
+}
+
 func TestListDevices(t *testing.T) {
 	searchResults1 := &DeviceSearchResults{
 		Count: 1,
@@ -103,7 +112,7 @@ func TestListDevices(t *testing.T) {
 		{
 			name: "no options",
 			expect: func(s *MockAPI) {
-				s.EXPECT().ListDevices(mock.Anything, &ListDevicesOpts{}).Return(
+				s.EXPECT().ListDevices(mock.Anything, &ListDevicesOpts{Body: &DeviceSearchBody{}}).Return(
 					&Response{
 						Code:   200,
 						Object: searchResults1,
@@ -111,8 +120,9 @@ func TestListDevices(t *testing.T) {
 				)
 			},
 			request: &http.Request{
-				Method: http.MethodGet,
-				URL:    &url.URL{Path: "/api/v1/device"},
+				Method: http.MethodPost,
+				URL:    &url.URL{Path: "/api/v1/device/search"},
+				Body:   toJSONReadCloser(&DeviceSearchBody{}),
 			},
 			response: newResponseBuilder(200).json(searchResults1).build(),
 		},
@@ -124,6 +134,14 @@ func TestListDevices(t *testing.T) {
 						Page:    utils.ToPtr(1),
 						PerPage: utils.ToPtr(10),
 						Sort:    utils.ToPtr("name"),
+						Body: &DeviceSearchBody{
+							Ids:        []uuid.UUID{uuid.MustParse("637C7185-AEF8-42A9-91FC-F369E3970729")},
+							Fields:     []string{"name", "device_type", "status"},
+							NameRegex:  utils.ToPtr("test1"),
+							Name:       utils.ToPtr("test2"),
+							Status:     utils.ToPtr("test3"),
+							DeviceType: []uuid.UUID{uuid.MustParse("637C7185-AEF8-42A9-91FC-F369E3970730")},
+						},
 					},
 				).Return(
 					&Response{
@@ -133,8 +151,18 @@ func TestListDevices(t *testing.T) {
 				)
 			},
 			request: &http.Request{
-				Method: http.MethodGet,
-				URL:    &url.URL{Path: "/api/v1/device", RawQuery: "page=1&per_page=10&sort=name"},
+				Method: http.MethodPost,
+				URL:    &url.URL{Path: "/api/v1/device/search", RawQuery: "page=1&per_page=10&sort=name"},
+				Body: toJSONReadCloser(
+					&DeviceSearchBody{
+						Ids:        []uuid.UUID{uuid.MustParse("637C7185-AEF8-42A9-91FC-F369E3970729")},
+						Fields:     []string{"name", "device_type", "status"},
+						NameRegex:  utils.ToPtr("test1"),
+						Name:       utils.ToPtr("test2"),
+						Status:     utils.ToPtr("test3"),
+						DeviceType: []uuid.UUID{uuid.MustParse("637C7185-AEF8-42A9-91FC-F369E3970730")},
+					},
+				),
 			},
 			response: newResponseBuilder(200).json(searchResults1).build(),
 		},
@@ -151,8 +179,9 @@ func TestListDevices(t *testing.T) {
 				).Return()
 			},
 			request: &http.Request{
-				Method: http.MethodGet,
-				URL:    &url.URL{Path: "/api/v1/device", RawQuery: "page=abc"},
+				Method: http.MethodPost,
+				URL:    &url.URL{Path: "/api/v1/device/search", RawQuery: "page=abc"},
+				Body:   toJSONReadCloser(&DeviceSearchBody{}),
 			},
 			response: newResponseBuilder(200).build(),
 		},
@@ -169,8 +198,9 @@ func TestListDevices(t *testing.T) {
 				).Return()
 			},
 			request: &http.Request{
-				Method: http.MethodGet,
-				URL:    &url.URL{Path: "/api/v1/device", RawQuery: "per_page=abc"},
+				Method: http.MethodPost,
+				URL:    &url.URL{Path: "/api/v1/device/search", RawQuery: "per_page=abc"},
+				Body:   toJSONReadCloser(&DeviceSearchBody{}),
 			},
 			response: newResponseBuilder(200).build(),
 		},
@@ -188,8 +218,9 @@ func TestListDevices(t *testing.T) {
 				).Return()
 			},
 			request: &http.Request{
-				Method: http.MethodGet,
-				URL:    &url.URL{Path: "/api/v1/device"},
+				Method: http.MethodPost,
+				URL:    &url.URL{Path: "/api/v1/device/search"},
+				Body:   toJSONReadCloser(&DeviceSearchBody{}),
 			},
 			response: newResponseBuilder(200).build(),
 		},

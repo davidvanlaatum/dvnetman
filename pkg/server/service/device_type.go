@@ -48,7 +48,7 @@ func (s *Service) UpdateDeviceType(ctx context.Context, opts *openapi.UpdateDevi
 	if err = s.db.SaveDeviceType(ctx, mod); err != nil {
 		return
 	}
-	res.Code = http.StatusAccepted
+	res.Code = http.StatusOK
 	return
 }
 
@@ -80,11 +80,12 @@ func (s *Service) ListDeviceTypes(ctx context.Context, opts *openapi.ListDeviceT
 		size = int64(*opts.PerPage)
 	}
 	search := filter{}
-	search.equalsStr("model", opts.Model)
-	search.regex("model", opts.ModelRegex, "i")
-	search.inUUID("id", utils.MapTo(opts.Ids, modal.ConvertUUID))
+	search.equalsStr("model", opts.Body.Model)
+	search.regex("model", opts.Body.ModelRegex, "i")
+	search.inUUID("id", utils.MapTo(opts.Body.Ids, modal.ConvertUUID))
+	search.inUUID("manufacturer", utils.MapTo(opts.Body.Manufacturer, modal.ConvertUUID))
 	findOpts := options.Find().SetLimit(size + 1).SetSkip(page * size)
-	if findOpts, err = s.setProjection(opts.Fields, []string{"model", "manufacturer"}, findOpts); err != nil {
+	if findOpts, err = s.setProjection(opts.Body.Fields, []string{"model", "manufacturer"}, findOpts); err != nil {
 		return
 	}
 	var DeviceTypes []*modal.DeviceType

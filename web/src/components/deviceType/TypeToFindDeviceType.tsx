@@ -31,7 +31,11 @@ export const TypeToFindDeviceType: FC<TypeToFindDeviceTypeProps> = ({ id, onSele
   const currentlyLoading = useRef<CurrentlyLoading>()
 
   async function onSearch(q: string) {
-    loadSearchResults({ modelRegex: q }).then()
+    loadSearchResults({
+      deviceTypeSearchBody: {
+        modelRegex: q,
+      },
+    }).then()
   }
 
   function onChange(options: DeviceTypeResult[]) {
@@ -43,7 +47,8 @@ export const TypeToFindDeviceType: FC<TypeToFindDeviceTypeProps> = ({ id, onSele
 
   const loadSearchResults = useCallback(
     async (opts: ListDeviceTypesRequest) => {
-      opts.fields = ['model', 'manufacturer']
+      if (!opts.deviceTypeSearchBody) opts.deviceTypeSearchBody = {}
+      opts.deviceTypeSearchBody.fields = ['model', 'manufacturer']
       const abort = new AbortController()
       if (currentlyLoading.current?.opts && isEqual(currentlyLoading.current.opts, opts)) {
         return currentlyLoading.current.promise
@@ -80,7 +85,7 @@ export const TypeToFindDeviceType: FC<TypeToFindDeviceTypeProps> = ({ id, onSele
           return { id: v, version: 0, model: 'loading' }
         }) || []
       if (newValue.length > 0) {
-        loadSearchResults({ ids: selected }).then((results) => {
+        loadSearchResults({ deviceTypeSearchBody: { ids: selected } }).then((results) => {
           setCurrentSelection(results?.items)
         })
       }

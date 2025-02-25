@@ -30,7 +30,6 @@ function DeviceAdd() {
   async function addDevice(e: FormEvent<HTMLElement>) {
     e.preventDefault()
     const rt = await api.deviceApi.createDevice({ device })
-    console.log('Device added', rt)
     navigate(`${basePath}/device/${rt.id}`)
   }
 
