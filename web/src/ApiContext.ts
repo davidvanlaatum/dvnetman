@@ -1,16 +1,16 @@
-import { createContext, FC, ReactNode, useContext, useMemo } from 'react'
 import {
-  Configuration,
-  DeviceApi,
-  Middleware,
   APIErrorModal,
   APIErrorModalFromJSON,
-  ResponseContext,
+  Configuration,
+  ConfigurationParameters,
+  DeviceApi,
   ManufacturerApi,
+  Middleware,
+  ResponseContext,
   StatsApi,
   UserApi,
-  ConfigurationParameters,
-} from './api'
+} from '@src/api'
+import { createContext, useContext } from 'react'
 
 export class APIError extends Error {
   response: Response
@@ -29,13 +29,25 @@ export class APIError extends Error {
 
 export class NotFoundError extends APIError {}
 
+export class UnauthorizedError extends APIError {}
+
+export class ForbiddenError extends APIError {}
+
+export class ConflictError extends APIError {}
+
 export class ErrorTransformer implements Middleware {
   async post(context: ResponseContext): Promise<Response | void> {
     if (context.response.status >= 400) {
       const json = await context.response.json()
       switch (context.response.status) {
+        case 401:
+          throw new UnauthorizedError(context.response, APIErrorModalFromJSON(json))
+        case 403:
+          throw new ForbiddenError(context.response, APIErrorModalFromJSON(json))
         case 404:
           throw new NotFoundError(context.response, APIErrorModalFromJSON(json))
+        case 409:
+          throw new ConflictError(context.response, APIErrorModalFromJSON(json))
         default:
           throw new APIError(context.response, APIErrorModalFromJSON(json))
       }
@@ -63,19 +75,8 @@ export class Api {
   }
 }
 
-const ApiContext = createContext<Api | null>(null)
+export const ApiContext = createContext<Api | null>(null)
 
-export const ApiProvider: FC<{ children: ReactNode; apiConfig?: ConfigurationParameters }> = ({
-  children,
-  apiConfig,
-}) => {
-  const api = useMemo(() => {
-    return new Api(apiConfig)
-  }, [apiConfig])
-  return <ApiContext.Provider value={api}>{children}</ApiContext.Provider>
-}
-
-// eslint-disable-next-line react-refresh/only-export-components
 export const useApi = () => {
   const context = useContext(ApiContext)
   if (!context) {

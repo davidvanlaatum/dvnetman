@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import DeviceSearch from '@src/pages/device/DeviceSearch.tsx'
-import { ApiProvider } from '@src/ApiContext.tsx'
+import { ApiProvider } from '@src/ApiProvider.tsx'
 import { FakeFetch } from '@test/helpers/fakeFetch.ts'
 import { MemoryRouter } from 'react-router'
 

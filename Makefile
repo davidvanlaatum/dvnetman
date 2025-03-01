@@ -4,9 +4,9 @@ all: api/openapi.yaml web/src/api/index.ts server $(wildcard pkg/mongo/adapt/moc
 web/src/api/index.ts: api/openapi.yaml web/src/api/openapi-generator.yaml
 	cd web/src/api && openapi-generator generate -i ../../../api/openapi.yaml -g typescript-fetch -c openapi-generator.yaml
 ifeq ($(shell uname),Darwin)
-	sed -i '' '1s;^;// noinspection all\n// @ts-nocheck\n;' web/src/api/*/*.ts
+	sed -i '' '1s;^;// noinspection all\n// @ts-nocheck\n;' web/src/api/*/*.ts web/src/api/*.ts
 else
-	sed -i '1s;^;// noinspection all\n// @ts-nocheck\n;' web/src/api/*/*.ts
+	sed -i '1s;^;// noinspection all\n// @ts-nocheck\n;' web/src/api/*/*.ts web/src/api/*.ts
 endif
 	git add web/src/api
 

@@ -1,6 +1,5 @@
 import { AsyncTypeahead, Highlighter } from 'react-bootstrap-typeahead'
 import { FC, useCallback, useEffect, useRef, useState } from 'react'
-import { useApi } from '../../ApiContext.tsx'
 import { TypeaheadMenuProps } from 'react-bootstrap-typeahead/types/components/TypeaheadMenu/TypeaheadMenu'
 import { DeviceTypeResult, DeviceTypeSearchResults, ListDeviceTypesRequest } from '@src/api'
 import { UseAsyncProps } from 'react-bootstrap-typeahead/types/behaviors/async'
@@ -9,6 +8,7 @@ import { isEqual } from 'lodash'
 import 'react-bootstrap-typeahead/css/Typeahead.css'
 import 'react-bootstrap-typeahead/css/Typeahead.bs5.css'
 import '../../assets/TypeaheadOverride.scss'
+import { useApi } from '@src/ApiContext.ts'
 
 export interface TypeToFindDeviceTypeProps {
   id: string

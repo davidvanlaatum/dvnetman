@@ -1,6 +1,6 @@
 import { Stats } from './api'
-import { useApi } from './ApiContext.tsx'
 import { useEffect, useState } from 'react'
+import { useApi } from '@src/ApiContext.ts'
 
 function Index() {
   const api = useApi()

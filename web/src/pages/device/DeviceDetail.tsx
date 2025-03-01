@@ -2,8 +2,8 @@ import { useParams } from 'react-router'
 import { useEffect, useRef, useState } from 'react'
 import { Device } from '@src/api'
 import { Breadcrumb } from 'react-bootstrap'
-import { useApi } from '../../ApiContext.tsx'
 import ErrorPage from '../../ErrorPage.tsx'
+import { useApi } from '@src/ApiContext.ts'
 
 function DeviceDetail() {
   const { uuid } = useParams<{ uuid: string }>()

@@ -3,8 +3,8 @@ import { FormEvent, useState } from 'react'
 import { Device, DeviceTypeResult, DeviceTypeSearchResults } from '@src/api'
 import { AsyncTypeahead } from 'react-bootstrap-typeahead'
 import { Option } from 'react-bootstrap-typeahead/types/types'
-import { useApi } from '../../ApiContext.tsx'
 import { useNavigate } from 'react-router'
+import { useApi } from '@src/ApiContext.ts'
 
 function DeviceAdd() {
   const api = useApi()

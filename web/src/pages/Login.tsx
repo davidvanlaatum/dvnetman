@@ -1,7 +1,7 @@
 import { Button, Container, Spinner } from 'react-bootstrap'
-import { useApi } from '@src/ApiContext.tsx'
 import { useEffect, useState } from 'react'
 import { UserProvider } from '@src/api'
+import { useApi } from '@src/ApiContext.ts'
 
 export function Login() {
   const api = useApi()

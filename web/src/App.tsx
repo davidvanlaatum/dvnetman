@@ -2,8 +2,8 @@ import './App.scss'
 import { BrowserRouter as Router, Route, Routes } from 'react-router'
 import { Nav, Navbar, NavDropdown } from 'react-bootstrap'
 import { lazy, Suspense } from 'react'
-import { ApiProvider } from './ApiContext.tsx'
-import { UserProvider } from './UserContext.tsx'
+import { ApiProvider } from './ApiProvider.tsx'
+import { UserProvider } from './UserProvider.tsx'
 import CurrentUser from '@src/components/CurrentUser.tsx'
 
 const About = lazy(() => import('./About.tsx'))

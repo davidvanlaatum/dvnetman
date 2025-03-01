@@ -162,10 +162,19 @@ func indexModelEqual(a, b mongo.IndexModel) bool {
 		}
 	}
 
-	aopts := indexOptionsBuilderToIndexOptions(a.Options)
-	bopts := indexOptionsBuilderToIndexOptions(b.Options)
+	aOpts := indexOptionsBuilderToIndexOptions(a.Options)
+	bOpts := indexOptionsBuilderToIndexOptions(b.Options)
 
-	return utils.ComparePointers(aopts.Unique, bopts.Unique)
+	return utils.ComparePointers(aOpts.Unique, bOpts.Unique)
+}
+
+func updateLoaded[T baseInterface](obj ...T) (err error) {
+	for _, o := range obj {
+		if o.GetBase().loaded, err = bson.Marshal(o); err != nil {
+			return errors.Wrap(err, "failed to marshal document")
+		}
+	}
+	return nil
 }
 
 func findById[T baseInterface](
@@ -174,11 +183,10 @@ func findById[T baseInterface](
 	err := collection(db, *result).FindOne(ctx, bson.M{"id": id}, opts...).Decode(&result)
 	if err != nil {
 		result = nil
-		return errors.Wrapf(err, "failed to find document with id %s", id)
+		return errors.Wrapf(err, "failed to find document with id %v", id)
 	}
-	(*result).GetBase().loaded, err = bson.Marshal(*result)
-	if err != nil {
-		return errors.Wrap(err, "failed to marshal document")
+	if err = updateLoaded(*result); err != nil {
+		return err
 	}
 	return nil
 }
@@ -195,11 +203,8 @@ func listBy[T baseInterface](
 	if err = c.All(ctx, result); err != nil {
 		return errors.Wrap(err, "failed to get documents")
 	}
-	for _, r := range *result {
-		r.GetBase().loaded, err = bson.Marshal(r)
-		if err != nil {
-			return errors.Wrap(err, "failed to marshal document")
-		}
+	if err = updateLoaded(*result...); err != nil {
+		return err
 	}
 	return nil
 }
@@ -212,9 +217,8 @@ func findOne[T baseInterface](
 		result = nil
 		return errors.Wrap(err, "failed to find document")
 	}
-	(*result).GetBase().loaded, err = bson.Marshal(*result)
-	if err != nil {
-		return errors.Wrap(err, "failed to marshal document")
+	if err = updateLoaded(*result); err != nil {
+		return err
 	}
 	return nil
 }
@@ -237,7 +241,9 @@ func save[T baseInterface](ctx context.Context, db *DBClient, document *T) (err 
 			return errors.Wrap(err, "failed to insert document")
 		}
 		base.ObjectId = res.InsertedID.(bson.ObjectID)
-		base.loaded, err = bson.Marshal(*document)
+		if err = updateLoaded(*document); err != nil {
+			return err
+		}
 	} else if hasChanged(document) {
 		base.Updated = now
 		var res *mongo.UpdateResult
@@ -255,7 +261,9 @@ func save[T baseInterface](ctx context.Context, db *DBClient, document *T) (err 
 			base.Version = oldVersion
 			return errors.WithStack(OptimisticLockError)
 		}
-		base.loaded, err = bson.Marshal(*document)
+		if err = updateLoaded(*document); err != nil {
+			return err
+		}
 	}
 	return
 }

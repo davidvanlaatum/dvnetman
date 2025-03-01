@@ -1,6 +1,6 @@
-import { useUser } from '@src/UserContext.tsx'
 import { FC } from 'react'
 import GravatarImage from '@src/components/GravatarImage.tsx'
+import { useUser } from '@src/UserContext.ts'
 
 export const CurrentUser: FC<{ display: 'icon' | 'name' }> = ({ display }) => {
   const user = useUser()

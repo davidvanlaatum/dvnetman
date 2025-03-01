@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Accordion, Breadcrumb } from 'react-bootstrap'
-import { useApi } from '@src/ApiContext.tsx'
 import { Device, DeviceSearchBody, ListDevicesRequest } from '@src/api'
 import { DataTable, DataTableColumnProps, DataTableRow } from '@src/components/DataTable.tsx'
 import { useSearchParams } from 'react-router'
 import { URLSearchParamsEqual } from '@src/utils/urlsearchparams.ts'
 import { DeviceSearchFilters } from '@src/components/device/DeviceSearchFilters.tsx'
+import { useApi } from '@src/ApiContext.ts'
 
 function searchOptsToParams(opts: ListDevicesRequest): URLSearchParams {
   const params = new URLSearchParams()

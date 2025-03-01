@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import TypeToFindDeviceType, { TypeToFindDeviceTypeProps } from '@src/components/deviceType/TypeToFindDeviceType.tsx'
-import { ApiProvider } from '@src/ApiContext.tsx'
+import { ApiProvider } from '@src/ApiProvider.tsx'
 import userEvent from '@testing-library/user-event'
 import { FakeFetch } from '@test/helpers/fakeFetch.ts'
 import { FC, useState } from 'react'
