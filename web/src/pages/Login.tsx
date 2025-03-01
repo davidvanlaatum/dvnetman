@@ -35,6 +35,13 @@ export function Login() {
     if (loading) {
       return <Spinner />
     }
+    if (providers?.length === 1) {
+      return (
+        <div>
+          <Spinner className="float-start" size="sm" /> Logging in with {providers[0].displayName}
+        </div>
+      )
+    }
     return providers?.map((provider) => (
       <Button variant="primary" size="lg" key={provider.provider} as={'a'} href={provider.loginURL}>
         {provider.loginButtonImageURL ? (
@@ -48,7 +55,6 @@ export function Login() {
 
   return (
     <Container>
-      <h1>Login</h1>
       <div className="d-grid gap-2">{providerList()}</div>
     </Container>
   )
