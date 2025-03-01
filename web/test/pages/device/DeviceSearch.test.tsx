@@ -26,7 +26,7 @@ describe('DeviceSearch', () => {
       </MemoryRouter>,
     )
     await waitFor(() => {
-      expect(screen.getByText('No devices found')).not.toBeNull()
+      expect(screen.getByText('No Devices Found')).not.toBeNull()
     })
   })
 

@@ -27,36 +27,75 @@ export interface DataTableProps {
   selected?: string[]
   onSelect?: (selected: string[]) => void
   loading?: boolean
+  renderOnNoData?: ReactNode
 }
 
-export const DataTable: FC<DataTableProps> = ({ columns, data, onSort, selectable, selected, onSelect, loading }) => {
+function toString(value: unknown): string {
+  if (value === null || value === undefined) {
+    return ''
+  }
+  switch (typeof value) {
+    case 'bigint':
+      return value.toString()
+    case 'string':
+      return value
+    case 'number':
+      return value.toString()
+    case 'boolean':
+      return value ? 'true' : 'false'
+    case 'object':
+      return JSON.stringify(value)
+    default:
+      throw new Error(`Unknown type ${typeof value}`)
+  }
+}
+
+function getColumnValueFunc(column: DataTableColumnProps): (row: DataTableRow) => string {
+  if (column.getDisplayValue) {
+    return column.getDisplayValue
+  }
+  return (row: DataTableRow) => toString(row[column.id])
+}
+
+function getSortFunc(column: DataTableColumnProps, sortDir: boolean): (a: DataTableRow, b: DataTableRow) => number {
+  const getValue = getColumnValueFunc(column)
+  let sortFunc = (a: DataTableRow, b: DataTableRow) => {
+    const aValue = getValue(a)
+    const bValue = getValue(b)
+    if (aValue < bValue) {
+      return sortDir ? -1 : 1
+    }
+    if (aValue > bValue) {
+      return sortDir ? 1 : -1
+    }
+    return 0
+  }
+  if (column.sort) {
+    const f = column.sort
+    sortFunc = (a, b) => f(a, b, sortDir)
+  }
+  return sortFunc
+}
+
+export const DataTable: FC<DataTableProps> = ({
+  columns,
+  data,
+  onSort,
+  selectable,
+  selected,
+  onSelect,
+  loading,
+  renderOnNoData,
+}) => {
   const [sortColumn, setSortColumn] = useState<string | null>(null)
   const [sortDir, setSortDir] = useState<boolean>(true)
   const [renderData, setRenderData] = useState<DataTableRow[]>(data)
 
   useEffect(() => {
     const sortColumnObj = columns.find((column) => column.id == sortColumn)
-    if (sortColumn && sortColumnObj && sortDir !== undefined) {
+    if (sortColumn && sortColumnObj) {
       const dataCopy = [...data]
-      const getValue: (x: any) => string = sortColumnObj.getDisplayValue
-        ? sortColumnObj.getDisplayValue
-        : (row: any) => row[sortColumn]
-      let sortFunc = (a: any, b: any) => {
-        const aValue = getValue(a)
-        const bValue = getValue(b)
-        if (aValue < bValue) {
-          return sortDir ? -1 : 1
-        }
-        if (aValue > bValue) {
-          return sortDir ? 1 : -1
-        }
-        return 0
-      }
-      if (sortColumnObj?.sort) {
-        const f = sortColumnObj.sort
-        sortFunc = (a, b) => f(a, b, sortDir)
-      }
-      dataCopy.sort(sortFunc)
+      dataCopy.sort(getSortFunc(sortColumnObj, sortDir))
       setRenderData(dataCopy)
     } else {
       setRenderData(data)
@@ -84,14 +123,14 @@ export const DataTable: FC<DataTableProps> = ({ columns, data, onSort, selectabl
   }
 
   function isAllSelected() {
-    return selected?.length == data.length
+    return data.length > 0 && selected?.length == data.length
   }
 
   function onSortClick(id: string) {
     if (sortColumn == id) {
       if (sortDir) {
         setSortDir(false)
-      } else if (!sortDir) {
+      } else {
         setSortColumn(null)
         setSortDir(true)
       }
@@ -104,17 +143,27 @@ export const DataTable: FC<DataTableProps> = ({ columns, data, onSort, selectabl
     }
   }
 
+  function emptyBody(body: ReactNode) {
+    return (
+      <tbody>
+        <tr>
+          <td colSpan={columns.length}>{body}</td>
+        </tr>
+      </tbody>
+    )
+  }
+
   function renderBody(): ReactNode {
     if (loading) {
-      return (
-        <tbody>
-          <tr>
-            <td colSpan={columns.length}>
-              <Spinner size="sm" /> Loading...
-            </td>
-          </tr>
-        </tbody>
+      return emptyBody(
+        <>
+          <Spinner size="sm" />
+          Loading...
+        </>,
       )
+    }
+    if (renderData.length == 0 && renderOnNoData) {
+      return emptyBody(renderOnNoData)
     }
     return (
       <tbody>
@@ -129,10 +178,8 @@ export const DataTable: FC<DataTableProps> = ({ columns, data, onSort, selectabl
     let value: ReactNode
     if (column.render) {
       value = column.render(row)
-    } else if (column.getDisplayValue) {
-      value = column.getDisplayValue(row)
     } else {
-      value = row[column.id]
+      value = getColumnValueFunc(column)(row)
     }
     return (
       <td key={column.id} className={'data-table-column'}>
@@ -141,7 +188,9 @@ export const DataTable: FC<DataTableProps> = ({ columns, data, onSort, selectabl
             <FormCheck
               className={'float-start'}
               checked={selected?.includes(row.id)}
-              onChange={(e) => onSelected(e.target.checked, row)}
+              onChange={(e) => {
+                onSelected(e.target.checked, row)
+              }}
             />
           )}
           {value}
@@ -168,7 +217,9 @@ export const DataTable: FC<DataTableProps> = ({ columns, data, onSort, selectabl
                   {column.sortable && (
                     <button
                       className={['data-table-sorter', 'fill', [sorted ? 'data-table-sorted' : null]].join(' ')}
-                      onClick={() => onSortClick(column.id)}
+                      onClick={() => {
+                        onSortClick(column.id)
+                      }}
                     >
                       {column.label}
                       <i

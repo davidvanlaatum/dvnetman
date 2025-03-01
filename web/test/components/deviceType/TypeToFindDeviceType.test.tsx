@@ -11,7 +11,14 @@ const TestComponent: FC<Partial<TypeToFindDeviceTypeProps>> = ({ selected, ...pr
   const [ids, setIds] = useState<string[]>(selected ?? [])
   return (
     <>
-      <TypeToFindDeviceType id="deviceType" {...props} onSelect={(id) => setIds(id)} selected={ids} />
+      <TypeToFindDeviceType
+        id="deviceType"
+        {...props}
+        onSelect={(id) => {
+          setIds(id)
+        }}
+        selected={ids}
+      />
       <div data-testid="selected-ids">{JSON.stringify(ids)}</div>
     </>
   )
@@ -47,7 +54,9 @@ describe('<TypeToFindDeviceType />', () => {
 
   it('should render initial value correctly', async () => {
     const fetch = new FakeFetch()
-    let resolve: (value: DeviceTypeSearchResults) => void = () => {}
+    let resolve: (value: DeviceTypeSearchResults) => void = () => {
+      throw new Error('not implemented')
+    }
     const p = new Promise<DeviceTypeSearchResults>((r) => {
       resolve = r
     })

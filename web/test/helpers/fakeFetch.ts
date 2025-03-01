@@ -18,11 +18,11 @@ export type ExpectedDeviceTypeSearch = ExpectedRequest<DeviceTypeSearchBody, Dev
 
 export type ExpectedDeviceSearch = ExpectedRequest<DeviceSearchBody, DeviceSearchResults>
 
-async function getBodyAsJson<T>(init: RequestInit): Promise<T | null> {
-  if (!init.body) {
+async function getBodyAsJson<T>(init?: RequestInit): Promise<T | null> {
+  if (!init?.body) {
     return null
   } else {
-    return new Response(init.body).json()
+    return (await new Response(init.body).json()) as Promise<T | null>
   }
 }
 
@@ -38,13 +38,11 @@ function headersMatch(expected: Headers, actual: Headers): boolean {
 export class FakeFetch {
   private readonly unexpectedCalls: string[] = []
   private readonly expectedRequests: ExpectedRequest<any, any>[] = []
-  // private readonly expectedDeviceTypeSearches: ExpectedDeviceTypeSearch[] = []
-  // private readonly expectedDeviceSearches: ExpectedDeviceSearch[] = []
 
   private async findMatchingRequest(
     url: URL,
-    init: RequestInit,
     log: string[],
+    init?: RequestInit,
   ): Promise<ExpectedRequest<any, any> | null> {
     const body = await getBodyAsJson(init)
     for (const v of this.expectedRequests) {
@@ -52,8 +50,8 @@ export class FakeFetch {
         log.push('url mismatch ' + v.url.href + ' ' + url.href)
         continue
       }
-      if (v.method !== init.method) {
-        log.push('method mismatch ' + v.method + ' ' + init.method)
+      if (v.method !== init?.method) {
+        log.push('method mismatch ' + v.method + ' ' + (init?.method ?? 'GET'))
         continue
       }
       if (v.headers && !headersMatch(v.headers, new Headers(init.headers))) {
@@ -122,15 +120,15 @@ export class FakeFetch {
       const url = new URL(input as string)
       const log: string[] = []
       let response: Response | null = null
-      const res = await this.findMatchingRequest(url, init as RequestInit, log)
+      const res = await this.findMatchingRequest(url, log, init)
       if (res) {
-        response = await this.response(res, url, init as RequestInit, log)
+        response = await this.response(res, url, init ?? {}, log)
       }
       if (response) {
         return response
       }
       console.error('unexpected fetch', input, init, log)
-      this.unexpectedCalls.push(init?.method + ' ' + (input as string) + ': ' + log.join(', '))
+      this.unexpectedCalls.push((init?.method ?? 'GET') + ' ' + (input as string) + ': ' + log.join(', '))
       return new Response(
         JSON.stringify({
           errors: [

@@ -2,10 +2,12 @@ import { Button, Container, Spinner } from 'react-bootstrap'
 import { useEffect, useState } from 'react'
 import { UserProvider } from '@src/api'
 import { useApi } from '@src/ApiContext.ts'
+import ErrorPage from '@src/ErrorPage.tsx'
 
 export function Login() {
   const api = useApi()
   const [providers, setProviders] = useState<UserProvider[] | null>(null)
+  const [error, setError] = useState<unknown>(null)
 
   useEffect(() => {
     const fetchProviders = async () => {
@@ -15,8 +17,14 @@ export function Login() {
         window.location.href = providers[0].loginURL
       }
     }
-    fetchProviders().then()
+    fetchProviders().catch((err: unknown) => {
+      setError(err)
+    })
   }, [api.userApi])
+
+  if (error) {
+    return <ErrorPage error={error} />
+  }
 
   return (
     <Container>

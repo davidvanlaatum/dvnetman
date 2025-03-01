@@ -78,7 +78,14 @@ export const DeviceSearchFilters: FC<DeviceSearchFiltersProps> = ({ onSearch, se
         </Row>
         <ButtonGroup className="float-end">
           <Button type="submit" size="sm" className="bi bi-search" />
-          <Button type="button" size="sm" variant={'secondary'} onClick={() => setSearchOptsState({})}>
+          <Button
+            type="button"
+            size="sm"
+            variant={'secondary'}
+            onClick={() => {
+              setSearchOptsState({})
+            }}
+          >
             Clear
           </Button>
         </ButtonGroup>

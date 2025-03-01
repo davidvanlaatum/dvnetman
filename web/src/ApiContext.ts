@@ -36,9 +36,9 @@ export class ForbiddenError extends APIError {}
 export class ConflictError extends APIError {}
 
 export class ErrorTransformer implements Middleware {
-  async post(context: ResponseContext): Promise<Response | void> {
+  async post(context: ResponseContext): Promise<Response> {
     if (context.response.status >= 400) {
-      const json = await context.response.json()
+      const json = (await context.response.json()) as object
       switch (context.response.status) {
         case 401:
           throw new UnauthorizedError(context.response, APIErrorModalFromJSON(json))

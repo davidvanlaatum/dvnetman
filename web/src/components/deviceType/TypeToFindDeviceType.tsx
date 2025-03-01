@@ -30,12 +30,12 @@ export const TypeToFindDeviceType: FC<TypeToFindDeviceTypeProps> = ({ id, onSele
   const [currentSelection, setCurrentSelection] = useState<DeviceTypeResult[]>()
   const currentlyLoading = useRef<CurrentlyLoading>()
 
-  async function onSearch(q: string) {
-    loadSearchResults({
+  function onSearch(q: string) {
+    void loadSearchResults({
       deviceTypeSearchBody: {
         modelRegex: q,
       },
-    }).then()
+    })
   }
 
   function onChange(options: DeviceTypeResult[]) {
@@ -83,9 +83,9 @@ export const TypeToFindDeviceType: FC<TypeToFindDeviceTypeProps> = ({ id, onSele
       const newValue =
         selected?.map((v) => {
           return { id: v, version: 0, model: 'loading' }
-        }) || []
+        }) ?? []
       if (newValue.length > 0) {
-        loadSearchResults({ deviceTypeSearchBody: { ids: selected } }).then((results) => {
+        void loadSearchResults({ deviceTypeSearchBody: { ids: selected } }).then((results) => {
           setCurrentSelection(results?.items)
         })
       }
@@ -93,11 +93,16 @@ export const TypeToFindDeviceType: FC<TypeToFindDeviceTypeProps> = ({ id, onSele
     })
   }, [selected, api.deviceApi, loadSearchResults, options])
 
-  function renderMenuItemChildren(option: Record<string, any>, props: TypeaheadMenuProps) {
+  function renderMenuItemChildren(option: DeviceTypeResult, props: TypeaheadMenuProps) {
     return (
       <>
         <span className="manufacturer">{option.manufacturer?.displayName} </span>
-        <Highlighter search={props.text}>{option.model}</Highlighter>
+        <Highlighter
+          /* eslint-disable-next-line react/prop-types  */
+          search={props.text}
+        >
+          {option.model ?? ''}
+        </Highlighter>
       </>
     )
   }
@@ -111,13 +116,15 @@ export const TypeToFindDeviceType: FC<TypeToFindDeviceTypeProps> = ({ id, onSele
         onSearch={onSearch}
         options={options}
         useCache={true}
-        onChange={(v) => onChange(v as DeviceTypeResult[])}
+        onChange={(v) => {
+          onChange(v as DeviceTypeResult[])
+        }}
         labelKey={'model'}
         filterBy={() => true}
         selected={currentSelection ?? []}
         highlightOnlyResult={true}
         inputProps={{ id }}
-        renderMenuItemChildren={(option, opts) => renderMenuItemChildren(option as Record<string, any>, opts)}
+        renderMenuItemChildren={(option, opts) => renderMenuItemChildren(option as DeviceTypeResult, opts)}
         {...asyncProps}
       />
     </span>

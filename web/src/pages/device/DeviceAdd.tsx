@@ -1,51 +1,37 @@
 import { Button, Container, Form } from 'react-bootstrap'
 import { FormEvent, useState } from 'react'
-import { Device, DeviceTypeResult, DeviceTypeSearchResults } from '@src/api'
-import { AsyncTypeahead } from 'react-bootstrap-typeahead'
-import { Option } from 'react-bootstrap-typeahead/types/types'
+import { Device } from '@src/api'
 import { useNavigate } from 'react-router'
 import { useApi } from '@src/ApiContext.ts'
+import TypeToFindDeviceType from '@src/components/deviceType/TypeToFindDeviceType.tsx'
 
 function DeviceAdd() {
   const api = useApi()
-  const [device, setDevice] = useState<Device>({
-    id: '',
-    version: 0,
-  })
-  const [deviceTypeOptions, setDeviceTypeOptions] = useState<DeviceTypeSearchResults>()
-  const [deviceTypeLoading, setDeviceTypeLoading] = useState(false)
+  const [device, setDevice] = useState<Partial<Device>>({})
+  const [isAdding, setIsAdding] = useState(false)
   const navigate = useNavigate()
   const basePath = import.meta.env.BASE_URL
 
-  async function lookupDeviceTypes(/*query: string*/) {
-    setDeviceTypeLoading(true)
-    try {
-      const response = await api.deviceApi.listDeviceTypes(/*{ q: query }*/)
-      setDeviceTypeOptions(response)
-    } finally {
-      setDeviceTypeLoading(false)
+  function addDevice(e: FormEvent<HTMLElement>) {
+    e.preventDefault()
+    if (!isAdding) {
+      setIsAdding(true)
+      api.deviceApi
+        .createDevice({ device: { ...device, version: 0 } })
+        .then((rt) => navigate(`${basePath}/device/${rt.id}`))
+        .catch((err: unknown) => {
+          console.log(err)
+        })
+        .finally(() => {
+          setIsAdding(false)
+        })
     }
   }
 
-  async function addDevice(e: FormEvent<HTMLElement>) {
-    e.preventDefault()
-    const rt = await api.deviceApi.createDevice({ device })
-    navigate(`${basePath}/device/${rt.id}`)
-  }
-
-  function renderDeviceTypeMenuItem(option: Option) {
-    return (
-      <div>
-        <div>{(option as DeviceTypeResult).model}</div>
-      </div>
-    )
-  }
-
-  function setDeviceProperty(key: keyof Device, value: any) {
+  function setDeviceProperty(key: keyof Device, value: string | object | undefined) {
     if (value === undefined) {
-      const d = { ...device }
-      delete d[key]
-      setDevice(d)
+      const { [key]: _, ...d } = device
+      setDevice(d as Device)
     } else {
       setDevice({ ...device, [key]: value })
     }
@@ -55,52 +41,47 @@ function DeviceAdd() {
     <Container>
       <h1>Add Device</h1>
       <Form onSubmit={addDevice}>
-        <Form.Group className="mb-3" controlId="deviceName">
-          <Form.Label>Name</Form.Label>
-          <Form.Control
-            type="text"
-            placeholder="Enter name"
-            value={device.name ?? ''}
-            onChange={(e) => setDeviceProperty('name', e.target.value || undefined)}
-          />
-        </Form.Group>
-        <Form.Group className="mb-3" controlId="deviceDescription">
-          <Form.Label>Description</Form.Label>
-          <Form.Control
-            type="text"
-            placeholder="Enter description"
-            value={device.description ?? ''}
-            onChange={(e) => setDeviceProperty('description', e.target.value || undefined)}
-          />
-        </Form.Group>
-        <Form.Group className="mb-3">
-          <Form.Label htmlFor="deviceType">Type</Form.Label>
-          <AsyncTypeahead
-            filterBy={() => true}
-            isLoading={deviceTypeLoading}
-            onSearch={lookupDeviceTypes}
-            options={deviceTypeOptions?.items || []}
-            labelKey="name"
-            id="deviceType"
-            onChange={(selected) =>
-              setDeviceProperty(
-                'deviceType',
-                selected.length > 0
-                  ? {
-                      id: (selected[0] as DeviceTypeResult).id,
-                      displayName: (selected[0] as DeviceTypeResult).model,
-                    }
-                  : undefined,
-              )
-            }
-            renderMenuItemChildren={renderDeviceTypeMenuItem}
-          />
-        </Form.Group>
-        <Button variant="primary" type="submit">
-          Add
-        </Button>
+        <fieldset disabled={isAdding}>
+          <Form.Group className="mb-3" controlId="deviceName">
+            <Form.Label>Name</Form.Label>
+            <Form.Control
+              type="text"
+              placeholder="Enter name"
+              value={device.name ?? ''}
+              onChange={(e) => {
+                setDeviceProperty('name', e.target.value || undefined)
+              }}
+            />
+          </Form.Group>
+          <Form.Group className="mb-3" controlId="deviceDescription">
+            <Form.Label>Description</Form.Label>
+            <Form.Control
+              type="text"
+              placeholder="Enter description"
+              value={device.description ?? ''}
+              onChange={(e) => {
+                setDeviceProperty('description', e.target.value || undefined)
+              }}
+            />
+          </Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Label htmlFor="deviceType">Type</Form.Label>
+            <TypeToFindDeviceType
+              id={'deviceType'}
+              onSelect={(selected) => {
+                setDeviceProperty('deviceType', selected.length > 0 ? { id: selected[0] } : undefined)
+              }}
+            />
+          </Form.Group>
+          <Button variant="primary" type="submit">
+            Add
+          </Button>
+        </fieldset>
       </Form>
-      <pre>{JSON.stringify(device, null, 2)}</pre>
+      <details>
+        <summary>Debug</summary>
+        <pre>{JSON.stringify(device, null, 2)}</pre>
+      </details>
     </Container>
   )
 }

@@ -9,7 +9,7 @@ function Index() {
 
   useEffect(() => {
     const f = () => {
-      api.statsApi.getStats().then((response) => {
+      void api.statsApi.getStats().then((response) => {
         setStats(response)
       })
     }
@@ -18,7 +18,9 @@ function Index() {
       f()
       setInitialized(true)
     }
-    return () => clearInterval(id)
+    return () => {
+      clearInterval(id)
+    }
   }, [api.statsApi, initialized])
 
   return (

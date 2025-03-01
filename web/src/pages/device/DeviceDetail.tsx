@@ -9,7 +9,7 @@ function DeviceDetail() {
   const { uuid } = useParams<{ uuid: string }>()
   const [device, setDevice] = useState<Device | null>(null)
   const loading = useRef(false)
-  const [error, setError] = useState<Error | null>(null)
+  const [error, setError] = useState<unknown>(null)
   const api = useApi()
   const basePath = import.meta.env.BASE_URL
 
@@ -26,7 +26,7 @@ function DeviceDetail() {
       }
     }
 
-    fetchDevice().catch((err) => {
+    fetchDevice().catch((err: unknown) => {
       setError(err)
     })
   }, [api.deviceApi, device, device?.id, error, uuid])

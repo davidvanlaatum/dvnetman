@@ -24,9 +24,13 @@ export const UserProvider: FC<{ children: ReactNode; forceUser?: CurrentUser }> 
         setLoading(false)
       }
     }
-    fetchUser().then()
-    const id = setInterval(fetchUser, 1000 * 60)
-    return () => clearInterval(id)
+    void fetchUser().then()
+    const id = setInterval(() => {
+      void fetchUser()
+    }, 1000 * 60)
+    return () => {
+      clearInterval(id)
+    }
   }, [api.userApi, forceUser])
 
   if (loading) {

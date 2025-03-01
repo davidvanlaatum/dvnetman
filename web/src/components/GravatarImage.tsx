@@ -1,4 +1,4 @@
-import { FC, RefAttributes, useCallback } from 'react'
+import { FC, RefAttributes } from 'react'
 import { Image } from 'react-bootstrap'
 import { ImageProps } from 'react-bootstrap/Image'
 
@@ -7,25 +7,36 @@ export interface GravatarImageProps extends ImageProps, RefAttributes<HTMLImageE
   baseSize: number
 }
 
+interface GravatarOpts {
+  url: string
+  size: number
+}
+
+function buildUrl(opts: GravatarOpts): URL {
+  const url = new URL(opts.url)
+  url.searchParams.set('s', String(opts.size))
+  return url
+}
+
 export const GravatarImage: FC<GravatarImageProps> = ({ profileUrl, baseSize, ...props }) => {
-  const buildUrl = useCallback(
-    (size: number) => {
-      const url = new URL(profileUrl as string)
-      url.searchParams.set('s', String(size))
-      return url
-    },
-    [profileUrl],
-  )
+  if (!profileUrl) {
+    return null
+  }
+
+  const urlOpts: GravatarOpts = {
+    url: profileUrl,
+    size: baseSize,
+  }
 
   return (
-    profileUrl && (
-      <Image
-        src={buildUrl(baseSize).href}
-        roundedCircle
-        srcSet={[1, 1.5, 2, 2.5, 3, 3.5, 4].map((v) => buildUrl(v * baseSize).href + ' ' + v + 'x').join(',')}
-        {...props}
-      />
-    )
+    <Image
+      src={buildUrl(urlOpts).href}
+      roundedCircle
+      srcSet={[1, 1.5, 2, 2.5, 3, 3.5, 4]
+        .map((v) => `${buildUrl({ ...urlOpts, size: v * baseSize }).href} ${v.toString()}x`)
+        .join(',')}
+      {...props}
+    />
   )
 }
 

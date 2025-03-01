@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Accordion, Breadcrumb } from 'react-bootstrap'
 import { Device, DeviceSearchBody, ListDevicesRequest } from '@src/api'
-import { DataTable, DataTableColumnProps, DataTableRow } from '@src/components/DataTable.tsx'
+import { DataTable, DataTableColumnProps } from '@src/components/DataTable.tsx'
 import { useSearchParams } from 'react-router'
 import { URLSearchParamsEqual } from '@src/utils/urlsearchparams.ts'
 import { DeviceSearchFilters } from '@src/components/device/DeviceSearchFilters.tsx'
@@ -10,7 +10,9 @@ import { useApi } from '@src/ApiContext.ts'
 function searchOptsToParams(opts: ListDevicesRequest): URLSearchParams {
   const params = new URLSearchParams()
   if (opts.deviceSearchBody?.deviceType) {
-    opts.deviceSearchBody.deviceType.forEach((v) => params.append('deviceTypeId', v))
+    opts.deviceSearchBody.deviceType.forEach((v) => {
+      params.append('deviceTypeId', v)
+    })
   }
   if (opts.deviceSearchBody?.nameRegex) {
     params.set('nameRegex', opts.deviceSearchBody.nameRegex)
@@ -22,7 +24,8 @@ function paramsToSearchOpts(params: URLSearchParams): ListDevicesRequest {
   const opts: ListDevicesRequest = {}
   const searchOpts: DeviceSearchBody = {}
   if (params.has('nameRegex')) {
-    searchOpts.nameRegex = params.get('nameRegex') as string
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    searchOpts.nameRegex = params.get('nameRegex')!
   }
   if (params.has('deviceTypeId')) {
     searchOpts.deviceType = params.getAll('deviceTypeId')
@@ -46,10 +49,15 @@ function DeviceSearch() {
         return
       }
       loading.current = true
-      api.deviceApi.listDevices(opts).then((response) => {
-        setDevices(response.items)
-        loading.current = false
-      })
+      api.deviceApi
+        .listDevices(opts)
+        .then((response) => {
+          setDevices(response.items)
+        })
+        .catch((err: unknown) => {
+          console.log(err)
+        })
+        .finally(() => (loading.current = false))
     },
     [api.deviceApi, params, setParams],
   )
@@ -87,22 +95,25 @@ function DeviceSearch() {
           <Accordion.Header as={'div'}>Filters</Accordion.Header>
           <Accordion.Body>
             <DeviceSearchFilters
-              onSearch={(opts) => performSearch({ deviceSearchBody: opts })}
-              searchOpts={paramsToSearchOpts(params)?.deviceSearchBody}
+              onSearch={(opts) => {
+                performSearch({ deviceSearchBody: opts })
+              }}
+              searchOpts={paramsToSearchOpts(params).deviceSearchBody}
             />
           </Accordion.Body>
         </Accordion.Item>
       </Accordion>
-      {((devices?.length ?? 0) > 0 && (
-        <DataTable
-          columns={columns}
-          data={(devices as DataTableRow[]) || []}
-          selectable={true}
-          onSelect={(selected) => setSelected(selected)}
-          selected={selected}
-          loading={loading.current}
-        />
-      )) || <div>No devices found</div>}
+      <DataTable
+        columns={columns}
+        data={devices ?? []}
+        selectable={true}
+        onSelect={(selected) => {
+          setSelected(selected)
+        }}
+        selected={selected}
+        loading={loading.current}
+        renderOnNoData={<>No Devices Found</>}
+      />
       {import.meta.env.DEV && (
         <details>
           <summary>Debug</summary>
