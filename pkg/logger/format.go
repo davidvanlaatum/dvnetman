@@ -2,9 +2,27 @@ package logger
 
 import (
 	"dvnetman/pkg/utils"
+	"fmt"
 	"github.com/fatih/color"
 	"time"
 )
+
+type LogKeyFormatter interface {
+	FormatLogKeyValue() interface{}
+}
+
+func ExpandLogKeyValue(value interface{}) interface{} {
+	for {
+		switch v := value.(type) {
+		case LogKeyFormatter:
+			value = v.FormatLogKeyValue()
+		case error:
+			return fmt.Sprintf("%+v", v)
+		default:
+			return v
+		}
+	}
+}
 
 type Formatter interface {
 	Format(data *EventData) string
@@ -54,12 +72,7 @@ func (f *ConsoleFormatter) Format(data *EventData) string {
 	for _, v := range utils.MapSortedByKey(data.Keys, utils.MapSortedByKeyString) {
 		s += " "
 		s += key.Sprint(v.Key + "=")
-		if _, ok := v.Value.(error); ok {
-			s += d.Sprintf("%+v", v.Value)
-		} else {
-			s += d.Sprintf("%v", v.Value)
-		}
+		s += d.Sprintf("%v", ExpandLogKeyValue(v.Value))
 	}
-
 	return s
 }

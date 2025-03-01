@@ -541,7 +541,7 @@ func (c *CodeGen) determineGoTypeFor(schema *openapi.Schema) *GoType {
 			return &GoType{pkg: "time", name: "Time"}
 		} else if schema.Format == "uuid" {
 			return &GoType{pkg: "github.com/google/uuid", name: "UUID"}
-		} else if schema.Format != "" && schema.Format != "email" {
+		} else if schema.Format != "" && schema.Format != "email" && schema.Format != "uri" {
 			panic(errors.Errorf("Unhandled format %s", schema.Format))
 		} else if schema.Enum != nil {
 			return &GoType{name: "enum"}

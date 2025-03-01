@@ -11,12 +11,10 @@ type User struct {
 	Base             `bson:",inline"`
 	FirstName        *string `bson:"first_name"`
 	LastName         *string `bson:"last_name"`
-	FullName         *string `bson:"full_name"`
+	DisplayName      *string `bson:"display_name"`
 	Email            *string `bson:"email"`
-	Password         *string `bson:"password"`
 	ExternalProvider *string `bson:"external_provider"`
 	ExternalID       *string `bson:"external_id"`
-	Username         *string `bson:"username"`
 }
 
 func (u *User) GetCollectionName() string {
@@ -31,6 +29,19 @@ func init() {
 				{
 					Keys:    bson.D{{"id", int32(1)}},
 					Options: options.Index().SetUnique(true),
+				},
+				{
+					Keys: bson.D{{"email", int32(1)}},
+				},
+				{
+					Keys:    bson.D{{"external_provider", int32(1)}, {"external_id", int32(1)}},
+					Options: options.Index().SetUnique(true),
+				},
+				{
+					Keys: bson.D{{"first_name", int32(1)}, {"last_name", int32(1)}},
+				},
+				{
+					Keys: bson.D{{"display_name", int32(1)}},
 				},
 			},
 		},
@@ -66,4 +77,9 @@ func (db *DBClient) CountUsers(
 ) (int64, error) {
 	t := &User{}
 	return count(ctx, db, &t, filter, opts...)
+}
+
+func (db *DBClient) GetUserByExternalID(ctx context.Context, provider, id string) (u *User, err error) {
+	err = findOne(ctx, db, bson.D{{"external_provider", provider}, {"external_id", id}}, &u)
+	return
 }

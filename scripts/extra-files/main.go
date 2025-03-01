@@ -39,7 +39,7 @@ func main() {
 				return filepath.SkipDir
 			}
 			if info.IsDir() || slices.Contains(
-				[]string{".openapi-generator-ignore", "openapi-generator.yaml"}, filepath.Base(path),
+				[]string{".openapi-generator-ignore", "openapi-generator.yaml", ".editorconfig"}, filepath.Base(path),
 			) {
 				return nil
 			}

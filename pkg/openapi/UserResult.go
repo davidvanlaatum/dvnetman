@@ -9,5 +9,4 @@ type UserResult struct {
 	FirstName *string   `json:"firstName,omitzero"`
 	Id        uuid.UUID `json:"id"`
 	LastName  *string   `json:"lastName,omitzero"`
-	Username  *string   `json:"username,omitzero"`
 }

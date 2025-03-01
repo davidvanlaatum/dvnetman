@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"dvnetman/pkg/auth"
 	"dvnetman/pkg/mongo/modal"
 	"dvnetman/pkg/openapi"
 	"dvnetman/pkg/server/dto"
@@ -12,6 +13,9 @@ import (
 )
 
 func (s *Service) CreateDevice(ctx context.Context, opts *openapi.CreateDeviceOpts) (res *openapi.Response, err error) {
+	if err = auth.RequirePerm(ctx, auth.PermissionWrite); err != nil {
+		return
+	}
 	c := dto.NewConverter(s.db)
 	mod := &modal.Device{}
 	if err = c.UpdateDeviceFromOpenAPI(ctx, opts.Body, mod); err != nil {
@@ -29,6 +33,9 @@ func (s *Service) CreateDevice(ctx context.Context, opts *openapi.CreateDeviceOp
 }
 
 func (s *Service) UpdateDevice(ctx context.Context, opts *openapi.UpdateDeviceOpts) (res *openapi.Response, err error) {
+	if err = auth.RequirePerm(ctx, auth.PermissionWrite); err != nil {
+		return
+	}
 	c := dto.NewConverter(s.db)
 	var mod *modal.Device
 	if mod, err = s.db.GetDevice(ctx, (*modal.UUID)(&opts.Id)); err != nil {
@@ -50,6 +57,9 @@ func (s *Service) UpdateDevice(ctx context.Context, opts *openapi.UpdateDeviceOp
 }
 
 func (s *Service) GetDevice(ctx context.Context, opts *openapi.GetDeviceOpts) (res *openapi.Response, err error) {
+	if err = auth.RequirePerm(ctx, auth.PermissionRead); err != nil {
+		return
+	}
 	c := dto.NewConverter(s.db)
 	var d *modal.Device
 	if d, err = s.db.GetDevice(ctx, (*modal.UUID)(&opts.Id)); err != nil {
@@ -67,6 +77,9 @@ func (s *Service) GetDevice(ctx context.Context, opts *openapi.GetDeviceOpts) (r
 }
 
 func (s *Service) ListDevices(ctx context.Context, opts *openapi.ListDevicesOpts) (res *openapi.Response, err error) {
+	if err = auth.RequirePerm(ctx, auth.PermissionRead); err != nil {
+		return
+	}
 	c := dto.NewConverter(s.db)
 	var page, size int64 = 0, 10
 	if opts.PerPage != nil && *opts.PerPage > 0 {
@@ -105,6 +118,9 @@ func (s *Service) ListDevices(ctx context.Context, opts *openapi.ListDevicesOpts
 }
 
 func (s *Service) DeleteDevice(ctx context.Context, opts *openapi.DeleteDeviceOpts) (res *openapi.Response, err error) {
+	if err = auth.RequirePerm(ctx, auth.PermissionWrite); err != nil {
+		return
+	}
 	var d *modal.Device
 	if d, err = s.db.GetDevice(ctx, (*modal.UUID)(&opts.Id)); err != nil {
 		return

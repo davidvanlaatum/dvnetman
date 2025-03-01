@@ -1,6 +1,7 @@
 package service
 
 import (
+	"dvnetman/pkg/auth"
 	"dvnetman/pkg/logger"
 	"dvnetman/pkg/mongo/modal"
 	"dvnetman/pkg/openapi"
@@ -11,7 +12,8 @@ import (
 )
 
 type Service struct {
-	db *modal.DBClient
+	db   *modal.DBClient
+	auth *auth.Auth
 }
 
 func (s *Service) ErrorHandler(w http.ResponseWriter, r *http.Request, err error) {
@@ -84,8 +86,9 @@ func (s *Service) checkIfModified(
 	return
 }
 
-func NewService(db *modal.DBClient) *Service {
+func NewService(db *modal.DBClient, auth *auth.Auth) *Service {
 	return &Service{
-		db: db,
+		db:   db,
+		auth: auth,
 	}
 }

@@ -2,6 +2,7 @@ package dto
 
 import (
 	"context"
+	"dvnetman/pkg/auth"
 	"dvnetman/pkg/mongo/modal"
 	"dvnetman/pkg/openapi"
 	"dvnetman/pkg/utils"
@@ -22,11 +23,7 @@ func (c *Converter) UpdateUserFromOpenAPI(ctx context.Context, body *openapi.Use
 	mod.Email = body.Email
 	mod.FirstName = body.FirstName
 	mod.LastName = body.LastName
-	mod.FullName = utils.JoinPtr(" ", body.FirstName, body.LastName)
-	mod.Username = body.Username
-	if mod.Password != nil {
-		mod.Password = body.Password
-	}
+	mod.DisplayName = utils.JoinPtr(" ", body.FirstName, body.LastName)
 	mod.ExternalID = body.ExternalID
 	mod.ExternalProvider = body.ExternalProvider
 	return nil
@@ -42,8 +39,19 @@ func (c *Converter) UserToOpenAPISearchResults(ctx context.Context, users []*mod
 			Email:     user.Email,
 			FirstName: user.FirstName,
 			LastName:  user.LastName,
-			Username:  user.Username,
 		}
 	}
 	return res, nil
+}
+
+func (c *Converter) AuthUserToOpenAPI(ctx context.Context, u *auth.User) (user openapi.CurrentUser, err error) {
+	user = openapi.CurrentUser{
+		Email:            u.Email,
+		DisplayName:      u.DisplayName,
+		ExternalProvider: u.ExternalProvider,
+		ExternalID:       u.ExternalID,
+		LoggedIn:         utils.ToPtr(u.IsAuthenticated()),
+		ProfileImageURL:  u.ProfileImageURL,
+	}
+	return
 }

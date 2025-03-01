@@ -19,7 +19,79 @@ func BuildUser(api *OpenAPI) {
 					Content: map[string]openapi.Content{
 						json: {
 							Schema: openapi.Schema{
-								Ref: "#/components/schemas/User",
+								Ref: api.AddSchema(
+									"CurrentUser",
+									&openapi.Schema{
+										Type: "object",
+										Properties: map[string]openapi.Schema{
+											"displayName": {
+												Type: "string",
+											},
+											"email": {
+												Type: "string",
+											},
+											"externalProvider": {
+												Type: "string",
+											},
+											"externalID": {
+												Type: "string",
+											},
+											"loggedIn": {
+												Type: "boolean",
+											},
+											"profileImageURL": {
+												Type:   "string",
+												Format: "uri",
+											},
+										},
+									},
+								),
+							},
+						},
+					},
+				},
+			},
+			InSecure: true,
+		},
+	)
+	api.AddEndpoint(
+		AddEndpointOpts{
+			Method:    "get",
+			Path:      "/api/v1/user/providers",
+			Operation: "GetUserProviders",
+			Tags:      []string{"User"},
+			InSecure:  true,
+			Responses: map[string]openapi.Response{
+				"200": {
+					Description: "Get user providers",
+					Content: map[string]openapi.Content{
+						json: {
+							Schema: openapi.Schema{
+								Type: "array",
+								Items: &openapi.Schema{
+									Ref: api.AddSchema(
+										"UserProvider", &openapi.Schema{
+											Type: "object",
+											Properties: map[string]openapi.Schema{
+												"provider": {
+													Type: "string",
+												},
+												"displayName": {
+													Type: "string",
+												},
+												"loginURL": {
+													Type:   "string",
+													Format: "uri",
+												},
+												"loginButtonImageURL": {
+													Type:   "string",
+													Format: "uri",
+												},
+											},
+											Required: []string{"provider", "displayName", "loginURL"},
+										},
+									),
+								},
 							},
 						},
 					},
@@ -53,21 +125,15 @@ func BuildUser(api *OpenAPI) {
 					"lastNameRegex": {
 						Type: "string",
 					},
-					"fullName": {
+					"displayName": {
 						Type: "string",
 					},
-					"fullNameRegex": {
+					"displayNameRegex": {
 						Type: "string",
 					},
 					"email": {
 						Type:   "string",
 						Format: "email",
-					},
-					"username": {
-						Type: "string",
-					},
-					"usernameRegex": {
-						Type: "string",
 					},
 					"fields": {
 						Type: "array",
@@ -93,9 +159,6 @@ func BuildUser(api *OpenAPI) {
 					"email": {
 						Type: "string",
 					},
-					"username": {
-						Type: "string",
-					},
 				},
 				Required: []string{"id"},
 			},
@@ -103,9 +166,6 @@ func BuildUser(api *OpenAPI) {
 				&openapi.Schema{
 					Type: "object",
 					Properties: map[string]openapi.Schema{
-						"username": {
-							Type: "string",
-						},
 						"firstName": {
 							Type: "string",
 						},

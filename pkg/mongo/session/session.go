@@ -123,7 +123,7 @@ func (m *MongoStore) Save(r *http.Request, w http.ResponseWriter, s *sessions.Se
 	l.Debug().
 		Key("session", s.ID).
 		Key("name", s.Name()).
-		Msgf("saving session with options %#v: %#v", s.Options, s.Values)
+		Msg("saving session")
 	if s.IsNew && s.Options.MaxAge > 0 {
 		l.Trace().Msg("insert")
 		err = m.insert(r.Context(), s)

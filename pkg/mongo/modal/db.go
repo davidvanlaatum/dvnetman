@@ -204,6 +204,21 @@ func listBy[T baseInterface](
 	return nil
 }
 
+func findOne[T baseInterface](
+	ctx context.Context, db *DBClient, filter interface{}, result *T, opts ...options.Lister[options.FindOneOptions],
+) error {
+	err := collection(db, *result).FindOne(ctx, filter, opts...).Decode(&result)
+	if err != nil {
+		result = nil
+		return errors.Wrap(err, "failed to find document")
+	}
+	(*result).GetBase().loaded, err = bson.Marshal(*result)
+	if err != nil {
+		return errors.Wrap(err, "failed to marshal document")
+	}
+	return nil
+}
+
 func collection(db *DBClient, obj baseInterface) mongoadapt.MongoCollection {
 	return db.db.Collection(obj.GetCollectionName())
 }

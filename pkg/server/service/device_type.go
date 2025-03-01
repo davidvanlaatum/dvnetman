@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"dvnetman/pkg/auth"
 	"dvnetman/pkg/mongo/modal"
 	"dvnetman/pkg/openapi"
 	"dvnetman/pkg/server/dto"
@@ -14,6 +15,9 @@ import (
 func (s *Service) CreateDeviceType(ctx context.Context, opts *openapi.CreateDeviceTypeOpts) (
 	res *openapi.Response, err error,
 ) {
+	if err = auth.RequirePerm(ctx, auth.PermissionWrite); err != nil {
+		return
+	}
 	c := dto.NewConverter(s.db)
 	mod := &modal.DeviceType{}
 	if err = c.UpdateDeviceTypeFromOpenAPI(ctx, opts.Body, mod); err != nil {
@@ -33,6 +37,9 @@ func (s *Service) CreateDeviceType(ctx context.Context, opts *openapi.CreateDevi
 func (s *Service) UpdateDeviceType(ctx context.Context, opts *openapi.UpdateDeviceTypeOpts) (
 	res *openapi.Response, err error,
 ) {
+	if err = auth.RequirePerm(ctx, auth.PermissionWrite); err != nil {
+		return
+	}
 	c := dto.NewConverter(s.db)
 	var mod *modal.DeviceType
 	if mod, err = s.db.GetDeviceType(ctx, (*modal.UUID)(&opts.Id)); err != nil {
@@ -55,6 +62,9 @@ func (s *Service) UpdateDeviceType(ctx context.Context, opts *openapi.UpdateDevi
 func (s *Service) GetDeviceType(ctx context.Context, opts *openapi.GetDeviceTypeOpts) (
 	res *openapi.Response, err error,
 ) {
+	if err = auth.RequirePerm(ctx, auth.PermissionRead); err != nil {
+		return
+	}
 	c := dto.NewConverter(s.db)
 	var d *modal.DeviceType
 	if d, err = s.db.GetDeviceType(ctx, (*modal.UUID)(&opts.Id)); err != nil {
@@ -74,6 +84,9 @@ func (s *Service) GetDeviceType(ctx context.Context, opts *openapi.GetDeviceType
 func (s *Service) ListDeviceTypes(ctx context.Context, opts *openapi.ListDeviceTypesOpts) (
 	res *openapi.Response, err error,
 ) {
+	if err = auth.RequirePerm(ctx, auth.PermissionRead); err != nil {
+		return
+	}
 	c := dto.NewConverter(s.db)
 	var page, size int64 = 0, 10
 	if opts.PerPage != nil && *opts.PerPage > 0 {
@@ -111,6 +124,9 @@ func (s *Service) ListDeviceTypes(ctx context.Context, opts *openapi.ListDeviceT
 func (s *Service) DeleteDeviceType(ctx context.Context, opts *openapi.DeleteDeviceTypeOpts) (
 	res *openapi.Response, err error,
 ) {
+	if err = auth.RequirePerm(ctx, auth.PermissionWrite); err != nil {
+		return
+	}
 	var d *modal.DeviceType
 	if d, err = s.db.GetDeviceType(ctx, (*modal.UUID)(&opts.Id)); err != nil {
 		return

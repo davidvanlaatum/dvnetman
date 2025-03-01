@@ -874,7 +874,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: '#/components/schemas/CurrentUser'
         "400":
           description: Bad request
           content:
@@ -901,8 +901,44 @@ paths:
                     message: Internal server error
       tags:
         - User
-      security:
-        - bearerAuth: []
+  /api/v1/user/providers:
+    get:
+      operationId: GetUserProviders
+      responses:
+        "200":
+          description: Get user providers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserProvider'
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/APIErrorModal'
+              example:
+                errors:
+                  - code: bad_request
+                    message: Bad request
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/APIErrorModal'
+              example:
+                errors:
+                  - code: internal_server_error
+                    message: Internal server error
+      tags:
+        - User
   /api/v1/user/search:
     post:
       operationId: listUsers
@@ -1127,6 +1163,22 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ErrorMessage'
+    CurrentUser:
+      type: object
+      properties:
+        displayName:
+          type: string
+        email:
+          type: string
+        externalID:
+          type: string
+        externalProvider:
+          type: string
+        loggedIn:
+          type: boolean
+        profileImageURL:
+          type: string
+          format: uri
     Device:
       type: object
       properties:
@@ -1514,13 +1566,28 @@ components:
           type: string
           format: date-time
           readOnly: true
-        username:
-          type: string
         version:
           type: integer
       required:
         - id
         - version
+    UserProvider:
+      type: object
+      properties:
+        displayName:
+          type: string
+        loginButtonImageURL:
+          type: string
+          format: uri
+        loginURL:
+          type: string
+          format: uri
+        provider:
+          type: string
+      required:
+        - provider
+        - displayName
+        - loginURL
     UserResult:
       type: object
       properties:
@@ -1533,13 +1600,15 @@ components:
           format: uuid
         lastName:
           type: string
-        username:
-          type: string
       required:
         - id
     UserSearchBody:
       type: object
       properties:
+        displayName:
+          type: string
+        displayNameRegex:
+          type: string
         email:
           type: string
           format: email
@@ -1551,10 +1620,6 @@ components:
           type: string
         firstNameRegex:
           type: string
-        fullName:
-          type: string
-        fullNameRegex:
-          type: string
         ids:
           type: array
           items:
@@ -1563,10 +1628,6 @@ components:
         lastName:
           type: string
         lastNameRegex:
-          type: string
-        username:
-          type: string
-        usernameRegex:
           type: string
     UserSearchResults:
       type: object

@@ -5,6 +5,7 @@ apis/UserApi.ts
 apis/index.ts
 index.ts
 models/APIErrorModal.ts
+models/CurrentUser.ts
 models/Device.ts
 models/DevicePort.ts
 models/DeviceResult.ts
@@ -23,6 +24,7 @@ models/ObjectReference.ts
 models/Stats.ts
 models/Tag.ts
 models/User.ts
+models/UserProvider.ts
 models/UserResult.ts
 models/UserSearchBody.ts
 models/UserSearchResults.ts

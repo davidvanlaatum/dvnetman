@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"dvnetman/pkg/auth"
 	"dvnetman/pkg/mongo/modal"
 	"dvnetman/pkg/openapi"
 	"dvnetman/pkg/server/dto"
@@ -14,6 +15,9 @@ import (
 func (s *Service) CreateManufacturer(ctx context.Context, opts *openapi.CreateManufacturerOpts) (
 	res *openapi.Response, err error,
 ) {
+	if err = auth.RequirePerm(ctx, auth.PermissionWrite); err != nil {
+		return
+	}
 	c := dto.NewConverter(s.db)
 	mod := &modal.Manufacturer{}
 	if err = c.UpdateManufacturerFromOpenAPI(ctx, opts.Body, mod); err != nil {
@@ -33,6 +37,9 @@ func (s *Service) CreateManufacturer(ctx context.Context, opts *openapi.CreateMa
 func (s *Service) UpdateManufacturer(ctx context.Context, opts *openapi.UpdateManufacturerOpts) (
 	res *openapi.Response, err error,
 ) {
+	if err = auth.RequirePerm(ctx, auth.PermissionWrite); err != nil {
+		return
+	}
 	c := dto.NewConverter(s.db)
 	var mod *modal.Manufacturer
 	if mod, err = s.db.GetManufacturer(ctx, (*modal.UUID)(&opts.Id)); err != nil {
@@ -55,6 +62,9 @@ func (s *Service) UpdateManufacturer(ctx context.Context, opts *openapi.UpdateMa
 func (s *Service) GetManufacturer(ctx context.Context, opts *openapi.GetManufacturerOpts) (
 	res *openapi.Response, err error,
 ) {
+	if err = auth.RequirePerm(ctx, auth.PermissionRead); err != nil {
+		return
+	}
 	c := dto.NewConverter(s.db)
 	var d *modal.Manufacturer
 	if d, err = s.db.GetManufacturer(ctx, (*modal.UUID)(&opts.Id)); err != nil {
@@ -74,6 +84,9 @@ func (s *Service) GetManufacturer(ctx context.Context, opts *openapi.GetManufact
 func (s *Service) ListManufacturers(ctx context.Context, opts *openapi.ListManufacturersOpts) (
 	res *openapi.Response, err error,
 ) {
+	if err = auth.RequirePerm(ctx, auth.PermissionRead); err != nil {
+		return
+	}
 	c := dto.NewConverter(s.db)
 	var page, size int64 = 0, 10
 	if opts.PerPage != nil && *opts.PerPage > 0 {
@@ -104,6 +117,9 @@ func (s *Service) ListManufacturers(ctx context.Context, opts *openapi.ListManuf
 func (s *Service) DeleteManufacturer(ctx context.Context, opts *openapi.DeleteManufacturerOpts) (
 	res *openapi.Response, err error,
 ) {
+	if err = auth.RequirePerm(ctx, auth.PermissionWrite); err != nil {
+		return
+	}
 	var d *modal.Manufacturer
 	if d, err = s.db.GetManufacturer(ctx, (*modal.UUID)(&opts.Id)); err != nil {
 		return

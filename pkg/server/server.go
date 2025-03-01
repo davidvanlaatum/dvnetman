@@ -124,16 +124,17 @@ func accessLogMiddleware(handler http.Handler) http.Handler {
 }
 
 func (s *Server) setupRouter() error {
-	s.service = service.NewService(s.client)
+	s.service = service.NewService(s.client, s.auth)
 	router := mux.NewRouter()
 	router.Use(handlers.RecoveryHandler(handlers.PrintRecoveryStack(true)))
+	router.Use(handlers.ProxyHeaders)
 	router.Use(otelhttp.NewMiddleware("http"))
 	router.Use(traceIDHeaderMiddleware)
 	router.Use(logger.Middleware(s.log))
 	router.Use(mongosession.Middleware())
+	router.Use(s.auth.AuthMiddleware)
 	router.Use(handlers.CORS(handlers.AllowedOrigins([]string{"*"})))
 	router.Use(accessLogMiddleware)
-	router.Use(handlers.ProxyHeaders)
 	s.auth.AddRoutes(router)
 	router.Methods("GET").Path("/api/openapi.yaml").HandlerFunc(s.openapiSpec).Name("OpenAPI")
 	apiRouter := openapi.NewRouter(s.service)
@@ -215,7 +216,7 @@ func (s *Server) setupAuth() (err error) {
 	); err != nil {
 		return errors.WithMessage(err, "failed to create session store")
 	}
-	s.auth = auth.NewAuth(s.log, s.store, s.config, s.service.ErrorHandler)
+	s.auth = auth.NewAuth(s.store, s.config, s.client, s.service.ErrorHandler)
 	if err = s.auth.Init(); err != nil {
 		return errors.WithMessage(err, "failed to initialize authentication")
 	}

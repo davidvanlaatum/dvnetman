@@ -8,30 +8,6 @@ charset = utf-8
 insert_final_newline = true
 trim_trailing_whitespace = true
 
-[{*.ts,*.tsx,*.js,*.jsx}]
-indent_style = space
-indent_size = 2
-end_of_line = lf
-charset = utf-8
-trim_trailing_whitespace = true
-insert_final_newline = true
-
-[{*.yml,*.yaml}]
-indent_style = space
-indent_size = 2
-end_of_line = lf
-charset = utf-8
-trim_trailing_whitespace = true
-insert_final_newline = true
-
-[*ignore]
-indent_style = space
-indent_size = 2
-end_of_line = lf
-charset = utf-8
-trim_trailing_whitespace = true
-insert_final_newline = true
-
 [{*.go,Makefile,.gitmodules,go.mod,go.sum}]
 indent_style = tab
 

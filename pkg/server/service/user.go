@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"dvnetman/pkg/auth"
 	"dvnetman/pkg/mongo/modal"
 	"dvnetman/pkg/openapi"
 	"dvnetman/pkg/server/dto"
@@ -12,6 +13,9 @@ import (
 )
 
 func (s *Service) CreateUser(ctx context.Context, opts *openapi.CreateUserOpts) (res *openapi.Response, err error) {
+	if err = auth.RequirePerm(ctx, auth.PermissionWrite); err != nil {
+		return
+	}
 	c := dto.NewConverter(s.db)
 	mod := &modal.User{}
 	if err = c.UpdateUserFromOpenAPI(ctx, opts.Body, mod); err != nil {
@@ -29,6 +33,9 @@ func (s *Service) CreateUser(ctx context.Context, opts *openapi.CreateUserOpts) 
 }
 
 func (s *Service) UpdateUser(ctx context.Context, opts *openapi.UpdateUserOpts) (res *openapi.Response, err error) {
+	if err = auth.RequirePerm(ctx, auth.PermissionWrite); err != nil {
+		return
+	}
 	c := dto.NewConverter(s.db)
 	var mod *modal.User
 	if mod, err = s.db.GetUser(ctx, (*modal.UUID)(&opts.Id)); err != nil {
@@ -49,6 +56,9 @@ func (s *Service) UpdateUser(ctx context.Context, opts *openapi.UpdateUserOpts) 
 }
 
 func (s *Service) DeleteUser(ctx context.Context, opts *openapi.DeleteUserOpts) (res *openapi.Response, err error) {
+	if err = auth.RequirePerm(ctx, auth.PermissionWrite); err != nil {
+		return
+	}
 	var d *modal.User
 	if d, err = s.db.GetUser(ctx, (*modal.UUID)(&opts.Id)); err != nil {
 		return
@@ -61,6 +71,9 @@ func (s *Service) DeleteUser(ctx context.Context, opts *openapi.DeleteUserOpts) 
 }
 
 func (s *Service) GetUser(ctx context.Context, opts *openapi.GetUserOpts) (res *openapi.Response, err error) {
+	if err = auth.RequirePerm(ctx, auth.PermissionRead); err != nil {
+		return
+	}
 	c := dto.NewConverter(s.db)
 	var d *modal.User
 	if d, err = s.db.GetUser(ctx, (*modal.UUID)(&opts.Id)); err != nil {
@@ -78,11 +91,38 @@ func (s *Service) GetUser(ctx context.Context, opts *openapi.GetUserOpts) (res *
 }
 
 func (s *Service) GetCurrentUser(ctx context.Context) (res *openapi.Response, err error) {
-	//TODO implement me
-	panic("implement me")
+	if u := auth.UserFromContext(ctx); u != nil {
+		c := dto.NewConverter(s.db)
+		res = &openapi.Response{}
+		if res.Object, err = c.AuthUserToOpenAPI(ctx, u); err != nil {
+			return
+		}
+		res.Code = http.StatusOK
+	}
+	return
+}
+
+func convertProvider(provider auth.Provider) *openapi.UserProvider {
+	return &openapi.UserProvider{
+		Provider:            provider.Provider,
+		DisplayName:         provider.DisplayName,
+		LoginURL:            provider.LoginURL,
+		LoginButtonImageURL: provider.LoginButtonImageURL,
+	}
+}
+
+func (s *Service) GetUserProviders(ctx context.Context) (res *openapi.Response, err error) {
+	res = &openapi.Response{
+		Code:   http.StatusOK,
+		Object: utils.MapTo(s.auth.AuthProviders(), convertProvider),
+	}
+	return
 }
 
 func (s *Service) ListUsers(ctx context.Context, opts *openapi.ListUsersOpts) (res *openapi.Response, err error) {
+	if err = auth.RequirePerm(ctx, auth.PermissionRead); err != nil {
+		return
+	}
 	c := dto.NewConverter(s.db)
 	var page, size int64 = 0, 10
 	if opts.PerPage != nil && *opts.PerPage > 0 {
@@ -95,10 +135,8 @@ func (s *Service) ListUsers(ctx context.Context, opts *openapi.ListUsersOpts) (r
 	search.regex("first_name_regex", opts.Body.FirstNameRegex, "i")
 	search.equalsStr("last_name", opts.Body.LastName)
 	search.regex("last_name_regex", opts.Body.LastNameRegex, "i")
-	search.equalsStr("full_name", opts.Body.FullName)
-	search.regex("full_name_regex", opts.Body.FullNameRegex, "i")
-	search.equalsStr("username", opts.Body.Username)
-	search.regex("username_regex", opts.Body.UsernameRegex, "i")
+	search.equalsStr("display_name", opts.Body.DisplayName)
+	search.regex("display_name_regex", opts.Body.DisplayNameRegex, "i")
 	findOpts := options.Find().SetLimit(size + 1).SetSkip(page * size)
 	if findOpts, err = s.setProjection(opts.Body.Fields, []string{"model", "manufacturer"}, findOpts); err != nil {
 		return

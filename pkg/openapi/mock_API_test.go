@@ -881,6 +881,64 @@ func (_c *MockAPI_GetUser_Call) RunAndReturn(run func(context.Context, *GetUserO
 	return _c
 }
 
+// GetUserProviders provides a mock function with given fields: ctx
+func (_m *MockAPI) GetUserProviders(ctx context.Context) (*Response, error) {
+	ret := _m.Called(ctx)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetUserProviders")
+	}
+
+	var r0 *Response
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context) (*Response, error)); ok {
+		return rf(ctx)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context) *Response); ok {
+		r0 = rf(ctx)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*Response)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = rf(ctx)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockAPI_GetUserProviders_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetUserProviders'
+type MockAPI_GetUserProviders_Call struct {
+	*mock.Call
+}
+
+// GetUserProviders is a helper method to define mock.On call
+//   - ctx context.Context
+func (_e *MockAPI_Expecter) GetUserProviders(ctx interface{}) *MockAPI_GetUserProviders_Call {
+	return &MockAPI_GetUserProviders_Call{Call: _e.mock.On("GetUserProviders", ctx)}
+}
+
+func (_c *MockAPI_GetUserProviders_Call) Run(run func(ctx context.Context)) *MockAPI_GetUserProviders_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context))
+	})
+	return _c
+}
+
+func (_c *MockAPI_GetUserProviders_Call) Return(res *Response, err error) *MockAPI_GetUserProviders_Call {
+	_c.Call.Return(res, err)
+	return _c
+}
+
+func (_c *MockAPI_GetUserProviders_Call) RunAndReturn(run func(context.Context) (*Response, error)) *MockAPI_GetUserProviders_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // ListDeviceTypes provides a mock function with given fields: ctx, opts
 func (_m *MockAPI) ListDeviceTypes(ctx context.Context, opts *ListDeviceTypesOpts) (*Response, error) {
 	ret := _m.Called(ctx, opts)

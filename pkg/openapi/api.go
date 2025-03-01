@@ -113,6 +113,7 @@ type API interface {
 	GetManufacturer(ctx context.Context, opts *GetManufacturerOpts) (res *Response, err error)
 	GetStats(ctx context.Context) (res *Response, err error)
 	GetUser(ctx context.Context, opts *GetUserOpts) (res *Response, err error)
+	GetUserProviders(ctx context.Context) (res *Response, err error)
 	ListDeviceTypes(ctx context.Context, opts *ListDeviceTypesOpts) (res *Response, err error)
 	ListDevices(ctx context.Context, opts *ListDevicesOpts) (res *Response, err error)
 	ListManufacturers(ctx context.Context, opts *ListManufacturersOpts) (res *Response, err error)
@@ -580,6 +581,15 @@ func (h *apiHandler) GetCurrentUser(w http.ResponseWriter, r *http.Request) {
 		h.service.WriteErrorHandler(w, r, err)
 	}
 }
+func (h *apiHandler) GetUserProviders(w http.ResponseWriter, r *http.Request) {
+	var res *Response
+	var err error
+	if res, err = h.service.GetUserProviders(r.Context()); err != nil {
+		h.service.ErrorHandler(w, r, err)
+	} else if err = res.Write(r, w); err != nil {
+		h.service.WriteErrorHandler(w, r, err)
+	}
+}
 func (h *apiHandler) ListUsers(w http.ResponseWriter, r *http.Request) {
 	var res *Response
 	var err error
@@ -709,6 +719,7 @@ func NewRouter(service API) (router *mux.Router) {
 	router.Methods("GET").Path("/api/v1/stats").Name("GetStats").HandlerFunc(handler.GetStats)
 	router.Methods("POST").Path("/api/v1/user").Name("CreateUser").HandlerFunc(handler.CreateUser)
 	router.Methods("GET").Path("/api/v1/user/current").Name("GetCurrentUser").HandlerFunc(handler.GetCurrentUser)
+	router.Methods("GET").Path("/api/v1/user/providers").Name("GetUserProviders").HandlerFunc(handler.GetUserProviders)
 	router.Methods("POST").Path("/api/v1/user/search").Name("ListUsers").HandlerFunc(handler.ListUsers)
 	router.Methods("DELETE").Path("/api/v1/user/{id}").Name("DeleteUser").HandlerFunc(handler.DeleteUser)
 	router.Methods("GET").Path("/api/v1/user/{id}").Name("GetUser").HandlerFunc(handler.GetUser)

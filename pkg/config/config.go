@@ -21,13 +21,15 @@ type MongoConfig struct {
 type OpenIDConnectAuthConfig struct {
 	ClientID         string   `yaml:"clientID"`
 	ClientSecret     string   `yaml:"clientSecret"`
-	Provider         string   `yaml:"provider"`
 	AutoDiscoveryURL string   `yaml:"autoDiscoveryURL"`
 	Scopes           []string `yaml:"scopes"`
 }
 
 type AuthConfig struct {
-	OpenIDConnect *OpenIDConnectAuthConfig `yaml:"openIDConnect"`
+	Provider       string                   `yaml:"provider"`
+	DisplayName    string                   `yaml:"displayName"`
+	LoginButtonURL *string                  `yaml:"loginButtonURL"`
+	OpenIDConnect  *OpenIDConnectAuthConfig `yaml:"openIDConnect"`
 }
 
 type SessionConfig struct {

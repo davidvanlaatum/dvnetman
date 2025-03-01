@@ -18,6 +18,5 @@ type User struct {
 	Password         *string    `json:"password,omitzero"`
 	Tags             []*Tag     `json:"tags,omitzero"`
 	Updated          *time.Time `json:"updated,omitzero"`
-	Username         *string    `json:"username,omitzero"`
 	Version          int        `json:"version"`
 }
