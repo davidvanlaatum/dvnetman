@@ -110,7 +110,7 @@ func (m *MongoStore) New(r *http.Request, name string) (*sessions.Session, error
 				return s, nil
 			}
 		} else {
-			logger.Ctx(r.Context()).Error().Msgf("failed to decode session %s starting new: %+v", c[0].Value, err)
+			logger.Error(r.Context()).Msgf("failed to decode session %s starting new: %+v", c[0].Value, err)
 		}
 	}
 	s.IsNew = true
@@ -119,22 +119,23 @@ func (m *MongoStore) New(r *http.Request, name string) (*sessions.Session, error
 }
 
 func (m *MongoStore) Save(r *http.Request, w http.ResponseWriter, s *sessions.Session) (err error) {
-	l := logger.Ctx(r.Context())
-	l.Debug().
+	ctx := r.Context()
+	l := logger.Ctx(ctx)
+	l.Debug(ctx).
 		Key("session", s.ID).
 		Key("name", s.Name()).
 		Msg("saving session")
 	if s.IsNew && s.Options.MaxAge > 0 {
-		l.Trace().Msg("insert")
-		err = m.insert(r.Context(), s)
+		l.Trace(ctx).Msg("insert")
+		err = m.insert(ctx, s)
 	} else if !s.IsNew && s.Options.MaxAge > 0 {
-		l.Trace().Msg("update")
-		err = m.update(r.Context(), s)
+		l.Trace(ctx).Msg("update")
+		err = m.update(ctx, s)
 	} else if !s.IsNew {
-		l.Trace().Msg("delete")
-		err = m.delete(r.Context(), s)
+		l.Trace(ctx).Msg("delete")
+		err = m.delete(ctx, s)
 	} else {
-		l.Trace().Msg("session is new and max age is 0, not saving")
+		l.Trace(ctx).Msg("session is new and max age is 0, not saving")
 	}
 	if err == nil {
 		var encoded string
@@ -157,7 +158,7 @@ func (m *MongoStore) Save(r *http.Request, w http.ResponseWriter, s *sessions.Se
 }
 
 func (m *MongoStore) insert(ctx context.Context, s *sessions.Session) (err error) {
-	logger.Ctx(ctx).Debug().Key("session", s.ID).Key("name", s.Name()).Msgf(
+	logger.Debug(ctx).Key("session", s.ID).Key("name", s.Name()).Msgf(
 		"inserting session %s: %#v", s.Name(), s.Values,
 	)
 	data := &sessionData{
@@ -178,7 +179,7 @@ func (m *MongoStore) insert(ctx context.Context, s *sessions.Session) (err error
 	if err = m.db.FindOne(ctx, bson.M{"_id": data.ID}).Decode(t); err != nil {
 		return errors.Wrap(err, "failed to load session")
 	}
-	logger.Ctx(ctx).Debug().Key("session", s.ID).Key("name", s.Name()).Msgf("inserted session: %+v", t)
+	logger.Debug(ctx).Key("session", s.ID).Key("name", s.Name()).Msgf("inserted session: %+v", t)
 	return
 }
 
@@ -189,7 +190,7 @@ func (m *MongoStore) update(ctx context.Context, s *sessions.Session) (err error
 	if changed, err = data.hasDataChangedAndUpdate(s.Values); err != nil {
 		return errors.Wrap(err, "failed to check data changes")
 	} else if !changed {
-		logger.Ctx(ctx).Debug().Key("session", s.ID).Msg("no changes in session")
+		logger.Debug(ctx).Key("session", s.ID).Msg("no changes in session")
 		now := time.Now()
 		if res, err = m.db.UpdateOne(
 			ctx, bson.M{"_id": data.ID}, bson.M{"$set": bson.M{"last_access": now}},
@@ -198,7 +199,7 @@ func (m *MongoStore) update(ctx context.Context, s *sessions.Session) (err error
 		}
 		data.LastAccess = now
 	} else {
-		logger.Ctx(ctx).Debug().Key("session", s.ID).Msg("changes in session")
+		logger.Debug(ctx).Key("session", s.ID).Msg("changes in session")
 		oldVersion := data.Version
 		data.Version++
 		if res, err = m.db.ReplaceOne(ctx, bson.M{"_id": data.ID, "version": oldVersion}, data); err != nil {

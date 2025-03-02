@@ -12,6 +12,7 @@ require (
 	github.com/gorilla/mux v1.8.1
 	github.com/gorilla/securecookie v1.1.2
 	github.com/gorilla/sessions v1.4.0
+	github.com/inhies/go-bytesize v0.0.0-20220417184213-4913239db9cf
 	github.com/markbates/goth v1.80.0
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.20.5

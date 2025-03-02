@@ -1,6 +1,7 @@
 package spec
 
 import (
+	"context"
 	"dvnetman/api/gen/openapi"
 	"dvnetman/pkg/file"
 	"dvnetman/pkg/logger"
@@ -11,7 +12,6 @@ import (
 
 type OpenAPI struct {
 	openapi.OpenAPI
-	log logger.Logger
 }
 
 const objectRef = "#/components/schemas/ObjectReference"
@@ -91,8 +91,8 @@ func (o *OpenAPI) AddSchema(name string, s *openapi.Schema) string {
 	return "#/components/schemas/" + name
 }
 
-func (o *OpenAPI) WriteOpenAPISpec(path string) (err error) {
-	o.log.Info().Key("path", path).Msg("Writing OpenAPI spec")
+func (o *OpenAPI) WriteOpenAPISpec(ctx context.Context, path string) (err error) {
+	logger.Info(ctx).Key("path", path).Msg("Writing OpenAPI spec")
 	var f file.FileUpdate
 	if f, err = file.NewFileUpdate(path, nil); err != nil {
 		return
@@ -113,7 +113,7 @@ func RegisterBuilder(f func(*OpenAPI)) {
 	builders = append(builders, f)
 }
 
-func NewSpec(log logger.Logger) *OpenAPI {
+func NewSpec() *OpenAPI {
 	api := &OpenAPI{
 		OpenAPI: openapi.OpenAPI{
 			OpenAPI: "3.1.0",
@@ -132,7 +132,6 @@ func NewSpec(log logger.Logger) *OpenAPI {
 				Schemas: map[string]*openapi.Schema{},
 			},
 		},
-		log: log,
 	}
 	errorMsg := api.AddSchema(
 		"ErrorMessage", &openapi.Schema{

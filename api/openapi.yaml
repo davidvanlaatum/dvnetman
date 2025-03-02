@@ -1525,6 +1525,11 @@ components:
           type: integer
         userCount:
           type: integer
+      required:
+        - deviceCount
+        - deviceTypeCount
+        - manufacturerCount
+        - userCount
     Tag:
       type: object
       properties:

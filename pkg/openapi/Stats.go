@@ -3,8 +3,8 @@
 package openapi
 
 type Stats struct {
-	DeviceCount       *int `json:"deviceCount,omitzero"`
-	DeviceTypeCount   *int `json:"deviceTypeCount,omitzero"`
-	ManufacturerCount *int `json:"manufacturerCount,omitzero"`
-	UserCount         *int `json:"userCount,omitzero"`
+	DeviceCount       int `json:"deviceCount"`
+	DeviceTypeCount   int `json:"deviceTypeCount"`
+	ManufacturerCount int `json:"manufacturerCount"`
+	UserCount         int `json:"userCount"`
 }

@@ -273,9 +273,11 @@ func (o *OpenAPI) AddObject(opts AddObjectOpts) {
 			},
 		},
 	)
-	o.Components.Schemas["Stats"].Properties[opts.Name+"Count"] = openapi.Schema{
+	stats := o.Components.Schemas["Stats"]
+	stats.Properties[opts.Name+"Count"] = openapi.Schema{
 		Type: "integer",
 	}
+	stats.Required = append(stats.Required, opts.Name+"Count")
 	for k, v := range opts.Additional {
 		o.AddSchema(k, v)
 	}

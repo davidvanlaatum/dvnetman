@@ -89,7 +89,7 @@ func (a *Auth) AddRoutes(router *mux.Router) {
 }
 
 func (a *Auth) logout(w http.ResponseWriter, r *http.Request) {
-	logger.Ctx(r.Context()).Info().Msg("Logging out")
+	logger.Info(r.Context()).Msg("Logging out")
 	if err := gothic.Logout(w, r); err != nil {
 		a.errorHandler(w, r, errors.Wrap(err, "failed to logout"))
 		return
@@ -100,7 +100,7 @@ func (a *Auth) logout(w http.ResponseWriter, r *http.Request) {
 	} else {
 		delete(s.Values, userSessionKey)
 	}
-	logger.Ctx(r.Context()).Info().Msgf("headers %+v", w.Header())
+	logger.Info(r.Context()).Msgf("headers %+v", w.Header())
 	http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 }
 
@@ -129,7 +129,7 @@ func (a *Auth) oAuthBeginHandler(w http.ResponseWriter, r *http.Request) {
 			a.errorHandler(w, r, errors.Wrap(err, "failed to get provider name"))
 			return
 		}
-		logger.Ctx(r.Context()).Debug().Key("returnTo", s.Values[returnToSessionKey]).Msg("Saved returnTo")
+		logger.Debug(r.Context()).Key("returnTo", s.Values[returnToSessionKey]).Msg("Saved returnTo")
 	}
 	gothic.BeginAuthHandler(w, r)
 }
@@ -220,11 +220,11 @@ func (a *Auth) oAuthCallbackHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if returnTo, ok := s.Values[returnToSessionKey].(string); ok {
-		logger.Ctx(r.Context()).Debug().Key("returnTo", returnTo).Msg("Redirecting")
+		logger.Debug(r.Context()).Key("returnTo", returnTo).Msg("Redirecting")
 		delete(s.Values, returnToSessionKey)
 		http.Redirect(w, r, returnTo, http.StatusTemporaryRedirect)
 	} else {
-		logger.Ctx(r.Context()).Debug().Msg("Redirecting to /")
+		logger.Debug(r.Context()).Msg("Redirecting to /")
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 	}
 }
@@ -250,7 +250,7 @@ func (a *Auth) GetUser(r *http.Request) (user *User, err error) {
 		return
 	}
 	if s.Values[userSessionKey] == nil {
-		logger.Ctx(r.Context()).Debug().Msg("No user in session")
+		logger.Debug(r.Context()).Msg("No user in session")
 		user = &User{
 			ID: anonymousUserId,
 		}
@@ -263,7 +263,7 @@ func (a *Auth) GetUser(r *http.Request) (user *User, err error) {
 		err = errors.Wrap(err, "failed to decode user")
 	}
 	if user.IsAuthenticated() && user.OAuthUser.ExpiresAt.Before(time.Now().Add(time.Minute)) {
-		logger.Ctx(r.Context()).Debug().Msg("Time to refresh token")
+		logger.Debug(r.Context()).Msg("Time to refresh token")
 		var provider goth.Provider
 		if provider, err = goth.GetProvider(user.OAuthUser.Provider); err != nil {
 			return nil, errors.Wrap(err, "failed to get provider")
@@ -279,7 +279,7 @@ func (a *Auth) GetUser(r *http.Request) (user *User, err error) {
 			return nil, errors.Wrap(err, "failed to set user in session")
 		}
 	} else {
-		logger.Ctx(r.Context()).Debug().Msgf("user token expires in %v", time.Until(user.OAuthUser.ExpiresAt))
+		logger.Debug(r.Context()).Msgf("user token expires in %v", time.Until(user.OAuthUser.ExpiresAt))
 	}
 	return
 }
@@ -288,7 +288,7 @@ func (a *Auth) AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
 			if u, err := a.GetUser(r); err != nil {
-				logger.Ctx(r.Context()).Debug().Err(err).Msg("No user in session")
+				logger.Debug(r.Context()).Err(err).Msg("No user in session")
 			} else if u != nil {
 				ctx := context.WithValue(r.Context(), userContextKey, u)
 				if u.IsAuthenticated() {

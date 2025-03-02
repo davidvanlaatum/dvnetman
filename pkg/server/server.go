@@ -4,6 +4,7 @@ import (
 	"context"
 	"dvnetman/api"
 	"dvnetman/pkg/auth"
+	"dvnetman/pkg/cache"
 	"dvnetman/pkg/config"
 	"dvnetman/pkg/logger"
 	"dvnetman/pkg/mongo/adapt"
@@ -38,17 +39,16 @@ type Server struct {
 	service    *service.Service
 	config     *config.Config
 	db         *mongo.Client
-	log        logger.Logger
 	store      sessions.Store
 	auth       *auth.Auth
 	otel       *otelServer
 	client     *modal.DBClient
+	cache      cache.Pool
 }
 
-func NewServer(cfg *config.Config, log logger.Logger) *Server {
+func NewServer(cfg *config.Config) *Server {
 	return &Server{
 		config: cfg,
-		log:    log,
 	}
 }
 
@@ -62,7 +62,7 @@ func (s *Server) startHTTP(ctx context.Context, cancel context.CancelCauseFunc) 
 		ReadTimeout: 5 * time.Second,
 	}
 	for _, address := range s.config.Listen {
-		s.log.Info().Key("address", address.Addr).Msg("Listening")
+		logger.Info(ctx).Key("address", address.Addr).Msg("Listening")
 		if l, err := net.Listen("tcp", address.Addr); err != nil {
 			return err
 		} else {
@@ -101,11 +101,11 @@ func (s *Server) connectToMongo(ctx context.Context) (err error) {
 	return
 }
 
-func (s *Server) disconnectFromMongo() {
+func (s *Server) disconnectFromMongo(ctx context.Context) {
 	if s.db != nil {
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 		defer cancel()
-		s.log.Info().Msg("disconnecting from MongoDB")
+		logger.Info(ctx).Msg("disconnecting from MongoDB")
 		_ = s.db.Disconnect(ctx)
 	}
 }
@@ -114,7 +114,7 @@ func accessLogMiddleware(handler http.Handler) http.Handler {
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
 			m := httpsnoop.CaptureMetrics(handler, w, r)
-			logger.Ctx(r.Context()).Info().
+			logger.Info(r.Context()).
 				Key("code", m.Code).
 				Key("duration", m.Duration).
 				Key("written", m.Written).
@@ -123,14 +123,14 @@ func accessLogMiddleware(handler http.Handler) http.Handler {
 	)
 }
 
-func (s *Server) setupRouter() error {
-	s.service = service.NewService(s.client, s.auth)
+func (s *Server) setupRouter(ctx context.Context) error {
+	s.service = service.NewService(ctx, s.client, s.auth, s.cache)
 	router := mux.NewRouter()
 	router.Use(handlers.RecoveryHandler(handlers.PrintRecoveryStack(true)))
 	router.Use(handlers.ProxyHeaders)
 	router.Use(otelhttp.NewMiddleware("http"))
 	router.Use(traceIDHeaderMiddleware)
-	router.Use(logger.Middleware(s.log))
+	router.Use(logger.Middleware())
 	router.Use(mongosession.Middleware())
 	router.Use(s.auth.AuthMiddleware)
 	router.Use(handlers.CORS(handlers.AllowedOrigins([]string{"*"})))
@@ -146,7 +146,7 @@ func (s *Server) setupRouter() error {
 			if _, ok := route.GetHandler().(*mux.Router); ok {
 				return nil
 			}
-			l := s.log.Info()
+			l := logger.Info(ctx)
 			if methods, err := route.GetMethods(); err == nil {
 				l.Key("methods", methods)
 			}
@@ -160,17 +160,17 @@ func (s *Server) setupRouter() error {
 		},
 	)
 	s.router = router
-	s.otel.attach(router)
+	s.otel.attach(ctx, router)
 	return nil
 }
 
 func (s *Server) notFound(w http.ResponseWriter, r *http.Request) {
-	logger.Ctx(r.Context()).Warn().Key("path", r.URL.Path).Msg("Not found")
+	logger.Warn(r.Context()).Key("path", r.URL.Path).Msg("Not found")
 	http.Error(w, "Not found", http.StatusNotFound)
 }
 
 func (s *Server) methodNotAllowed(w http.ResponseWriter, r *http.Request) {
-	logger.Ctx(r.Context()).Warn().Key("path", r.URL.Path).Key("method", r.Method).Msg("Method not allowed")
+	logger.Warn(r.Context()).Key("path", r.URL.Path).Key("method", r.Method).Msg("Method not allowed")
 	http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 }
 
@@ -199,16 +199,16 @@ func (s *Server) getMongoDatabase() mongoadapt.MongoDatabase {
 	return mongoadapt.AdapterMongoDatabase(s.db.Database(s.config.Mongo.Database))
 }
 
-func (s *Server) setupAuth() (err error) {
+func (s *Server) setupAuth(ctx context.Context) (err error) {
 	hashKey := s.config.Session.HashKeyBytes()
 	if hashKey == nil {
 		hashKey = securecookie.GenerateRandomKey(64)
-		s.log.Info().Msgf("Generated hash key: %v", base64.StdEncoding.EncodeToString(hashKey))
+		logger.Info(ctx).Msgf("Generated hash key: %v", base64.StdEncoding.EncodeToString(hashKey))
 	}
 	blockKey := s.config.Session.BlockKeyBytes()
 	if blockKey == nil {
 		blockKey = securecookie.GenerateRandomKey(32)
-		s.log.Info().Msgf("Generated block key: %v", base64.StdEncoding.EncodeToString(blockKey))
+		logger.Info(ctx).Msgf("Generated block key: %v", base64.StdEncoding.EncodeToString(blockKey))
 	}
 	secureCookie := securecookie.New(hashKey, blockKey)
 	if s.store, err = mongosession.NewMongoStore(
@@ -223,25 +223,32 @@ func (s *Server) setupAuth() (err error) {
 	return nil
 }
 
-func (s *Server) stopHTTP() {
+func (s *Server) stopHTTP(ctx context.Context) {
 	if s.httpServer != nil {
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 		defer cancel()
-		s.log.Info().Msg("shutting down HTTP server")
+		logger.Info(ctx).Msg("shutting down HTTP server")
 		if err := s.httpServer.Shutdown(ctx); err != nil {
-			s.log.Error().Err(err).Msg("Failed to shutdown HTTP server")
+			logger.Error(ctx).Err(err).Msg("Failed to shutdown HTTP server")
 		}
 	}
 }
 
 func (s *Server) setupOtel(ctx context.Context) (err error) {
-	s.otel = &otelServer{
-		log: s.log,
-	}
+	s.otel = &otelServer{}
 	if err = s.otel.setup(ctx); err != nil {
 		return errors.WithMessage(err, "failed to setup OpenTelemetry")
 	}
 	return nil
+}
+
+func (s *Server) setupCache(ctx context.Context) (err error) {
+	cfg := s.config.Cache
+	if cfg == "" {
+		cfg = "memory://?size=10MB&ttl=1h"
+	}
+	s.cache, err = cache.NewPool(ctx, cfg)
+	return
 }
 
 func (s *Server) Start(ctx context.Context) (err error) {
@@ -250,21 +257,29 @@ func (s *Server) Start(ctx context.Context) (err error) {
 	if err = s.setupOtel(c); err != nil {
 		return errors.WithMessage(err, "failed to setup OpenTelemetry")
 	}
-	defer s.otel.shutdown(context.Background())
+	defer s.otel.shutdown(context.WithoutCancel(ctx))
+	if err = s.setupCache(c); err != nil {
+		return errors.WithMessage(err, "failed to setup cache")
+	}
+	defer func() {
+		if err := s.cache.Shutdown(context.WithoutCancel(ctx)); err != nil {
+			logger.Error(ctx).Err(err).Msg("failed to shutdown cache")
+		}
+	}()
 	if err = s.connectToMongo(c); err != nil {
 		return errors.WithMessage(err, "failed to connect to MongoDB")
 	}
-	defer s.disconnectFromMongo()
-	if err = s.setupAuth(); err != nil {
+	defer s.disconnectFromMongo(context.WithoutCancel(ctx))
+	if err = s.setupAuth(ctx); err != nil {
 		return errors.WithMessage(err, "failed to setup authentication")
 	}
-	if err = s.setupRouter(); err != nil {
+	if err = s.setupRouter(ctx); err != nil {
 		return errors.WithMessage(err, "failed to setup HTTP router")
 	}
 	if err = s.startHTTP(c, cancel); err != nil {
 		return errors.WithMessage(err, "failed to start HTTP server")
 	}
-	defer s.stopHTTP()
+	defer s.stopHTTP(context.WithoutCancel(ctx))
 	<-ctx.Done()
 	return ctx.Err()
 }

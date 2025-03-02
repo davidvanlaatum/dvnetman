@@ -62,6 +62,7 @@ type Config struct {
 	Mongo   MongoConfig
 	Auth    []AuthConfig
 	Session SessionConfig
+	Cache   string
 	url     *url.URL
 }
 

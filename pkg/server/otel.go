@@ -23,7 +23,6 @@ type otelServer struct {
 	otelPropagator    propagation.TextMapPropagator
 	otelExporter      sdktrace.SpanExporter
 	otelTraceProvider *sdktrace.TracerProvider
-	log               logger.Logger
 	metricExporter    *prometheus.Exporter
 	meterProvider     *metric.MeterProvider
 }
@@ -76,7 +75,7 @@ func (o *otelServer) setup(ctx context.Context) (err error) {
 	return nil
 }
 
-func (o *otelServer) attach(router *mux.Router) {
+func (o *otelServer) attach(ctx context.Context, router *mux.Router) {
 	routers := map[*mux.Router]struct{}{}
 	_ = router.Walk(
 		func(route *mux.Route, router *mux.Router, ancestors []*mux.Route) (_ error) {
@@ -87,7 +86,7 @@ func (o *otelServer) attach(router *mux.Router) {
 			return
 		},
 	)
-	o.log.Debug().Msgf("Attached route info middleware to %v routers", len(routers))
+	logger.Debug(ctx).Msgf("Attached route info middleware to %v routers", len(routers))
 }
 
 func (o *otelServer) routeInfo(handler http.Handler) http.Handler {
@@ -108,7 +107,7 @@ func (o *otelServer) routeInfo(handler http.Handler) http.Handler {
 			}
 
 			if path, err := route.GetPathTemplate(); err != nil {
-				o.log.Error().Msgf("Failed to get path template: %v", err)
+				logger.Error(r.Context()).Err(err).Msgf("Failed to get path template")
 			} else {
 				span.SetAttributes(semconv.HTTPRouteKey.String(path))
 				if !nameSet {
@@ -124,16 +123,16 @@ func (o *otelServer) routeInfo(handler http.Handler) http.Handler {
 
 func (o *otelServer) shutdown(ctx context.Context) {
 	if err := o.otelTraceProvider.ForceFlush(ctx); err != nil {
-		o.log.Error().Msgf("Failed to flush OTLP sdktrace provider: %v", err)
+		logger.Error(ctx).Msgf("Failed to flush OTLP sdktrace provider: %v", err)
 	}
 	if err := o.otelExporter.Shutdown(ctx); err != nil {
-		o.log.Error().Msgf("Failed to shutdown OTLP sdktrace exporter: %v", err)
+		logger.Error(ctx).Msgf("Failed to shutdown OTLP sdktrace exporter: %v", err)
 	}
 	if err := o.otelTraceProvider.Shutdown(ctx); err != nil {
-		o.log.Error().Msgf("Failed to shutdown OTLP sdktrace provider: %v", err)
+		logger.Error(ctx).Msgf("Failed to shutdown OTLP sdktrace provider: %v", err)
 	}
 	if err := o.meterProvider.Shutdown(ctx); err != nil {
-		o.log.Error().Msgf("Failed to shutdown Prometheus meter provider: %v", err)
+		logger.Error(ctx).Msgf("Failed to shutdown Prometheus meter provider: %v", err)
 	}
 }
 

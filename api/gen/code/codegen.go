@@ -3,6 +3,7 @@ package code
 import (
 	"bufio"
 	"bytes"
+	"context"
 	"dvnetman/api/gen/openapi"
 	"dvnetman/pkg/file"
 	"dvnetman/pkg/logger"
@@ -29,11 +30,10 @@ type CodeGen struct {
 	files     map[string]*File
 	funcs     map[string]*APIFunc
 	funcOrder []*APIFunc
-	log       logger.Logger
 }
 
-func NewCodeGen(log logger.Logger) *CodeGen {
-	return &CodeGen{log: log}
+func NewCodeGen() *CodeGen {
+	return &CodeGen{}
 }
 
 func (c *CodeGen) newFile(name string) *File {
@@ -48,11 +48,11 @@ func (c *CodeGen) newFile(name string) *File {
 	return c.files[name]
 }
 
-func (c *CodeGen) Generate(api *openapi.OpenAPI) (err error) {
-	if err = c.generateModals(api); err != nil {
+func (c *CodeGen) Generate(ctx context.Context, api *openapi.OpenAPI) (err error) {
+	if err = c.generateModals(ctx, api); err != nil {
 		return
 	}
-	if err = c.generateAPI(api); err != nil {
+	if err = c.generateAPI(ctx, api); err != nil {
 		return
 	}
 	for k, v := range c.modals {
@@ -127,10 +127,10 @@ func (c *CodeGen) generateAPIMethod(path, method string, e openapi.Endpoint) (er
 	return
 }
 
-func (c *CodeGen) generateAPI(api *openapi.OpenAPI) (err error) {
+func (c *CodeGen) generateAPI(ctx context.Context, api *openapi.OpenAPI) (err error) {
 	c.funcs = map[string]*APIFunc{}
 	for _, v := range api.Paths.Sorted() {
-		c.log.Info().Msgf("Generating API for %s", v.Key)
+		logger.Info(ctx).Msgf("Generating API for %s", v.Key)
 		for _, m := range v.Value {
 			if err = c.generateAPIMethod(v.Key, m.Key, m.Value); err != nil {
 				return
@@ -573,12 +573,12 @@ func (c *CodeGen) isBasicType(t *GoType) bool {
 	return false
 }
 
-func (c *CodeGen) generateModals(api *openapi.OpenAPI) (err error) {
+func (c *CodeGen) generateModals(ctx context.Context, api *openapi.OpenAPI) (err error) {
 	c.modals = map[string]*Modal{}
 	c.enums = map[string]*Enum{}
 
 	for _, v := range utils.MapSortedByKey(api.Components.Schemas, utils.MapSortedByKeyString) {
-		c.log.Info().Msgf("Generating modal for %s", v.Key)
+		logger.Info(ctx).Msgf("Generating modal for %s", v.Key)
 		x := &Modal{name: v.Key}
 
 		for _, p := range utils.MapSortedByKey(v.Value.Properties, utils.MapSortedByKeyString) {
@@ -751,7 +751,7 @@ func (c *CodeGen) isGeneratedFile(path string) (ok bool, err error) {
 	return
 }
 
-func (c *CodeGen) removeOldFiles(path string, files map[string]string) (err error) {
+func (c *CodeGen) removeOldFiles(ctx context.Context, path string, files map[string]string) (err error) {
 	var dir []os.DirEntry
 	if dir, err = os.ReadDir(path); err != nil {
 		return errors.Wrap(err, "failed to read directory")
@@ -764,7 +764,7 @@ func (c *CodeGen) removeOldFiles(path string, files map[string]string) (err erro
 			if ok, err = c.isGeneratedFile(filepath.Join(path, entry.Name())); err != nil {
 				return
 			} else if ok {
-				c.log.Info().Msgf("Removing file %s", entry.Name())
+				logger.Info(ctx).Msgf("Removing file %s", entry.Name())
 				if err = os.Remove(filepath.Join(path, entry.Name())); err != nil {
 					return errors.Wrap(err, "failed to remove file")
 				}
@@ -774,10 +774,10 @@ func (c *CodeGen) removeOldFiles(path string, files map[string]string) (err erro
 	return
 }
 
-func (c *CodeGen) WriteFiles(path string) (err error) {
+func (c *CodeGen) WriteFiles(ctx context.Context, path string) (err error) {
 	files := map[string]string{}
 	for _, v := range utils.MapSortedByKey(c.files, utils.MapSortedByKeyString) {
-		c.log.Info().Msgf("Rendering file %s.go", v.Key)
+		logger.Info(ctx).Msgf("Rendering file %s.go", v.Key)
 		buf := &bytes.Buffer{}
 		if err = v.Value.Render(buf); err != nil {
 			return
@@ -785,7 +785,7 @@ func (c *CodeGen) WriteFiles(path string) (err error) {
 		files[v.Key+".go"] = buf.String()
 	}
 	for _, v := range utils.MapSortedByKey(files, utils.MapSortedByKeyString) {
-		c.log.Info().Msgf("Writing file %s", v.Key)
+		logger.Info(ctx).Msgf("Writing file %s", v.Key)
 		func() {
 			var f file.FileUpdate
 			if f, err = file.NewFileUpdate(filepath.Join(path, v.Key), file.OnlyGenerated); err != nil {
@@ -798,6 +798,6 @@ func (c *CodeGen) WriteFiles(path string) (err error) {
 			return
 		}
 	}
-	err = c.removeOldFiles(path, files)
+	err = c.removeOldFiles(ctx, path, files)
 	return
 }

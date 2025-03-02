@@ -5,18 +5,19 @@ import (
 )
 
 type Logger interface {
-	Trace() Event
-	Info() Event
-	Debug() Event
-	Warn() Event
-	Error() Event
-	Fatal() Event
+	Trace(ctx context.Context) Event
+	Info(ctx context.Context) Event
+	Debug(ctx context.Context) Event
+	Warn(ctx context.Context) Event
+	Error(ctx context.Context) Event
+	Fatal(ctx context.Context) Event
 	SubLogger() SubLogger
 	Context(ctx context.Context) context.Context
 }
 
 type SubLogger interface {
 	Key(key string, value interface{}) SubLogger
+	KeyProvider(provider func(ctx context.Context) map[string]interface{}) SubLogger
 	Logger() Logger
 }
 
@@ -26,9 +27,10 @@ type Driver interface {
 }
 
 type logger struct {
-	drivers []Driver
-	level   Level
-	keys    map[string]interface{}
+	drivers      []Driver
+	level        Level
+	keys         map[string]interface{}
+	keyProviders []func(ctx context.Context) map[string]interface{}
 }
 
 func NewLogger(level Level, drivers ...Driver) Logger {
@@ -54,51 +56,65 @@ func (l *logger) HelperFuncs() (rt []func()) {
 	return rt
 }
 
-func (l *logger) Trace() Event {
+func (l *logger) getKeys(ctx context.Context) map[string]interface{} {
+	keys := make(map[string]interface{}, len(l.keys))
+	for k, v := range l.keys {
+		keys[k] = v
+	}
+	for _, provider := range l.keyProviders {
+		for k, v := range provider(ctx) {
+			keys[k] = v
+		}
+	}
+	return keys
+}
+
+func (l *logger) Trace(ctx context.Context) Event {
 	if l.level <= LevelTrace {
-		return NewEvent(l, LevelTrace, l.keys)
+		return NewEvent(l, LevelTrace, l.getKeys(ctx))
 	}
 	return &noOpEvent{}
 }
 
-func (l *logger) Debug() Event {
+func (l *logger) Debug(ctx context.Context) Event {
 	if l.level <= LevelDebug {
-		return NewEvent(l, LevelDebug, l.keys)
+		return NewEvent(l, LevelDebug, l.getKeys(ctx))
 	}
 	return &noOpEvent{}
 }
 
-func (l *logger) Info() Event {
+func (l *logger) Info(ctx context.Context) Event {
 	if l.level <= LevelInfo {
-		return NewEvent(l, LevelInfo, l.keys)
+		return NewEvent(l, LevelInfo, l.getKeys(ctx))
 	}
 	return &noOpEvent{}
 }
 
-func (l *logger) Warn() Event {
+func (l *logger) Warn(ctx context.Context) Event {
 	if l.level <= LevelWarn {
-		return NewEvent(l, LevelWarn, l.keys)
+		return NewEvent(l, LevelWarn, l.getKeys(ctx))
 	}
 	return &noOpEvent{}
 }
 
-func (l *logger) Error() Event {
+func (l *logger) Error(ctx context.Context) Event {
 	if l.level <= LevelError {
-		return NewEvent(l, LevelError, l.keys)
+		return NewEvent(l, LevelError, l.getKeys(ctx))
 	}
 	return &noOpEvent{}
 }
 
-func (l *logger) Fatal() Event {
+func (l *logger) Fatal(ctx context.Context) Event {
 	if l.level <= LevelFatal {
-		return NewEvent(l, LevelFatal, l.keys)
+		return NewEvent(l, LevelFatal, l.getKeys(ctx))
 	}
 	return &noOpEvent{}
 }
 
 type subLogger struct {
-	logger *logger
-	keys   map[string]interface{}
+	logger       *logger
+	keys         map[string]interface{}
+	keyProviders []func(ctx context.Context) map[string]interface{}
 }
 
 func (s *subLogger) Key(key string, value interface{}) SubLogger {
@@ -106,19 +122,31 @@ func (s *subLogger) Key(key string, value interface{}) SubLogger {
 	return s
 }
 
+func (s *subLogger) KeyProvider(provider func(ctx context.Context) map[string]interface{}) SubLogger {
+	s.keyProviders = append(s.keyProviders, provider)
+	return s
+}
+
 func (s *subLogger) Logger() Logger {
 	return &logger{
-		drivers: s.logger.drivers,
-		level:   s.logger.level,
-		keys:    s.keys,
+		drivers:      s.logger.drivers,
+		level:        s.logger.level,
+		keys:         s.keys,
+		keyProviders: s.keyProviders,
 	}
 }
 
 func (l *logger) SubLogger() SubLogger {
-	return &subLogger{
-		logger: l,
-		keys:   map[string]interface{}{},
+	s := &subLogger{
+		logger:       l,
+		keys:         make(map[string]interface{}, len(l.keys)),
+		keyProviders: make([]func(ctx context.Context) map[string]interface{}, len(l.keyProviders)),
 	}
+	for k, v := range l.keys {
+		s.keys[k] = v
+	}
+	copy(s.keyProviders, l.keyProviders)
+	return s
 }
 
 type contextKeyType struct{}
@@ -140,17 +168,26 @@ func Ctx(ctx context.Context) Logger {
 	panic("logger not found in context")
 }
 
-//func LogFromContext(ctx context.Context, logger Logger) Logger {
-//	span := trace.SpanFromContext(ctx)
-//	if !span.SpanContext().IsValid() {
-//		return logger
-//	}
-//	prefix := span.SpanContext().TraceID().String() + "/" + span.SpanContext().SpanID().String()
-//	if sl, ok := logger.(SubLogger); ok {
-//		return sl.GetSubLogger(prefix)
-//	}
-//	if sl, ok := logger.(*log.Logger); ok {
-//		return log.New(sl.Writer(), prefix+" ", sl.Flags())
-//	}
-//	return logger
-//}
+func Trace(ctx context.Context) Event {
+	return Ctx(ctx).Trace(ctx)
+}
+
+func Debug(ctx context.Context) Event {
+	return Ctx(ctx).Debug(ctx)
+}
+
+func Info(ctx context.Context) Event {
+	return Ctx(ctx).Info(ctx)
+}
+
+func Warn(ctx context.Context) Event {
+	return Ctx(ctx).Warn(ctx)
+}
+
+func Error(ctx context.Context) Event {
+	return Ctx(ctx).Error(ctx)
+}
+
+func Fatal(ctx context.Context) Event {
+	return Ctx(ctx).Fatal(ctx)
+}

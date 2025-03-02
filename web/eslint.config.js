@@ -7,7 +7,7 @@ import eslintPluginPrettier from 'eslint-plugin-prettier'
 import react from 'eslint-plugin-react'
 
 export default tseslint.config(
-  { ignores: ['dist', 'src/api', 'coverage'] },
+  { ignores: ['dist', 'src/api', 'coverage', 'test-results', 'playwright-report', 'node_modules'] },
   {
     extends: [js.configs.recommended, ...tseslint.configs.strictTypeChecked, ...tseslint.configs.stylisticTypeChecked],
     files: ['**/*.{ts,tsx}'],

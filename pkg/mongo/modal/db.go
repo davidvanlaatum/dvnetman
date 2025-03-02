@@ -89,7 +89,7 @@ func (db *DBClient) Init(ctx context.Context) (err error) {
 
 func (db *DBClient) initCollection(ctx context.Context, info *CollectionInfo, exists bool) (err error) {
 	if !exists {
-		logger.Ctx(ctx).Info().Key("collection", info.Name).Msg("Creating collection")
+		logger.Info(ctx).Key("collection", info.Name).Msg("Creating collection")
 		if err = db.db.CreateCollection(ctx, info.Name); err != nil {
 			return errors.Wrapf(err, "failed to create collection %s", info.Name)
 		}
@@ -113,7 +113,7 @@ func (db *DBClient) initCollection(ctx context.Context, info *CollectionInfo, ex
 			if name, err = col.Indexes().CreateOne(ctx, index); err != nil {
 				return errors.Wrapf(err, "failed to create index for collection %s", info.Name)
 			}
-			logger.Ctx(ctx).Info().Key("collection", info.Name).Key("index", name).Msg("Created index")
+			logger.Info(ctx).Key("collection", info.Name).Key("index", name).Msg("Created index")
 		}
 	}
 	return nil

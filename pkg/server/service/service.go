@@ -1,7 +1,9 @@
 package service
 
 import (
+	"context"
 	"dvnetman/pkg/auth"
+	"dvnetman/pkg/cache"
 	"dvnetman/pkg/logger"
 	"dvnetman/pkg/mongo/modal"
 	"dvnetman/pkg/openapi"
@@ -12,21 +14,22 @@ import (
 )
 
 type Service struct {
-	db   *modal.DBClient
-	auth *auth.Auth
+	db    *modal.DBClient
+	auth  *auth.Auth
+	cache cache.Cache
 }
 
 func (s *Service) ErrorHandler(w http.ResponseWriter, r *http.Request, err error) {
 	for _, converter := range errorConverters {
 		if res := converter(err); res != nil {
 			if err := res.Write(r, w); err != nil {
-				logger.Ctx(r.Context()).Error().Err(err).Msg("error writing error response")
+				logger.Error(r.Context()).Err(err).Msg("error writing error response")
 				return
 			}
 			return
 		}
 	}
-	logger.Ctx(r.Context()).Error().Err(err).Msg("no error handler found")
+	logger.Error(r.Context()).Err(err).Msg("no error handler found")
 	http.Error(w, err.Error(), http.StatusInternalServerError)
 }
 
@@ -86,9 +89,10 @@ func (s *Service) checkIfModified(
 	return
 }
 
-func NewService(db *modal.DBClient, auth *auth.Auth) *Service {
+func NewService(ctx context.Context, db *modal.DBClient, auth *auth.Auth, cache cache.Pool) *Service {
 	return &Service{
-		db:   db,
-		auth: auth,
+		db:    db,
+		auth:  auth,
+		cache: cache,
 	}
 }

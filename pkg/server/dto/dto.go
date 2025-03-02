@@ -138,7 +138,7 @@ func resolveQueue[T any](ctx context.Context, queue lookupQueue[T], f listFunc[*
 		if len(ids) == 0 {
 			break
 		}
-		logger.Ctx(ctx).Trace().Key("references", len(ids)).Msg("resolving references")
+		logger.Trace(ctx).Key("references", len(ids)).Msg("resolving references")
 		var d []*T
 		if d, err = f(ctx, bson.M{"id": bson.M{"$in": ids}}); err != nil {
 			return
@@ -182,7 +182,7 @@ func (c *Converter) resolveQueue(ctx context.Context) (err error) {
 				return
 			}
 		}
-		logger.Ctx(ctx).Trace().Key("references", resolved).Msg("resolved references")
+		logger.Trace(ctx).Key("references", resolved).Msg("resolved references")
 		if resolved == 0 {
 			break
 		}

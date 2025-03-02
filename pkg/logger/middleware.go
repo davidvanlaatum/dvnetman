@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"context"
 	"github.com/gorilla/mux"
 	"go.opentelemetry.io/otel/trace"
 	"net/http"
@@ -14,16 +15,11 @@ func isValidRoute(route *mux.Route) bool {
 	return !ok
 }
 
-func Middleware(log Logger) mux.MiddlewareFunc {
+func Middleware() mux.MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(
 			func(w http.ResponseWriter, r *http.Request) {
-				t := trace.SpanFromContext(r.Context())
-				l := log.SubLogger()
-				if t.SpanContext().IsValid() {
-					l.Key("trace", t.SpanContext().TraceID().String()).
-						Key("span", t.SpanContext().SpanID().String())
-				}
+				l := Ctx(r.Context()).SubLogger()
 				l.Key("remote", r.RemoteAddr).
 					Key("method", r.Method).
 					Key("url", r.URL.String())
@@ -41,4 +37,15 @@ func Middleware(log Logger) mux.MiddlewareFunc {
 			},
 		)
 	}
+}
+
+func OTelTraceKeyProvider(ctx context.Context) map[string]interface{} {
+	s := trace.SpanFromContext(ctx)
+	if s.SpanContext().IsValid() {
+		return map[string]interface{}{
+			"trace": s.SpanContext().TraceID().String(),
+			"span":  s.SpanContext().SpanID().String(),
+		}
+	}
+	return nil
 }

@@ -67,7 +67,7 @@ func (m *middlewareWriteWrapper) save() {
 	m.saveDone = true
 	for key, sess := range m.storage.sessions {
 		if err := sess.Session.Save(m.r, m.ResponseWriter); err != nil {
-			logger.Ctx(m.r.Context()).Error().Key("session", key).Msgf("failed to save session: %+v", err)
+			logger.Error(m.r.Context()).Key("session", key).Msgf("failed to save session: %+v", err)
 		}
 	}
 }

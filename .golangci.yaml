@@ -2,3 +2,10 @@ linters-settings:
   govet:
     disable:
       - composites
+
+exclude-dirs:
+  - web/test-results
+  - web/playwright-report
+  - web/coverage
+  - web/node_modules
+  - web/test-results
