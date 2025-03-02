@@ -37,6 +37,7 @@ lint-js:
 	cd web && npm run lint
 
 lint-go:
+	golangci-lint config verify
 	golangci-lint run
 
 lint: lint-go lint-js
