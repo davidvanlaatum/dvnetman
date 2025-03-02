@@ -304,6 +304,12 @@ func (c *CodeGen) renderAPIFunc(f *File, v *APIFunc) *Statement {
 				func(g *Group) {
 					g.Id("h").Dot("service").Dot("ErrorHandler").Call(Id("w"), Id("r"), Err())
 				},
+			).Else().If(Id("res").Op("==").Nil()).BlockFunc(
+				func(g *Group) {
+					g.Id("h").Dot("service").Dot("ErrorHandler").Call(
+						Id("w"), Id("r"), Qual(errorsPkg, "Errorf").Call(Lit("no response returned")),
+					)
+				},
 			).Else().If(Err().Op("=").Id("res").Dot("Write").Call(Id("r"), Id("w")), Err().Op("!=").Nil()).BlockFunc(
 				func(g *Group) {
 					g.Id("h").Dot("service").Dot("WriteErrorHandler").Call(Id("w"), Id("r"), Err())

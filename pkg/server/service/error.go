@@ -1,6 +1,7 @@
 package service
 
 import (
+	"dvnetman/pkg/auth"
 	"dvnetman/pkg/mongo/modal"
 	"dvnetman/pkg/openapi"
 	"github.com/pkg/errors"
@@ -70,6 +71,22 @@ func init() {
 					Object: openapi.APIErrorModal{
 						Errors: []*openapi.ErrorMessage{
 							{Code: "NOT_FOUND", Message: err.Error()},
+						},
+					},
+				}
+			}
+			return nil
+		},
+	)
+	RegisterErrorConverter(
+		func(err error) *openapi.Response {
+			var notLoggedIn *auth.NotLoggedInError
+			if ok := errors.As(err, &notLoggedIn); ok {
+				return &openapi.Response{
+					Code: http.StatusUnauthorized,
+					Object: openapi.APIErrorModal{
+						Errors: []*openapi.ErrorMessage{
+							{Code: "NOT_LOGGED_IN", Message: err.Error()},
 						},
 					},
 				}

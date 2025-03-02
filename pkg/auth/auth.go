@@ -17,6 +17,7 @@ import (
 	"github.com/markbates/goth/providers/openidConnect"
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"golang.org/x/oauth2"
 	"net/http"
 	"net/url"
@@ -57,13 +58,16 @@ func (a *Auth) initProvider(cfg *config.AuthConfig) (provider goth.Provider, err
 			return
 		}
 		u = u.ResolveReference(&url.URL{Path: "auth/" + cfg.Provider + "/callback"})
-		if provider, err = openidConnect.New(
-			cfg.OpenIDConnect.ClientID, cfg.OpenIDConnect.ClientSecret, u.String(),
+		var p *openidConnect.Provider
+		if p, err = openidConnect.NewNamed(
+			cfg.Provider, cfg.OpenIDConnect.ClientID, cfg.OpenIDConnect.ClientSecret, u.String(),
 			cfg.OpenIDConnect.AutoDiscoveryURL, cfg.OpenIDConnect.Scopes...,
 		); err != nil {
 			err = errors.Wrap(err, "failed to create OpenID Connect provider")
 		}
-		provider.SetName(cfg.Provider)
+		p.HTTPClient = &http.Client{Transport: otelhttp.NewTransport(http.DefaultTransport)}
+		p.SetName(cfg.Provider)
+		provider = p
 	}
 	return
 }

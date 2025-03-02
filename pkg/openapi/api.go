@@ -175,6 +175,8 @@ func (h *apiHandler) CreateDevice(w http.ResponseWriter, r *http.Request) {
 	}
 	if res, err = h.service.CreateDevice(r.Context(), opts); err != nil {
 		h.service.ErrorHandler(w, r, err)
+	} else if res == nil {
+		h.service.ErrorHandler(w, r, errors.Errorf("no response returned"))
 	} else if err = res.Write(r, w); err != nil {
 		h.service.WriteErrorHandler(w, r, err)
 	}
@@ -215,6 +217,8 @@ func (h *apiHandler) ListDevices(w http.ResponseWriter, r *http.Request) {
 	}
 	if res, err = h.service.ListDevices(r.Context(), opts); err != nil {
 		h.service.ErrorHandler(w, r, err)
+	} else if res == nil {
+		h.service.ErrorHandler(w, r, errors.Errorf("no response returned"))
 	} else if err = res.Write(r, w); err != nil {
 		h.service.WriteErrorHandler(w, r, err)
 	}
@@ -230,6 +234,8 @@ func (h *apiHandler) DeleteDevice(w http.ResponseWriter, r *http.Request) {
 	}
 	if res, err = h.service.DeleteDevice(r.Context(), opts); err != nil {
 		h.service.ErrorHandler(w, r, err)
+	} else if res == nil {
+		h.service.ErrorHandler(w, r, errors.Errorf("no response returned"))
 	} else if err = res.Write(r, w); err != nil {
 		h.service.WriteErrorHandler(w, r, err)
 	}
@@ -258,6 +264,8 @@ func (h *apiHandler) GetDevice(w http.ResponseWriter, r *http.Request) {
 	}
 	if res, err = h.service.GetDevice(r.Context(), opts); err != nil {
 		h.service.ErrorHandler(w, r, err)
+	} else if res == nil {
+		h.service.ErrorHandler(w, r, errors.Errorf("no response returned"))
 	} else if err = res.Write(r, w); err != nil {
 		h.service.WriteErrorHandler(w, r, err)
 	}
@@ -283,6 +291,8 @@ func (h *apiHandler) UpdateDevice(w http.ResponseWriter, r *http.Request) {
 	}
 	if res, err = h.service.UpdateDevice(r.Context(), opts); err != nil {
 		h.service.ErrorHandler(w, r, err)
+	} else if res == nil {
+		h.service.ErrorHandler(w, r, errors.Errorf("no response returned"))
 	} else if err = res.Write(r, w); err != nil {
 		h.service.WriteErrorHandler(w, r, err)
 	}
@@ -303,6 +313,8 @@ func (h *apiHandler) CreateDeviceType(w http.ResponseWriter, r *http.Request) {
 	}
 	if res, err = h.service.CreateDeviceType(r.Context(), opts); err != nil {
 		h.service.ErrorHandler(w, r, err)
+	} else if res == nil {
+		h.service.ErrorHandler(w, r, errors.Errorf("no response returned"))
 	} else if err = res.Write(r, w); err != nil {
 		h.service.WriteErrorHandler(w, r, err)
 	}
@@ -343,6 +355,8 @@ func (h *apiHandler) ListDeviceTypes(w http.ResponseWriter, r *http.Request) {
 	}
 	if res, err = h.service.ListDeviceTypes(r.Context(), opts); err != nil {
 		h.service.ErrorHandler(w, r, err)
+	} else if res == nil {
+		h.service.ErrorHandler(w, r, errors.Errorf("no response returned"))
 	} else if err = res.Write(r, w); err != nil {
 		h.service.WriteErrorHandler(w, r, err)
 	}
@@ -358,6 +372,8 @@ func (h *apiHandler) DeleteDeviceType(w http.ResponseWriter, r *http.Request) {
 	}
 	if res, err = h.service.DeleteDeviceType(r.Context(), opts); err != nil {
 		h.service.ErrorHandler(w, r, err)
+	} else if res == nil {
+		h.service.ErrorHandler(w, r, errors.Errorf("no response returned"))
 	} else if err = res.Write(r, w); err != nil {
 		h.service.WriteErrorHandler(w, r, err)
 	}
@@ -386,6 +402,8 @@ func (h *apiHandler) GetDeviceType(w http.ResponseWriter, r *http.Request) {
 	}
 	if res, err = h.service.GetDeviceType(r.Context(), opts); err != nil {
 		h.service.ErrorHandler(w, r, err)
+	} else if res == nil {
+		h.service.ErrorHandler(w, r, errors.Errorf("no response returned"))
 	} else if err = res.Write(r, w); err != nil {
 		h.service.WriteErrorHandler(w, r, err)
 	}
@@ -411,6 +429,8 @@ func (h *apiHandler) UpdateDeviceType(w http.ResponseWriter, r *http.Request) {
 	}
 	if res, err = h.service.UpdateDeviceType(r.Context(), opts); err != nil {
 		h.service.ErrorHandler(w, r, err)
+	} else if res == nil {
+		h.service.ErrorHandler(w, r, errors.Errorf("no response returned"))
 	} else if err = res.Write(r, w); err != nil {
 		h.service.WriteErrorHandler(w, r, err)
 	}
@@ -431,6 +451,8 @@ func (h *apiHandler) CreateManufacturer(w http.ResponseWriter, r *http.Request) 
 	}
 	if res, err = h.service.CreateManufacturer(r.Context(), opts); err != nil {
 		h.service.ErrorHandler(w, r, err)
+	} else if res == nil {
+		h.service.ErrorHandler(w, r, errors.Errorf("no response returned"))
 	} else if err = res.Write(r, w); err != nil {
 		h.service.WriteErrorHandler(w, r, err)
 	}
@@ -471,6 +493,8 @@ func (h *apiHandler) ListManufacturers(w http.ResponseWriter, r *http.Request) {
 	}
 	if res, err = h.service.ListManufacturers(r.Context(), opts); err != nil {
 		h.service.ErrorHandler(w, r, err)
+	} else if res == nil {
+		h.service.ErrorHandler(w, r, errors.Errorf("no response returned"))
 	} else if err = res.Write(r, w); err != nil {
 		h.service.WriteErrorHandler(w, r, err)
 	}
@@ -486,6 +510,8 @@ func (h *apiHandler) DeleteManufacturer(w http.ResponseWriter, r *http.Request) 
 	}
 	if res, err = h.service.DeleteManufacturer(r.Context(), opts); err != nil {
 		h.service.ErrorHandler(w, r, err)
+	} else if res == nil {
+		h.service.ErrorHandler(w, r, errors.Errorf("no response returned"))
 	} else if err = res.Write(r, w); err != nil {
 		h.service.WriteErrorHandler(w, r, err)
 	}
@@ -514,6 +540,8 @@ func (h *apiHandler) GetManufacturer(w http.ResponseWriter, r *http.Request) {
 	}
 	if res, err = h.service.GetManufacturer(r.Context(), opts); err != nil {
 		h.service.ErrorHandler(w, r, err)
+	} else if res == nil {
+		h.service.ErrorHandler(w, r, errors.Errorf("no response returned"))
 	} else if err = res.Write(r, w); err != nil {
 		h.service.WriteErrorHandler(w, r, err)
 	}
@@ -539,6 +567,8 @@ func (h *apiHandler) UpdateManufacturer(w http.ResponseWriter, r *http.Request) 
 	}
 	if res, err = h.service.UpdateManufacturer(r.Context(), opts); err != nil {
 		h.service.ErrorHandler(w, r, err)
+	} else if res == nil {
+		h.service.ErrorHandler(w, r, errors.Errorf("no response returned"))
 	} else if err = res.Write(r, w); err != nil {
 		h.service.WriteErrorHandler(w, r, err)
 	}
@@ -548,6 +578,8 @@ func (h *apiHandler) GetStats(w http.ResponseWriter, r *http.Request) {
 	var err error
 	if res, err = h.service.GetStats(r.Context()); err != nil {
 		h.service.ErrorHandler(w, r, err)
+	} else if res == nil {
+		h.service.ErrorHandler(w, r, errors.Errorf("no response returned"))
 	} else if err = res.Write(r, w); err != nil {
 		h.service.WriteErrorHandler(w, r, err)
 	}
@@ -568,6 +600,8 @@ func (h *apiHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	}
 	if res, err = h.service.CreateUser(r.Context(), opts); err != nil {
 		h.service.ErrorHandler(w, r, err)
+	} else if res == nil {
+		h.service.ErrorHandler(w, r, errors.Errorf("no response returned"))
 	} else if err = res.Write(r, w); err != nil {
 		h.service.WriteErrorHandler(w, r, err)
 	}
@@ -577,6 +611,8 @@ func (h *apiHandler) GetCurrentUser(w http.ResponseWriter, r *http.Request) {
 	var err error
 	if res, err = h.service.GetCurrentUser(r.Context()); err != nil {
 		h.service.ErrorHandler(w, r, err)
+	} else if res == nil {
+		h.service.ErrorHandler(w, r, errors.Errorf("no response returned"))
 	} else if err = res.Write(r, w); err != nil {
 		h.service.WriteErrorHandler(w, r, err)
 	}
@@ -586,6 +622,8 @@ func (h *apiHandler) GetUserProviders(w http.ResponseWriter, r *http.Request) {
 	var err error
 	if res, err = h.service.GetUserProviders(r.Context()); err != nil {
 		h.service.ErrorHandler(w, r, err)
+	} else if res == nil {
+		h.service.ErrorHandler(w, r, errors.Errorf("no response returned"))
 	} else if err = res.Write(r, w); err != nil {
 		h.service.WriteErrorHandler(w, r, err)
 	}
@@ -626,6 +664,8 @@ func (h *apiHandler) ListUsers(w http.ResponseWriter, r *http.Request) {
 	}
 	if res, err = h.service.ListUsers(r.Context(), opts); err != nil {
 		h.service.ErrorHandler(w, r, err)
+	} else if res == nil {
+		h.service.ErrorHandler(w, r, errors.Errorf("no response returned"))
 	} else if err = res.Write(r, w); err != nil {
 		h.service.WriteErrorHandler(w, r, err)
 	}
@@ -641,6 +681,8 @@ func (h *apiHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	}
 	if res, err = h.service.DeleteUser(r.Context(), opts); err != nil {
 		h.service.ErrorHandler(w, r, err)
+	} else if res == nil {
+		h.service.ErrorHandler(w, r, errors.Errorf("no response returned"))
 	} else if err = res.Write(r, w); err != nil {
 		h.service.WriteErrorHandler(w, r, err)
 	}
@@ -669,6 +711,8 @@ func (h *apiHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 	}
 	if res, err = h.service.GetUser(r.Context(), opts); err != nil {
 		h.service.ErrorHandler(w, r, err)
+	} else if res == nil {
+		h.service.ErrorHandler(w, r, errors.Errorf("no response returned"))
 	} else if err = res.Write(r, w); err != nil {
 		h.service.WriteErrorHandler(w, r, err)
 	}
@@ -694,6 +738,8 @@ func (h *apiHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	}
 	if res, err = h.service.UpdateUser(r.Context(), opts); err != nil {
 		h.service.ErrorHandler(w, r, err)
+	} else if res == nil {
+		h.service.ErrorHandler(w, r, errors.Errorf("no response returned"))
 	} else if err = res.Write(r, w); err != nil {
 		h.service.WriteErrorHandler(w, r, err)
 	}

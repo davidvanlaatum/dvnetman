@@ -91,13 +91,17 @@ func (s *Service) GetUser(ctx context.Context, opts *openapi.GetUserOpts) (res *
 }
 
 func (s *Service) GetCurrentUser(ctx context.Context) (res *openapi.Response, err error) {
+	res = &openapi.Response{
+		Code: http.StatusOK,
+		Object: &openapi.CurrentUser{
+			LoggedIn: utils.ToPtr(false),
+		},
+	}
 	if u := auth.UserFromContext(ctx); u != nil {
 		c := dto.NewConverter(s.db)
-		res = &openapi.Response{}
 		if res.Object, err = c.AuthUserToOpenAPI(ctx, u); err != nil {
 			return
 		}
-		res.Code = http.StatusOK
 	}
 	return
 }

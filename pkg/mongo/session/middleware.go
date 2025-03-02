@@ -5,6 +5,7 @@ import (
 	"dvnetman/pkg/logger"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
+	"go.opentelemetry.io/otel/trace"
 	"net/http"
 )
 
@@ -67,7 +68,8 @@ func (m *middlewareWriteWrapper) save() {
 	m.saveDone = true
 	for key, sess := range m.storage.sessions {
 		if err := sess.Session.Save(m.r, m.ResponseWriter); err != nil {
-			logger.Error(m.r.Context()).Key("session", key).Msgf("failed to save session: %+v", err)
+			trace.SpanFromContext(m.r.Context()).RecordError(err)
+			logger.Error(m.r.Context()).Key("session", key).Err(err).Msg("failed to save session")
 		}
 	}
 }

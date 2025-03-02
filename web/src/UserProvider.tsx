@@ -10,6 +10,7 @@ export const UserProvider: FC<{ children: ReactNode; forceUser?: CurrentUser }> 
   const api = useApi()
   const [user, setUser] = useState<CurrentUser | null>(null)
   const [loading, setLoading] = useState(true)
+
   useEffect(() => {
     if (forceUser) {
       setUser(forceUser)
@@ -28,10 +29,14 @@ export const UserProvider: FC<{ children: ReactNode; forceUser?: CurrentUser }> 
     const id = setInterval(() => {
       void fetchUser()
     }, 1000 * 60)
+    const cleanup = api.onUnauthorized(() => {
+      void fetchUser()
+    })
     return () => {
       clearInterval(id)
+      cleanup()
     }
-  }, [api.userApi, forceUser])
+  }, [api, forceUser])
 
   if (loading) {
     return (
