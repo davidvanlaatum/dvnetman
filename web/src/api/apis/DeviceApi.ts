@@ -20,9 +20,6 @@ import type {
   Device,
   DeviceSearchBody,
   DeviceSearchResults,
-  DeviceType,
-  DeviceTypeSearchBody,
-  DeviceTypeSearchResults,
 } from '../models/index';
 import {
     DeviceFromJSON,
@@ -31,27 +28,13 @@ import {
     DeviceSearchBodyToJSON,
     DeviceSearchResultsFromJSON,
     DeviceSearchResultsToJSON,
-    DeviceTypeFromJSON,
-    DeviceTypeToJSON,
-    DeviceTypeSearchBodyFromJSON,
-    DeviceTypeSearchBodyToJSON,
-    DeviceTypeSearchResultsFromJSON,
-    DeviceTypeSearchResultsToJSON,
 } from '../models/index';
 
 export interface CreateDeviceRequest {
     device: Omit<Device, 'created'|'id'|'updated'>;
 }
 
-export interface CreateDeviceTypeRequest {
-    deviceType: Omit<DeviceType, 'created'|'id'|'updated'>;
-}
-
 export interface DeleteDeviceRequest {
-    id: string;
-}
-
-export interface DeleteDeviceTypeRequest {
     id: string;
 }
 
@@ -59,19 +42,6 @@ export interface GetDeviceRequest {
     id: string;
     ifNoneMatch?: string;
     ifModifiedSince?: Date;
-}
-
-export interface GetDeviceTypeRequest {
-    id: string;
-    ifNoneMatch?: string;
-    ifModifiedSince?: Date;
-}
-
-export interface ListDeviceTypesRequest {
-    page?: number;
-    perPage?: number;
-    sort?: string;
-    deviceTypeSearchBody?: DeviceTypeSearchBody;
 }
 
 export interface ListDevicesRequest {
@@ -84,11 +54,6 @@ export interface ListDevicesRequest {
 export interface UpdateDeviceRequest {
     id: string;
     device: Omit<Device, 'created'|'id'|'updated'>;
-}
-
-export interface UpdateDeviceTypeRequest {
-    id: string;
-    deviceType: Omit<DeviceType, 'created'|'id'|'updated'>;
 }
 
 /**
@@ -113,19 +78,6 @@ export interface DeviceApiInterface {
 
     /**
      * 
-     * @param {DeviceType} deviceType 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof DeviceApiInterface
-     */
-    createDeviceTypeRaw(requestParameters: CreateDeviceTypeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<DeviceType>>;
-
-    /**
-     */
-    createDeviceType(requestParameters: CreateDeviceTypeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<DeviceType>;
-
-    /**
-     * 
      * @param {string} id 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -136,19 +88,6 @@ export interface DeviceApiInterface {
     /**
      */
     deleteDevice(requestParameters: DeleteDeviceRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void>;
-
-    /**
-     * 
-     * @param {string} id 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof DeviceApiInterface
-     */
-    deleteDeviceTypeRaw(requestParameters: DeleteDeviceTypeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>>;
-
-    /**
-     */
-    deleteDeviceType(requestParameters: DeleteDeviceTypeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void>;
 
     /**
      * 
@@ -164,37 +103,6 @@ export interface DeviceApiInterface {
     /**
      */
     getDevice(requestParameters: GetDeviceRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Device>;
-
-    /**
-     * 
-     * @param {string} id 
-     * @param {string} [ifNoneMatch] 
-     * @param {Date} [ifModifiedSince] 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof DeviceApiInterface
-     */
-    getDeviceTypeRaw(requestParameters: GetDeviceTypeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<DeviceType>>;
-
-    /**
-     */
-    getDeviceType(requestParameters: GetDeviceTypeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<DeviceType>;
-
-    /**
-     * 
-     * @param {number} [page] Page number
-     * @param {number} [perPage] Number of items per page
-     * @param {string} [sort] Sort order
-     * @param {DeviceTypeSearchBody} [deviceTypeSearchBody] 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof DeviceApiInterface
-     */
-    listDeviceTypesRaw(requestParameters: ListDeviceTypesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<DeviceTypeSearchResults>>;
-
-    /**
-     */
-    listDeviceTypes(requestParameters: ListDeviceTypesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<DeviceTypeSearchResults>;
 
     /**
      * 
@@ -225,20 +133,6 @@ export interface DeviceApiInterface {
     /**
      */
     updateDevice(requestParameters: UpdateDeviceRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Device>;
-
-    /**
-     * 
-     * @param {string} id 
-     * @param {DeviceType} deviceType 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof DeviceApiInterface
-     */
-    updateDeviceTypeRaw(requestParameters: UpdateDeviceTypeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<DeviceType>>;
-
-    /**
-     */
-    updateDeviceType(requestParameters: UpdateDeviceTypeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<DeviceType>;
 
 }
 
@@ -283,40 +177,6 @@ export class DeviceApi extends runtime.BaseAPI implements DeviceApiInterface {
 
     /**
      */
-    async createDeviceTypeRaw(requestParameters: CreateDeviceTypeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<DeviceType>> {
-        if (requestParameters['deviceType'] == null) {
-            throw new runtime.RequiredError(
-                'deviceType',
-                'Required parameter "deviceType" was null or undefined when calling createDeviceType().'
-            );
-        }
-
-        const queryParameters: any = {};
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        headerParameters['Content-Type'] = 'application/json';
-
-        const response = await this.request({
-            path: `/api/v1/deviceType`,
-            method: 'POST',
-            headers: headerParameters,
-            query: queryParameters,
-            body: DeviceTypeToJSON(requestParameters['deviceType']),
-        }, initOverrides);
-
-        return new runtime.JSONApiResponse(response, (jsonValue) => DeviceTypeFromJSON(jsonValue));
-    }
-
-    /**
-     */
-    async createDeviceType(requestParameters: CreateDeviceTypeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<DeviceType> {
-        const response = await this.createDeviceTypeRaw(requestParameters, initOverrides);
-        return await response.value();
-    }
-
-    /**
-     */
     async deleteDeviceRaw(requestParameters: DeleteDeviceRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
         if (requestParameters['id'] == null) {
             throw new runtime.RequiredError(
@@ -343,36 +203,6 @@ export class DeviceApi extends runtime.BaseAPI implements DeviceApiInterface {
      */
     async deleteDevice(requestParameters: DeleteDeviceRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
         await this.deleteDeviceRaw(requestParameters, initOverrides);
-    }
-
-    /**
-     */
-    async deleteDeviceTypeRaw(requestParameters: DeleteDeviceTypeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
-        if (requestParameters['id'] == null) {
-            throw new runtime.RequiredError(
-                'id',
-                'Required parameter "id" was null or undefined when calling deleteDeviceType().'
-            );
-        }
-
-        const queryParameters: any = {};
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        const response = await this.request({
-            path: `/api/v1/deviceType/{id}`.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id']))),
-            method: 'DELETE',
-            headers: headerParameters,
-            query: queryParameters,
-        }, initOverrides);
-
-        return new runtime.VoidApiResponse(response);
-    }
-
-    /**
-     */
-    async deleteDeviceType(requestParameters: DeleteDeviceTypeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
-        await this.deleteDeviceTypeRaw(requestParameters, initOverrides);
     }
 
     /**
@@ -411,84 +241,6 @@ export class DeviceApi extends runtime.BaseAPI implements DeviceApiInterface {
      */
     async getDevice(requestParameters: GetDeviceRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Device> {
         const response = await this.getDeviceRaw(requestParameters, initOverrides);
-        return await response.value();
-    }
-
-    /**
-     */
-    async getDeviceTypeRaw(requestParameters: GetDeviceTypeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<DeviceType>> {
-        if (requestParameters['id'] == null) {
-            throw new runtime.RequiredError(
-                'id',
-                'Required parameter "id" was null or undefined when calling getDeviceType().'
-            );
-        }
-
-        const queryParameters: any = {};
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        if (requestParameters['ifNoneMatch'] != null) {
-            headerParameters['If-None-Match'] = String(requestParameters['ifNoneMatch']);
-        }
-
-        if (requestParameters['ifModifiedSince'] != null) {
-            headerParameters['If-Modified-Since'] = String(requestParameters['ifModifiedSince']);
-        }
-
-        const response = await this.request({
-            path: `/api/v1/deviceType/{id}`.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id']))),
-            method: 'GET',
-            headers: headerParameters,
-            query: queryParameters,
-        }, initOverrides);
-
-        return new runtime.JSONApiResponse(response, (jsonValue) => DeviceTypeFromJSON(jsonValue));
-    }
-
-    /**
-     */
-    async getDeviceType(requestParameters: GetDeviceTypeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<DeviceType> {
-        const response = await this.getDeviceTypeRaw(requestParameters, initOverrides);
-        return await response.value();
-    }
-
-    /**
-     */
-    async listDeviceTypesRaw(requestParameters: ListDeviceTypesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<DeviceTypeSearchResults>> {
-        const queryParameters: any = {};
-
-        if (requestParameters['page'] != null) {
-            queryParameters['page'] = requestParameters['page'];
-        }
-
-        if (requestParameters['perPage'] != null) {
-            queryParameters['per_page'] = requestParameters['perPage'];
-        }
-
-        if (requestParameters['sort'] != null) {
-            queryParameters['sort'] = requestParameters['sort'];
-        }
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        headerParameters['Content-Type'] = 'application/json';
-
-        const response = await this.request({
-            path: `/api/v1/deviceType/search`,
-            method: 'POST',
-            headers: headerParameters,
-            query: queryParameters,
-            body: DeviceTypeSearchBodyToJSON(requestParameters['deviceTypeSearchBody']),
-        }, initOverrides);
-
-        return new runtime.JSONApiResponse(response, (jsonValue) => DeviceTypeSearchResultsFromJSON(jsonValue));
-    }
-
-    /**
-     */
-    async listDeviceTypes(requestParameters: ListDeviceTypesRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<DeviceTypeSearchResults> {
-        const response = await this.listDeviceTypesRaw(requestParameters, initOverrides);
         return await response.value();
     }
 
@@ -569,47 +321,6 @@ export class DeviceApi extends runtime.BaseAPI implements DeviceApiInterface {
      */
     async updateDevice(requestParameters: UpdateDeviceRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Device> {
         const response = await this.updateDeviceRaw(requestParameters, initOverrides);
-        return await response.value();
-    }
-
-    /**
-     */
-    async updateDeviceTypeRaw(requestParameters: UpdateDeviceTypeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<DeviceType>> {
-        if (requestParameters['id'] == null) {
-            throw new runtime.RequiredError(
-                'id',
-                'Required parameter "id" was null or undefined when calling updateDeviceType().'
-            );
-        }
-
-        if (requestParameters['deviceType'] == null) {
-            throw new runtime.RequiredError(
-                'deviceType',
-                'Required parameter "deviceType" was null or undefined when calling updateDeviceType().'
-            );
-        }
-
-        const queryParameters: any = {};
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        headerParameters['Content-Type'] = 'application/json';
-
-        const response = await this.request({
-            path: `/api/v1/deviceType/{id}`.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id']))),
-            method: 'PUT',
-            headers: headerParameters,
-            query: queryParameters,
-            body: DeviceTypeToJSON(requestParameters['deviceType']),
-        }, initOverrides);
-
-        return new runtime.JSONApiResponse(response, (jsonValue) => DeviceTypeFromJSON(jsonValue));
-    }
-
-    /**
-     */
-    async updateDeviceType(requestParameters: UpdateDeviceTypeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<DeviceType> {
-        const response = await this.updateDeviceTypeRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

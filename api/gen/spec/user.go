@@ -51,7 +51,7 @@ func BuildUser(api *OpenAPI) {
 					},
 				},
 			},
-			InSecure: true,
+			Insecure: true,
 		},
 	)
 	api.AddEndpoint(
@@ -60,7 +60,7 @@ func BuildUser(api *OpenAPI) {
 			Path:      "/api/v1/user/providers",
 			Operation: "GetUserProviders",
 			Tags:      []string{"User"},
-			InSecure:  true,
+			Insecure:  true,
 			Responses: map[string]openapi.Response{
 				"200": {
 					Description: "Get user providers",

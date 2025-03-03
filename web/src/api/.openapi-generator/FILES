@@ -1,4 +1,5 @@
 apis/DeviceApi.ts
+apis/DeviceTypeApi.ts
 apis/LocationApi.ts
 apis/ManufacturerApi.ts
 apis/SiteApi.ts

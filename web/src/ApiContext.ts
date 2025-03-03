@@ -4,6 +4,7 @@ import {
   Configuration,
   ConfigurationParameters,
   DeviceApi,
+  DeviceTypeApi,
   ErrorContext,
   FetchParams,
   ManufacturerApi,
@@ -107,6 +108,7 @@ export class OneAtATime implements Middleware {
 
 export class Api {
   deviceApi: DeviceApi
+  deviceTypeApi: DeviceTypeApi
   manufacturerApi: ManufacturerApi
   userApi: UserApi
   statsApi: StatsApi
@@ -123,6 +125,7 @@ export class Api {
       ],
     })
     this.deviceApi = new DeviceApi(config)
+    this.deviceTypeApi = new DeviceTypeApi(config)
     this.manufacturerApi = new ManufacturerApi(config)
     this.userApi = new UserApi(config)
     this.statsApi = new StatsApi(config)

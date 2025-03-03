@@ -10,7 +10,7 @@ type AddEndpointOpts struct {
 	Responses   map[string]openapi.Response
 	Parameters  []openapi.Parameter
 	RequestBody *openapi.RequestBody
-	InSecure    bool
+	Insecure    bool
 }
 
 func (o *OpenAPI) AddEndpoint(opts AddEndpointOpts) {
@@ -33,7 +33,7 @@ func (o *OpenAPI) AddEndpoint(opts AddEndpointOpts) {
 		Parameters:  opts.Parameters,
 		RequestBody: opts.RequestBody,
 	}
-	if !opts.InSecure {
+	if !opts.Insecure {
 		endpoint.Security = []map[string][]string{
 			{
 				"bearerAuth": {},

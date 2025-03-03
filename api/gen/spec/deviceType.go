@@ -10,7 +10,7 @@ func BuildDeviceType(api *OpenAPI) {
 	api.AddObject(
 		AddObjectOpts{
 			Name: "deviceType",
-			Tags: []string{"Device"},
+			Tags: []string{"DeviceType"},
 			SearchBody: &openapi.Schema{
 				Type: "object",
 				Properties: map[string]openapi.Schema{

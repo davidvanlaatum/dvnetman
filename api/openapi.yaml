@@ -306,7 +306,7 @@ paths:
               $ref: '#/components/schemas/DeviceType'
         required: true
       tags:
-        - Device
+        - DeviceType
       security:
         - bearerAuth: []
   /api/v1/deviceType/search:
@@ -365,7 +365,7 @@ paths:
             schema:
               $ref: '#/components/schemas/DeviceTypeSearchBody'
       tags:
-        - Device
+        - DeviceType
       security:
         - bearerAuth: []
   /api/v1/deviceType/{id}:
@@ -406,7 +406,7 @@ paths:
                   - code: internal_server_error
                     message: Internal server error
       tags:
-        - Device
+        - DeviceType
       security:
         - bearerAuth: []
     get:
@@ -471,7 +471,7 @@ paths:
                   - code: internal_server_error
                     message: Internal server error
       tags:
-        - Device
+        - DeviceType
       security:
         - bearerAuth: []
     put:
@@ -521,7 +521,7 @@ paths:
               $ref: '#/components/schemas/DeviceType'
         required: true
       tags:
-        - Device
+        - DeviceType
       security:
         - bearerAuth: []
   /api/v1/location:
@@ -567,7 +567,7 @@ paths:
       tags:
         - Location
       security:
-        - bearerAuth: [ ]
+        - bearerAuth: []
   /api/v1/location/search:
     post:
       operationId: listLocations
@@ -626,7 +626,7 @@ paths:
       tags:
         - Location
       security:
-        - bearerAuth: [ ]
+        - bearerAuth: []
   /api/v1/location/{id}:
     delete:
       operationId: deleteLocation
@@ -667,7 +667,7 @@ paths:
       tags:
         - Location
       security:
-        - bearerAuth: [ ]
+        - bearerAuth: []
     get:
       operationId: getLocation
       parameters:
@@ -732,7 +732,7 @@ paths:
       tags:
         - Location
       security:
-        - bearerAuth: [ ]
+        - bearerAuth: []
     put:
       operationId: updateLocation
       parameters:
@@ -782,7 +782,7 @@ paths:
       tags:
         - Location
       security:
-        - bearerAuth: [ ]
+        - bearerAuth: []
   /api/v1/manufacturer:
     post:
       operationId: createManufacturer
@@ -1085,7 +1085,7 @@ paths:
       tags:
         - Site
       security:
-        - bearerAuth: [ ]
+        - bearerAuth: []
   /api/v1/site/search:
     post:
       operationId: listSites
@@ -1144,7 +1144,7 @@ paths:
       tags:
         - Site
       security:
-        - bearerAuth: [ ]
+        - bearerAuth: []
   /api/v1/site/{id}:
     delete:
       operationId: deleteSite
@@ -1185,7 +1185,7 @@ paths:
       tags:
         - Site
       security:
-        - bearerAuth: [ ]
+        - bearerAuth: []
     get:
       operationId: getSite
       parameters:
@@ -1250,7 +1250,7 @@ paths:
       tags:
         - Site
       security:
-        - bearerAuth: [ ]
+        - bearerAuth: []
     put:
       operationId: updateSite
       parameters:
@@ -1300,7 +1300,7 @@ paths:
       tags:
         - Site
       security:
-        - bearerAuth: [ ]
+        - bearerAuth: []
   /api/v1/stats:
     get:
       operationId: GetStats

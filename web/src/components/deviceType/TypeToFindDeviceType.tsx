@@ -60,7 +60,7 @@ export const TypeToFindDeviceType: FC<TypeToFindDeviceTypeProps> = ({ id, onSele
         currentlyLoading.current = {
           opts,
           abort,
-          promise: api.deviceApi.listDeviceTypes(opts, { signal: abort.signal }),
+          promise: api.deviceTypeApi.listDeviceTypes(opts, { signal: abort.signal }),
         }
         const response = await currentlyLoading.current.promise
         setOptions(response.items)
@@ -72,7 +72,7 @@ export const TypeToFindDeviceType: FC<TypeToFindDeviceTypeProps> = ({ id, onSele
         setLoading(false)
       }
     },
-    [api.deviceApi],
+    [api.deviceTypeApi],
   )
 
   useEffect(() => {
