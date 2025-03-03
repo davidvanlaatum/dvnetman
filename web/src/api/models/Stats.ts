@@ -38,7 +38,19 @@ export interface Stats {
      * @type {number}
      * @memberof Stats
      */
+    locationCount: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof Stats
+     */
     manufacturerCount: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof Stats
+     */
+    siteCount: number;
     /**
      * 
      * @type {number}
@@ -53,7 +65,9 @@ export interface Stats {
 export function instanceOfStats(value: object): value is Stats {
     if (!('deviceCount' in value) || value['deviceCount'] === undefined) return false;
     if (!('deviceTypeCount' in value) || value['deviceTypeCount'] === undefined) return false;
+    if (!('locationCount' in value) || value['locationCount'] === undefined) return false;
     if (!('manufacturerCount' in value) || value['manufacturerCount'] === undefined) return false;
+    if (!('siteCount' in value) || value['siteCount'] === undefined) return false;
     if (!('userCount' in value) || value['userCount'] === undefined) return false;
     return true;
 }
@@ -70,7 +84,9 @@ export function StatsFromJSONTyped(json: any, ignoreDiscriminator: boolean): Sta
         
         'deviceCount': json['deviceCount'],
         'deviceTypeCount': json['deviceTypeCount'],
+        'locationCount': json['locationCount'],
         'manufacturerCount': json['manufacturerCount'],
+        'siteCount': json['siteCount'],
         'userCount': json['userCount'],
     };
 }
@@ -88,7 +104,9 @@ export function StatsToJSONTyped(value?: Stats | null, ignoreDiscriminator: bool
         
         'deviceCount': value['deviceCount'],
         'deviceTypeCount': value['deviceTypeCount'],
+        'locationCount': value['locationCount'],
         'manufacturerCount': value['manufacturerCount'],
+        'siteCount': value['siteCount'],
         'userCount': value['userCount'],
     };
 }

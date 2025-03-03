@@ -3,6 +3,8 @@
 /* tslint:disable */
 /* eslint-disable */
 export * from './DeviceApi';
+export * from './LocationApi';
 export * from './ManufacturerApi';
+export * from './SiteApi';
 export * from './StatsApi';
 export * from './UserApi';

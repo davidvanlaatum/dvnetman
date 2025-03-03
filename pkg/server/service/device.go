@@ -91,6 +91,10 @@ func (s *Service) ListDevices(ctx context.Context, opts *openapi.ListDevicesOpts
 	search.equalsStr("name", opts.Body.Name)
 	search.regex("name", opts.Body.NameRegex, "i")
 	search.equalsStr("status", opts.Body.Status)
+	search.equalsStr("serial", opts.Body.Serial)
+	search.regex("serial", opts.Body.SerialRegex, "i")
+	search.equalsStr("asset_tag", opts.Body.AssetTag)
+	search.regex("asset_tag", opts.Body.AssetTagRegex, "i")
 	var devices []*modal.Device
 	findOpts := options.Find().SetLimit(size + 1).SetSkip(page * size)
 	if findOpts, err = s.setProjection(

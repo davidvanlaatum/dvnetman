@@ -43,6 +43,18 @@ func BuildDevice(api *OpenAPI) {
 							Format: "uuid",
 						},
 					},
+					"serial": {
+						Type: "string",
+					},
+					"serialRegex": {
+						Type: "string",
+					},
+					"assetTag": {
+						Type: "string",
+					},
+					"assetTagRegex": {
+						Type: "string",
+					},
 				},
 			},
 			SearchModal: addCommonProps(
@@ -105,6 +117,12 @@ func BuildDevice(api *OpenAPI) {
 						},
 						"deviceType": {
 							Ref: objectRef,
+						},
+						"serial": {
+							Type: "string",
+						},
+						"assetTag": {
+							Type: "string",
 						},
 						"ports": {
 							Type: "array",

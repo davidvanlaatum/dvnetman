@@ -118,8 +118,10 @@ type Device struct {
 	Rack         *UUID         `bson:"rack,omitempty"`
 	RackFace     *RackFace     `bson:"rack_face,omitempty"`
 	RackPosition *int          `bson:"position,omitempty"`
-	Ports        []DevicePort  `bson:"ports,omitempty"`
 	DeviceType   *UUID         `bson:"device_type,omitempty"`
+	Serial       *string       `bson:"serial,omitempty"`
+	AssetTag     *string       `bson:"asset_tag,omitempty"`
+	Ports        []DevicePort  `bson:"ports,omitempty"`
 }
 
 func init() {

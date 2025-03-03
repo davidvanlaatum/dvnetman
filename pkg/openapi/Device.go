@@ -8,6 +8,7 @@ import (
 )
 
 type Device struct {
+	AssetTag     *string          `json:"assetTag,omitzero"`
 	Created      *time.Time       `json:"created,omitzero"`
 	Description  *string          `json:"description,omitzero"`
 	DeviceType   *ObjectReference `json:"deviceType,omitzero"`
@@ -18,6 +19,7 @@ type Device struct {
 	Rack         *ObjectReference `json:"rack,omitzero"`
 	RackFace     *DeviceRackFace  `json:"rackFace,omitzero"`
 	RackPosition *float64         `json:"rackPosition,omitzero"`
+	Serial       *string          `json:"serial,omitzero"`
 	Site         *ObjectReference `json:"site,omitzero"`
 	Status       *string          `json:"status,omitzero"`
 	Tags         []*Tag           `json:"tags,omitzero"`

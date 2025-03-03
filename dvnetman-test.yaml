@@ -1,4 +1,4 @@
-url: http://localhost:8080
+url: http://localhost:5173
 listen:
   - addr: :8080
 mongo:
@@ -8,10 +8,11 @@ session:
   hashkey: uWvLEya5Zqr2q7B6Mt3bsMpK4BB/MA7mAm8EtKx3IrHr900zWob0Mj06XWRbKaT0B+yR0887V5dWW6PZBWnxZg==
   blockkey: 2ZGFDRM0WROWPOIHaWUv3xGYoMzPWveHafbFx4SkIZE=
 auth:
-  - openIDConnect:
-      provider: test
-      clientID: 1234567890
-      clientSecret: 1234567890
-      autoDiscoveryURL: http://localhost:8082/.well-known/openid-configuration
+  - provider: test
+    displayName: KeyCloak
+    openIDConnect:
+      clientID: dvnetman
+      clientSecret: bGf86rrnX8u4s7Ay4mDrEdU5bS2udRik
+      autoDiscoveryURL: http://localhost:8083/realms/test/.well-known/openid-configuration
       scopes:
         - openid

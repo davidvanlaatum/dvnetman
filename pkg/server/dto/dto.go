@@ -34,6 +34,8 @@ type Converter struct {
 	deviceTypeQueue   lookupQueue[modal.DeviceType]
 	deviceQueue       lookupQueue[modal.Device]
 	manufacturerQueue lookupQueue[modal.Manufacturer]
+	locationQueue     lookupQueue[modal.Location]
+	siteQueue         lookupQueue[modal.Site]
 }
 
 func init() {
@@ -50,6 +52,16 @@ func init() {
 	addQueueResolverFunc(
 		func(ctx context.Context, c *Converter, resolved *int) (err error) {
 			return resolveQueue(ctx, c.manufacturerQueue, c.db.ListManufacturers, resolved)
+		},
+	)
+	addQueueResolverFunc(
+		func(ctx context.Context, c *Converter, resolved *int) (err error) {
+			return resolveQueue(ctx, c.locationQueue, c.db.ListLocations, resolved)
+		},
+	)
+	addQueueResolverFunc(
+		func(ctx context.Context, c *Converter, resolved *int) (err error) {
+			return resolveQueue(ctx, c.siteQueue, c.db.ListSites, resolved)
 		},
 	)
 }

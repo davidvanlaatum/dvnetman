@@ -140,6 +140,65 @@ func (_c *MockAPI_CreateDeviceType_Call) RunAndReturn(run func(context.Context, 
 	return _c
 }
 
+// CreateLocation provides a mock function with given fields: ctx, opts
+func (_m *MockAPI) CreateLocation(ctx context.Context, opts *CreateLocationOpts) (*Response, error) {
+	ret := _m.Called(ctx, opts)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CreateLocation")
+	}
+
+	var r0 *Response
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *CreateLocationOpts) (*Response, error)); ok {
+		return rf(ctx, opts)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *CreateLocationOpts) *Response); ok {
+		r0 = rf(ctx, opts)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*Response)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *CreateLocationOpts) error); ok {
+		r1 = rf(ctx, opts)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockAPI_CreateLocation_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CreateLocation'
+type MockAPI_CreateLocation_Call struct {
+	*mock.Call
+}
+
+// CreateLocation is a helper method to define mock.On call
+//   - ctx context.Context
+//   - opts *CreateLocationOpts
+func (_e *MockAPI_Expecter) CreateLocation(ctx interface{}, opts interface{}) *MockAPI_CreateLocation_Call {
+	return &MockAPI_CreateLocation_Call{Call: _e.mock.On("CreateLocation", ctx, opts)}
+}
+
+func (_c *MockAPI_CreateLocation_Call) Run(run func(ctx context.Context, opts *CreateLocationOpts)) *MockAPI_CreateLocation_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(*CreateLocationOpts))
+	})
+	return _c
+}
+
+func (_c *MockAPI_CreateLocation_Call) Return(res *Response, err error) *MockAPI_CreateLocation_Call {
+	_c.Call.Return(res, err)
+	return _c
+}
+
+func (_c *MockAPI_CreateLocation_Call) RunAndReturn(run func(context.Context, *CreateLocationOpts) (*Response, error)) *MockAPI_CreateLocation_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // CreateManufacturer provides a mock function with given fields: ctx, opts
 func (_m *MockAPI) CreateManufacturer(ctx context.Context, opts *CreateManufacturerOpts) (*Response, error) {
 	ret := _m.Called(ctx, opts)
@@ -195,6 +254,65 @@ func (_c *MockAPI_CreateManufacturer_Call) Return(res *Response, err error) *Moc
 }
 
 func (_c *MockAPI_CreateManufacturer_Call) RunAndReturn(run func(context.Context, *CreateManufacturerOpts) (*Response, error)) *MockAPI_CreateManufacturer_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// CreateSite provides a mock function with given fields: ctx, opts
+func (_m *MockAPI) CreateSite(ctx context.Context, opts *CreateSiteOpts) (*Response, error) {
+	ret := _m.Called(ctx, opts)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CreateSite")
+	}
+
+	var r0 *Response
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *CreateSiteOpts) (*Response, error)); ok {
+		return rf(ctx, opts)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *CreateSiteOpts) *Response); ok {
+		r0 = rf(ctx, opts)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*Response)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *CreateSiteOpts) error); ok {
+		r1 = rf(ctx, opts)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockAPI_CreateSite_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CreateSite'
+type MockAPI_CreateSite_Call struct {
+	*mock.Call
+}
+
+// CreateSite is a helper method to define mock.On call
+//   - ctx context.Context
+//   - opts *CreateSiteOpts
+func (_e *MockAPI_Expecter) CreateSite(ctx interface{}, opts interface{}) *MockAPI_CreateSite_Call {
+	return &MockAPI_CreateSite_Call{Call: _e.mock.On("CreateSite", ctx, opts)}
+}
+
+func (_c *MockAPI_CreateSite_Call) Run(run func(ctx context.Context, opts *CreateSiteOpts)) *MockAPI_CreateSite_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(*CreateSiteOpts))
+	})
+	return _c
+}
+
+func (_c *MockAPI_CreateSite_Call) Return(res *Response, err error) *MockAPI_CreateSite_Call {
+	_c.Call.Return(res, err)
+	return _c
+}
+
+func (_c *MockAPI_CreateSite_Call) RunAndReturn(run func(context.Context, *CreateSiteOpts) (*Response, error)) *MockAPI_CreateSite_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -376,6 +494,65 @@ func (_c *MockAPI_DeleteDeviceType_Call) RunAndReturn(run func(context.Context, 
 	return _c
 }
 
+// DeleteLocation provides a mock function with given fields: ctx, opts
+func (_m *MockAPI) DeleteLocation(ctx context.Context, opts *DeleteLocationOpts) (*Response, error) {
+	ret := _m.Called(ctx, opts)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeleteLocation")
+	}
+
+	var r0 *Response
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *DeleteLocationOpts) (*Response, error)); ok {
+		return rf(ctx, opts)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *DeleteLocationOpts) *Response); ok {
+		r0 = rf(ctx, opts)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*Response)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *DeleteLocationOpts) error); ok {
+		r1 = rf(ctx, opts)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockAPI_DeleteLocation_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeleteLocation'
+type MockAPI_DeleteLocation_Call struct {
+	*mock.Call
+}
+
+// DeleteLocation is a helper method to define mock.On call
+//   - ctx context.Context
+//   - opts *DeleteLocationOpts
+func (_e *MockAPI_Expecter) DeleteLocation(ctx interface{}, opts interface{}) *MockAPI_DeleteLocation_Call {
+	return &MockAPI_DeleteLocation_Call{Call: _e.mock.On("DeleteLocation", ctx, opts)}
+}
+
+func (_c *MockAPI_DeleteLocation_Call) Run(run func(ctx context.Context, opts *DeleteLocationOpts)) *MockAPI_DeleteLocation_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(*DeleteLocationOpts))
+	})
+	return _c
+}
+
+func (_c *MockAPI_DeleteLocation_Call) Return(res *Response, err error) *MockAPI_DeleteLocation_Call {
+	_c.Call.Return(res, err)
+	return _c
+}
+
+func (_c *MockAPI_DeleteLocation_Call) RunAndReturn(run func(context.Context, *DeleteLocationOpts) (*Response, error)) *MockAPI_DeleteLocation_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // DeleteManufacturer provides a mock function with given fields: ctx, opts
 func (_m *MockAPI) DeleteManufacturer(ctx context.Context, opts *DeleteManufacturerOpts) (*Response, error) {
 	ret := _m.Called(ctx, opts)
@@ -431,6 +608,65 @@ func (_c *MockAPI_DeleteManufacturer_Call) Return(res *Response, err error) *Moc
 }
 
 func (_c *MockAPI_DeleteManufacturer_Call) RunAndReturn(run func(context.Context, *DeleteManufacturerOpts) (*Response, error)) *MockAPI_DeleteManufacturer_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// DeleteSite provides a mock function with given fields: ctx, opts
+func (_m *MockAPI) DeleteSite(ctx context.Context, opts *DeleteSiteOpts) (*Response, error) {
+	ret := _m.Called(ctx, opts)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeleteSite")
+	}
+
+	var r0 *Response
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *DeleteSiteOpts) (*Response, error)); ok {
+		return rf(ctx, opts)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *DeleteSiteOpts) *Response); ok {
+		r0 = rf(ctx, opts)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*Response)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *DeleteSiteOpts) error); ok {
+		r1 = rf(ctx, opts)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockAPI_DeleteSite_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeleteSite'
+type MockAPI_DeleteSite_Call struct {
+	*mock.Call
+}
+
+// DeleteSite is a helper method to define mock.On call
+//   - ctx context.Context
+//   - opts *DeleteSiteOpts
+func (_e *MockAPI_Expecter) DeleteSite(ctx interface{}, opts interface{}) *MockAPI_DeleteSite_Call {
+	return &MockAPI_DeleteSite_Call{Call: _e.mock.On("DeleteSite", ctx, opts)}
+}
+
+func (_c *MockAPI_DeleteSite_Call) Run(run func(ctx context.Context, opts *DeleteSiteOpts)) *MockAPI_DeleteSite_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(*DeleteSiteOpts))
+	})
+	return _c
+}
+
+func (_c *MockAPI_DeleteSite_Call) Return(res *Response, err error) *MockAPI_DeleteSite_Call {
+	_c.Call.Return(res, err)
+	return _c
+}
+
+func (_c *MockAPI_DeleteSite_Call) RunAndReturn(run func(context.Context, *DeleteSiteOpts) (*Response, error)) *MockAPI_DeleteSite_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -705,6 +941,65 @@ func (_c *MockAPI_GetDeviceType_Call) RunAndReturn(run func(context.Context, *Ge
 	return _c
 }
 
+// GetLocation provides a mock function with given fields: ctx, opts
+func (_m *MockAPI) GetLocation(ctx context.Context, opts *GetLocationOpts) (*Response, error) {
+	ret := _m.Called(ctx, opts)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetLocation")
+	}
+
+	var r0 *Response
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *GetLocationOpts) (*Response, error)); ok {
+		return rf(ctx, opts)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *GetLocationOpts) *Response); ok {
+		r0 = rf(ctx, opts)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*Response)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *GetLocationOpts) error); ok {
+		r1 = rf(ctx, opts)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockAPI_GetLocation_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetLocation'
+type MockAPI_GetLocation_Call struct {
+	*mock.Call
+}
+
+// GetLocation is a helper method to define mock.On call
+//   - ctx context.Context
+//   - opts *GetLocationOpts
+func (_e *MockAPI_Expecter) GetLocation(ctx interface{}, opts interface{}) *MockAPI_GetLocation_Call {
+	return &MockAPI_GetLocation_Call{Call: _e.mock.On("GetLocation", ctx, opts)}
+}
+
+func (_c *MockAPI_GetLocation_Call) Run(run func(ctx context.Context, opts *GetLocationOpts)) *MockAPI_GetLocation_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(*GetLocationOpts))
+	})
+	return _c
+}
+
+func (_c *MockAPI_GetLocation_Call) Return(res *Response, err error) *MockAPI_GetLocation_Call {
+	_c.Call.Return(res, err)
+	return _c
+}
+
+func (_c *MockAPI_GetLocation_Call) RunAndReturn(run func(context.Context, *GetLocationOpts) (*Response, error)) *MockAPI_GetLocation_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetManufacturer provides a mock function with given fields: ctx, opts
 func (_m *MockAPI) GetManufacturer(ctx context.Context, opts *GetManufacturerOpts) (*Response, error) {
 	ret := _m.Called(ctx, opts)
@@ -760,6 +1055,65 @@ func (_c *MockAPI_GetManufacturer_Call) Return(res *Response, err error) *MockAP
 }
 
 func (_c *MockAPI_GetManufacturer_Call) RunAndReturn(run func(context.Context, *GetManufacturerOpts) (*Response, error)) *MockAPI_GetManufacturer_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetSite provides a mock function with given fields: ctx, opts
+func (_m *MockAPI) GetSite(ctx context.Context, opts *GetSiteOpts) (*Response, error) {
+	ret := _m.Called(ctx, opts)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetSite")
+	}
+
+	var r0 *Response
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *GetSiteOpts) (*Response, error)); ok {
+		return rf(ctx, opts)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *GetSiteOpts) *Response); ok {
+		r0 = rf(ctx, opts)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*Response)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *GetSiteOpts) error); ok {
+		r1 = rf(ctx, opts)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockAPI_GetSite_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetSite'
+type MockAPI_GetSite_Call struct {
+	*mock.Call
+}
+
+// GetSite is a helper method to define mock.On call
+//   - ctx context.Context
+//   - opts *GetSiteOpts
+func (_e *MockAPI_Expecter) GetSite(ctx interface{}, opts interface{}) *MockAPI_GetSite_Call {
+	return &MockAPI_GetSite_Call{Call: _e.mock.On("GetSite", ctx, opts)}
+}
+
+func (_c *MockAPI_GetSite_Call) Run(run func(ctx context.Context, opts *GetSiteOpts)) *MockAPI_GetSite_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(*GetSiteOpts))
+	})
+	return _c
+}
+
+func (_c *MockAPI_GetSite_Call) Return(res *Response, err error) *MockAPI_GetSite_Call {
+	_c.Call.Return(res, err)
+	return _c
+}
+
+func (_c *MockAPI_GetSite_Call) RunAndReturn(run func(context.Context, *GetSiteOpts) (*Response, error)) *MockAPI_GetSite_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -1057,6 +1411,65 @@ func (_c *MockAPI_ListDevices_Call) RunAndReturn(run func(context.Context, *List
 	return _c
 }
 
+// ListLocations provides a mock function with given fields: ctx, opts
+func (_m *MockAPI) ListLocations(ctx context.Context, opts *ListLocationsOpts) (*Response, error) {
+	ret := _m.Called(ctx, opts)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ListLocations")
+	}
+
+	var r0 *Response
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *ListLocationsOpts) (*Response, error)); ok {
+		return rf(ctx, opts)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *ListLocationsOpts) *Response); ok {
+		r0 = rf(ctx, opts)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*Response)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *ListLocationsOpts) error); ok {
+		r1 = rf(ctx, opts)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockAPI_ListLocations_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListLocations'
+type MockAPI_ListLocations_Call struct {
+	*mock.Call
+}
+
+// ListLocations is a helper method to define mock.On call
+//   - ctx context.Context
+//   - opts *ListLocationsOpts
+func (_e *MockAPI_Expecter) ListLocations(ctx interface{}, opts interface{}) *MockAPI_ListLocations_Call {
+	return &MockAPI_ListLocations_Call{Call: _e.mock.On("ListLocations", ctx, opts)}
+}
+
+func (_c *MockAPI_ListLocations_Call) Run(run func(ctx context.Context, opts *ListLocationsOpts)) *MockAPI_ListLocations_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(*ListLocationsOpts))
+	})
+	return _c
+}
+
+func (_c *MockAPI_ListLocations_Call) Return(res *Response, err error) *MockAPI_ListLocations_Call {
+	_c.Call.Return(res, err)
+	return _c
+}
+
+func (_c *MockAPI_ListLocations_Call) RunAndReturn(run func(context.Context, *ListLocationsOpts) (*Response, error)) *MockAPI_ListLocations_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // ListManufacturers provides a mock function with given fields: ctx, opts
 func (_m *MockAPI) ListManufacturers(ctx context.Context, opts *ListManufacturersOpts) (*Response, error) {
 	ret := _m.Called(ctx, opts)
@@ -1112,6 +1525,65 @@ func (_c *MockAPI_ListManufacturers_Call) Return(res *Response, err error) *Mock
 }
 
 func (_c *MockAPI_ListManufacturers_Call) RunAndReturn(run func(context.Context, *ListManufacturersOpts) (*Response, error)) *MockAPI_ListManufacturers_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// ListSites provides a mock function with given fields: ctx, opts
+func (_m *MockAPI) ListSites(ctx context.Context, opts *ListSitesOpts) (*Response, error) {
+	ret := _m.Called(ctx, opts)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ListSites")
+	}
+
+	var r0 *Response
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *ListSitesOpts) (*Response, error)); ok {
+		return rf(ctx, opts)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *ListSitesOpts) *Response); ok {
+		r0 = rf(ctx, opts)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*Response)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *ListSitesOpts) error); ok {
+		r1 = rf(ctx, opts)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockAPI_ListSites_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListSites'
+type MockAPI_ListSites_Call struct {
+	*mock.Call
+}
+
+// ListSites is a helper method to define mock.On call
+//   - ctx context.Context
+//   - opts *ListSitesOpts
+func (_e *MockAPI_Expecter) ListSites(ctx interface{}, opts interface{}) *MockAPI_ListSites_Call {
+	return &MockAPI_ListSites_Call{Call: _e.mock.On("ListSites", ctx, opts)}
+}
+
+func (_c *MockAPI_ListSites_Call) Run(run func(ctx context.Context, opts *ListSitesOpts)) *MockAPI_ListSites_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(*ListSitesOpts))
+	})
+	return _c
+}
+
+func (_c *MockAPI_ListSites_Call) Return(res *Response, err error) *MockAPI_ListSites_Call {
+	_c.Call.Return(res, err)
+	return _c
+}
+
+func (_c *MockAPI_ListSites_Call) RunAndReturn(run func(context.Context, *ListSitesOpts) (*Response, error)) *MockAPI_ListSites_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -1293,6 +1765,65 @@ func (_c *MockAPI_UpdateDeviceType_Call) RunAndReturn(run func(context.Context, 
 	return _c
 }
 
+// UpdateLocation provides a mock function with given fields: ctx, opts
+func (_m *MockAPI) UpdateLocation(ctx context.Context, opts *UpdateLocationOpts) (*Response, error) {
+	ret := _m.Called(ctx, opts)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateLocation")
+	}
+
+	var r0 *Response
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *UpdateLocationOpts) (*Response, error)); ok {
+		return rf(ctx, opts)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *UpdateLocationOpts) *Response); ok {
+		r0 = rf(ctx, opts)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*Response)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *UpdateLocationOpts) error); ok {
+		r1 = rf(ctx, opts)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockAPI_UpdateLocation_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpdateLocation'
+type MockAPI_UpdateLocation_Call struct {
+	*mock.Call
+}
+
+// UpdateLocation is a helper method to define mock.On call
+//   - ctx context.Context
+//   - opts *UpdateLocationOpts
+func (_e *MockAPI_Expecter) UpdateLocation(ctx interface{}, opts interface{}) *MockAPI_UpdateLocation_Call {
+	return &MockAPI_UpdateLocation_Call{Call: _e.mock.On("UpdateLocation", ctx, opts)}
+}
+
+func (_c *MockAPI_UpdateLocation_Call) Run(run func(ctx context.Context, opts *UpdateLocationOpts)) *MockAPI_UpdateLocation_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(*UpdateLocationOpts))
+	})
+	return _c
+}
+
+func (_c *MockAPI_UpdateLocation_Call) Return(res *Response, err error) *MockAPI_UpdateLocation_Call {
+	_c.Call.Return(res, err)
+	return _c
+}
+
+func (_c *MockAPI_UpdateLocation_Call) RunAndReturn(run func(context.Context, *UpdateLocationOpts) (*Response, error)) *MockAPI_UpdateLocation_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // UpdateManufacturer provides a mock function with given fields: ctx, opts
 func (_m *MockAPI) UpdateManufacturer(ctx context.Context, opts *UpdateManufacturerOpts) (*Response, error) {
 	ret := _m.Called(ctx, opts)
@@ -1348,6 +1879,65 @@ func (_c *MockAPI_UpdateManufacturer_Call) Return(res *Response, err error) *Moc
 }
 
 func (_c *MockAPI_UpdateManufacturer_Call) RunAndReturn(run func(context.Context, *UpdateManufacturerOpts) (*Response, error)) *MockAPI_UpdateManufacturer_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// UpdateSite provides a mock function with given fields: ctx, opts
+func (_m *MockAPI) UpdateSite(ctx context.Context, opts *UpdateSiteOpts) (*Response, error) {
+	ret := _m.Called(ctx, opts)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateSite")
+	}
+
+	var r0 *Response
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *UpdateSiteOpts) (*Response, error)); ok {
+		return rf(ctx, opts)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *UpdateSiteOpts) *Response); ok {
+		r0 = rf(ctx, opts)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*Response)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *UpdateSiteOpts) error); ok {
+		r1 = rf(ctx, opts)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockAPI_UpdateSite_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpdateSite'
+type MockAPI_UpdateSite_Call struct {
+	*mock.Call
+}
+
+// UpdateSite is a helper method to define mock.On call
+//   - ctx context.Context
+//   - opts *UpdateSiteOpts
+func (_e *MockAPI_Expecter) UpdateSite(ctx interface{}, opts interface{}) *MockAPI_UpdateSite_Call {
+	return &MockAPI_UpdateSite_Call{Call: _e.mock.On("UpdateSite", ctx, opts)}
+}
+
+func (_c *MockAPI_UpdateSite_Call) Run(run func(ctx context.Context, opts *UpdateSiteOpts)) *MockAPI_UpdateSite_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(*UpdateSiteOpts))
+	})
+	return _c
+}
+
+func (_c *MockAPI_UpdateSite_Call) Return(res *Response, err error) *MockAPI_UpdateSite_Call {
+	_c.Call.Return(res, err)
+	return _c
+}
+
+func (_c *MockAPI_UpdateSite_Call) RunAndReturn(run func(context.Context, *UpdateSiteOpts) (*Response, error)) *MockAPI_UpdateSite_Call {
 	_c.Call.Return(run)
 	return _c
 }

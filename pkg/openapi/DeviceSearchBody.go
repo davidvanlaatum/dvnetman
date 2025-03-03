@@ -5,10 +5,14 @@ package openapi
 import uuid "github.com/google/uuid"
 
 type DeviceSearchBody struct {
-	DeviceType []uuid.UUID `json:"deviceType,omitzero"`
-	Fields     []string    `json:"fields,omitzero"`
-	Ids        []uuid.UUID `json:"ids,omitzero"`
-	Name       *string     `json:"name,omitzero"`
-	NameRegex  *string     `json:"nameRegex,omitzero"`
-	Status     *string     `json:"status,omitzero"`
+	AssetTag      *string     `json:"assetTag,omitzero"`
+	AssetTagRegex *string     `json:"assetTagRegex,omitzero"`
+	DeviceType    []uuid.UUID `json:"deviceType,omitzero"`
+	Fields        []string    `json:"fields,omitzero"`
+	Ids           []uuid.UUID `json:"ids,omitzero"`
+	Name          *string     `json:"name,omitzero"`
+	NameRegex     *string     `json:"nameRegex,omitzero"`
+	Serial        *string     `json:"serial,omitzero"`
+	SerialRegex   *string     `json:"serialRegex,omitzero"`
+	Status        *string     `json:"status,omitzero"`
 }

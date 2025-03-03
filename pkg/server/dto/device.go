@@ -18,6 +18,12 @@ func (c *Converter) DeviceToOpenAPI(ctx context.Context, device *modal.Device) (
 		Version:      device.Version,
 		Status:       (*string)(device.Status),
 		DeviceType:   c.getDeviceTypeRef(device.DeviceType),
+		Location:     c.getLocationRef(device.Location),
+		Site:         c.getSiteRef(device.Site),
+		Created:      utils.ToPtr(device.Created),
+		Updated:      utils.ToPtr(device.Updated),
+		Serial:       device.Serial,
+		AssetTag:     device.AssetTag,
 	}
 	if err = c.resolveQueue(ctx); err != nil {
 		return
@@ -31,10 +37,16 @@ func (c *Converter) DeviceToOpenAPISearchResults(ctx context.Context, devices []
 	res = utils.MapTo(
 		devices, func(device *modal.Device) *openapi.DeviceResult {
 			dev := &openapi.DeviceResult{
-				Id:         *(*uuid.UUID)(device.ID),
-				Name:       device.Name,
-				DeviceType: c.getDeviceTypeRef(device.DeviceType),
-				Version:    device.Version,
+				Id:          *(*uuid.UUID)(device.ID),
+				Name:        device.Name,
+				DeviceType:  c.getDeviceTypeRef(device.DeviceType),
+				Location:    c.getLocationRef(device.Location),
+				Site:        c.getSiteRef(device.Site),
+				Version:     device.Version,
+				Status:      (*string)(device.Status),
+				Created:     utils.ToPtr(device.Created),
+				Updated:     utils.ToPtr(device.Updated),
+				Description: device.Description,
 			}
 			return dev
 		},
@@ -50,5 +62,7 @@ func (c *Converter) UpdateDeviceFromOpenAPI(ctx context.Context, device *openapi
 	mod.Description = device.Description
 	mod.RackPosition = utils.ConvertPtr(device.RackPosition, func(x float64) int { return int(x * 2) })
 	mod.DeviceType = c.checkDeviceTypeRefExists(device.DeviceType)
+	mod.Site = c.checkSiteRefExists(device.Site)
+	mod.Location = c.checkLocationRefExists(device.Location)
 	return c.resolveQueue(ctx)
 }

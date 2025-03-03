@@ -11,6 +11,7 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"testing"
+	"time"
 )
 
 var testUUID1 = uuid.MustParse("8793D858-5D4C-4D64-866E-7F80DC89F2B1")
@@ -78,6 +79,8 @@ func TestConverter_DeviceToOpenAPI(t *testing.T) {
 				Id:      testUUID1,
 				Name:    utils.ToPtr("test name"),
 				Version: 1,
+				Created: &time.Time{},
+				Updated: &time.Time{},
 			},
 		},
 		{
@@ -95,6 +98,8 @@ func TestConverter_DeviceToOpenAPI(t *testing.T) {
 					DisplayName: utils.ToPtr("test manufacturer test device type"),
 				},
 				Version: 0,
+				Created: &time.Time{},
+				Updated: &time.Time{},
 			},
 			setup: deviceTypeSetup,
 		},

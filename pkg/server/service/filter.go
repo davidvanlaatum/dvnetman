@@ -2,6 +2,7 @@ package service
 
 import (
 	"dvnetman/pkg/mongo/modal"
+	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
@@ -9,6 +10,12 @@ type filter bson.D
 
 func (f *filter) equalsStr(field string, value *string) {
 	if value != nil && *value != "" {
+		*f = append(*f, bson.E{field, *value})
+	}
+}
+
+func (f *filter) equalsUUID(field string, value *uuid.UUID) {
+	if value != nil && *value != uuid.Nil {
 		*f = append(*f, bson.E{field, *value})
 	}
 }

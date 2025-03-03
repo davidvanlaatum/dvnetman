@@ -45,6 +45,12 @@ import {
 export interface Device {
     /**
      * 
+     * @type {string}
+     * @memberof Device
+     */
+    assetTag?: string;
+    /**
+     * 
      * @type {Date}
      * @memberof Device
      */
@@ -103,6 +109,12 @@ export interface Device {
      * @memberof Device
      */
     rackPosition?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof Device
+     */
+    serial?: string;
     /**
      * 
      * @type {ObjectReference}
@@ -165,6 +177,7 @@ export function DeviceFromJSONTyped(json: any, ignoreDiscriminator: boolean): De
     }
     return {
         
+        'assetTag': json['assetTag'] == null ? undefined : json['assetTag'],
         'created': json['created'] == null ? undefined : (new Date(json['created'])),
         'description': json['description'] == null ? undefined : json['description'],
         'deviceType': json['deviceType'] == null ? undefined : ObjectReferenceFromJSON(json['deviceType']),
@@ -175,6 +188,7 @@ export function DeviceFromJSONTyped(json: any, ignoreDiscriminator: boolean): De
         'rack': json['rack'] == null ? undefined : ObjectReferenceFromJSON(json['rack']),
         'rackFace': json['rackFace'] == null ? undefined : json['rackFace'],
         'rackPosition': json['rackPosition'] == null ? undefined : json['rackPosition'],
+        'serial': json['serial'] == null ? undefined : json['serial'],
         'site': json['site'] == null ? undefined : ObjectReferenceFromJSON(json['site']),
         'status': json['status'] == null ? undefined : json['status'],
         'tags': json['tags'] == null ? undefined : ((json['tags'] as Array<any>).map(TagFromJSON)),
@@ -194,6 +208,7 @@ export function DeviceToJSONTyped(value?: Omit<Device, 'created'|'id'|'updated'>
 
     return {
         
+        'assetTag': value['assetTag'],
         'description': value['description'],
         'deviceType': ObjectReferenceToJSON(value['deviceType']),
         'location': ObjectReferenceToJSON(value['location']),
@@ -202,6 +217,7 @@ export function DeviceToJSONTyped(value?: Omit<Device, 'created'|'id'|'updated'>
         'rack': ObjectReferenceToJSON(value['rack']),
         'rackFace': value['rackFace'],
         'rackPosition': value['rackPosition'],
+        'serial': value['serial'],
         'site': ObjectReferenceToJSON(value['site']),
         'status': value['status'],
         'tags': value['tags'] == null ? undefined : ((value['tags'] as Array<any>).map(TagToJSON)),

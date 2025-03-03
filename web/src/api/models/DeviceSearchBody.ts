@@ -23,6 +23,18 @@ import { mapValues } from '../runtime';
 export interface DeviceSearchBody {
     /**
      * 
+     * @type {string}
+     * @memberof DeviceSearchBody
+     */
+    assetTag?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof DeviceSearchBody
+     */
+    assetTagRegex?: string;
+    /**
+     * 
      * @type {Array<string>}
      * @memberof DeviceSearchBody
      */
@@ -56,6 +68,18 @@ export interface DeviceSearchBody {
      * @type {string}
      * @memberof DeviceSearchBody
      */
+    serial?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof DeviceSearchBody
+     */
+    serialRegex?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof DeviceSearchBody
+     */
     status?: string;
 }
 
@@ -76,11 +100,15 @@ export function DeviceSearchBodyFromJSONTyped(json: any, ignoreDiscriminator: bo
     }
     return {
         
+        'assetTag': json['assetTag'] == null ? undefined : json['assetTag'],
+        'assetTagRegex': json['assetTagRegex'] == null ? undefined : json['assetTagRegex'],
         'deviceType': json['deviceType'] == null ? undefined : json['deviceType'],
         'fields': json['fields'] == null ? undefined : json['fields'],
         'ids': json['ids'] == null ? undefined : json['ids'],
         'name': json['name'] == null ? undefined : json['name'],
         'nameRegex': json['nameRegex'] == null ? undefined : json['nameRegex'],
+        'serial': json['serial'] == null ? undefined : json['serial'],
+        'serialRegex': json['serialRegex'] == null ? undefined : json['serialRegex'],
         'status': json['status'] == null ? undefined : json['status'],
     };
 }
@@ -96,11 +124,15 @@ export function DeviceSearchBodyToJSONTyped(value?: DeviceSearchBody | null, ign
 
     return {
         
+        'assetTag': value['assetTag'],
+        'assetTagRegex': value['assetTagRegex'],
         'deviceType': value['deviceType'],
         'fields': value['fields'],
         'ids': value['ids'],
         'name': value['name'],
         'nameRegex': value['nameRegex'],
+        'serial': value['serial'],
+        'serialRegex': value['serialRegex'],
         'status': value['status'],
     };
 }

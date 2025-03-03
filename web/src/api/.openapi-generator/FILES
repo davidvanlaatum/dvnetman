@@ -1,5 +1,7 @@
 apis/DeviceApi.ts
+apis/LocationApi.ts
 apis/ManufacturerApi.ts
+apis/SiteApi.ts
 apis/StatsApi.ts
 apis/UserApi.ts
 apis/index.ts
@@ -16,11 +18,19 @@ models/DeviceTypeResult.ts
 models/DeviceTypeSearchBody.ts
 models/DeviceTypeSearchResults.ts
 models/ErrorMessage.ts
+models/Location.ts
+models/LocationResult.ts
+models/LocationSearchBody.ts
+models/LocationSearchResults.ts
 models/Manufacturer.ts
 models/ManufacturerResult.ts
 models/ManufacturerSearchBody.ts
 models/ManufacturerSearchResults.ts
 models/ObjectReference.ts
+models/Site.ts
+models/SiteResult.ts
+models/SiteSearchBody.ts
+models/SiteSearchResults.ts
 models/Stats.ts
 models/Tag.ts
 models/User.ts
