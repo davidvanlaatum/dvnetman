@@ -5,6 +5,7 @@ import (
 	"dvnetman/pkg/utils"
 	"encoding/json"
 	"github.com/google/uuid"
+	mux2 "github.com/gorilla/mux"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -105,13 +106,13 @@ func TestListDevices(t *testing.T) {
 
 	tests := []struct {
 		name     string
-		expect   func(s *MockAPI)
+		expect   func(s *MockDeviceAPI, e *MockErrorHandler)
 		request  *http.Request
 		response *http.Response
 	}{
 		{
 			name: "no options",
-			expect: func(s *MockAPI) {
+			expect: func(s *MockDeviceAPI, e *MockErrorHandler) {
 				s.EXPECT().ListDevices(mock.Anything, &ListDevicesOpts{Body: &DeviceSearchBody{}}).Return(
 					&Response{
 						Code:   200,
@@ -128,7 +129,7 @@ func TestListDevices(t *testing.T) {
 		},
 		{
 			name: "all options",
-			expect: func(s *MockAPI) {
+			expect: func(s *MockDeviceAPI, e *MockErrorHandler) {
 				s.EXPECT().ListDevices(
 					mock.Anything, &ListDevicesOpts{
 						Page:    utils.ToPtr(1),
@@ -168,8 +169,8 @@ func TestListDevices(t *testing.T) {
 		},
 		{
 			name: "invalid page number",
-			expect: func(s *MockAPI) {
-				s.EXPECT().ErrorHandler(
+			expect: func(s *MockDeviceAPI, e *MockErrorHandler) {
+				e.EXPECT().ErrorHandler(
 					mock.Anything, mock.Anything,
 					mock.MatchedBy(
 						func(err error) bool {
@@ -187,8 +188,8 @@ func TestListDevices(t *testing.T) {
 		},
 		{
 			name: "invalid per page number",
-			expect: func(s *MockAPI) {
-				s.EXPECT().ErrorHandler(
+			expect: func(s *MockDeviceAPI, e *MockErrorHandler) {
+				e.EXPECT().ErrorHandler(
 					mock.Anything, mock.Anything,
 					mock.MatchedBy(
 						func(err error) bool {
@@ -206,9 +207,9 @@ func TestListDevices(t *testing.T) {
 		},
 		{
 			name: "handler error",
-			expect: func(s *MockAPI) {
+			expect: func(s *MockDeviceAPI, e *MockErrorHandler) {
 				s.EXPECT().ListDevices(mock.Anything, mock.Anything).Return(nil, errors.New("handler error"))
-				s.EXPECT().ErrorHandler(
+				e.EXPECT().ErrorHandler(
 					mock.Anything, mock.Anything,
 					mock.MatchedBy(
 						func(err error) bool {
@@ -229,11 +230,13 @@ func TestListDevices(t *testing.T) {
 		t.Run(
 			test.name, func(t *testing.T) {
 				r := require.New(t)
-				s := NewMockAPI(t)
-				mux := NewRouter(s)
+				s := NewMockDeviceAPI(t)
+				e := NewMockErrorHandler(t)
+				mux := mux2.NewRouter()
+				AttachDeviceAPI(s, e, mux)
 				srv := httptest.NewServer(mux)
 				defer srv.Close()
-				test.expect(s)
+				test.expect(s, e)
 				c := srv.Client()
 				u, err := url.Parse(srv.URL)
 				r.NoError(err)

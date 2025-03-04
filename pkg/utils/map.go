@@ -60,3 +60,16 @@ func MapSortedByKey[K comparable, V any](
 func MapSortedByKeyString[V any](a, b SortedMapEntries[string, V]) bool {
 	return a.Key < b.Key
 }
+
+func SortedMapKeys[K comparable, V any](in map[K]V, less func(a, b K) bool) []K {
+	keys := make([]K, 0, len(in))
+	for k := range in {
+		keys = append(keys, k)
+	}
+	sort.Slice(
+		keys, func(i, j int) bool {
+			return less(keys[i], keys[j])
+		},
+	)
+	return keys
+}

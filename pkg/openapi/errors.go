@@ -2,8 +2,15 @@
 
 package openapi
 
-import "fmt"
+import (
+	"fmt"
+	"net/http"
+)
 
+type ErrorHandler interface {
+	ErrorHandler(w http.ResponseWriter, r *http.Request, err error)
+	WriteErrorHandler(w http.ResponseWriter, r *http.Request, err error)
+}
 type PathParamError struct {
 	name string
 	err  error

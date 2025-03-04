@@ -3,6 +3,7 @@ package code
 import (
 	"dvnetman/pkg/utils"
 	. "github.com/dave/jennifer/jen"
+	"strings"
 )
 
 type GoType struct {
@@ -101,7 +102,21 @@ type APIFunc struct {
 	path   string
 	method string
 	name   string
+	api    string
 	params []*APIFuncParam
+}
+
+func (f *APIFunc) muxPath() string {
+	s := f.path
+	for _, p := range f.params {
+		if p.in == "path" && p.goType.name == "UUID" {
+			s = strings.ReplaceAll(
+				s, "{"+p.wireName+"}",
+				"{"+p.wireName+":"+utils.UUIDRegexString+"}",
+			)
+		}
+	}
+	return s
 }
 
 func (f *APIFunc) hasRequiredParams() bool {

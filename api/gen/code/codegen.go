@@ -12,6 +12,8 @@ import (
 	"github.com/pkg/errors"
 	"os"
 	"path/filepath"
+	"slices"
+	"sort"
 	"strings"
 )
 
@@ -21,8 +23,6 @@ const uuidPkg = "github.com/google/uuid"
 const errorsPkg = "github.com/pkg/errors"
 const utilsPkg = "dvnetman/pkg/utils"
 const responseStruct = "Response"
-const apiHandlerStruct = "apiHandler"
-const apiInterface = "API"
 
 type CodeGen struct {
 	modals    map[string]*Modal
@@ -30,13 +30,14 @@ type CodeGen struct {
 	files     map[string]*File
 	funcs     map[string]*APIFunc
 	funcOrder []*APIFunc
+	apis      []string
 }
 
 func NewCodeGen() *CodeGen {
 	return &CodeGen{}
 }
 
-func (c *CodeGen) newFile(name string) *File {
+func (c *CodeGen) getFile(name string) *File {
 	if c.files == nil {
 		c.files = map[string]*File{}
 	}
@@ -56,10 +57,10 @@ func (c *CodeGen) Generate(ctx context.Context, api *openapi.OpenAPI) (err error
 		return
 	}
 	for k, v := range c.modals {
-		f := c.newFile(k)
+		f := c.getFile(k)
 		f.Add(v.ToCode())
 	}
-	e := c.newFile("enum")
+	e := c.getFile("enum")
 	for _, v := range c.enums {
 		e.Add(v.ToCode())
 	}
@@ -91,7 +92,12 @@ func (c *CodeGen) generateAPIMethod(path, method string, e openapi.Endpoint) (er
 	f := &APIFunc{
 		name:   utils.UCFirst(e.OperationID),
 		path:   path,
+		api:    utils.UCFirst(e.Tags[0]) + "API",
 		method: method,
+	}
+	if !slices.Contains(c.apis, utils.UCFirst(e.Tags[0])+"API") {
+		c.apis = append(c.apis, utils.UCFirst(e.Tags[0])+"API")
+		sort.Strings(c.apis)
 	}
 	for _, p := range e.Parameters {
 		t := c.determineGoTypeFor(p.Schema)
@@ -140,9 +146,10 @@ func (c *CodeGen) generateAPI(ctx context.Context, api *openapi.OpenAPI) (err er
 	return nil
 }
 
-func (c *CodeGen) renderOptsStructs(f *File) {
+func (c *CodeGen) renderOptsStructs() {
 	for _, apiFunc := range c.funcOrder {
 		if len(apiFunc.params) > 0 {
+			f := c.getFile(apiFunc.api)
 			f.Type().Id(apiFunc.name + "Opts").StructFunc(
 				func(g *Group) {
 					for _, p := range apiFunc.params {
@@ -154,33 +161,36 @@ func (c *CodeGen) renderOptsStructs(f *File) {
 	}
 }
 
-func (c *CodeGen) renderAPIInterface(f *File) {
-	f.Type().Id(apiInterface).InterfaceFunc(
-		func(g *Group) {
-			for _, v := range utils.MapSortedByKey(c.funcs, utils.MapSortedByKeyString) {
-				g.Id(v.Key).Params(
-					Id("ctx").Qual("context", "Context"), Do(
-						func(g *Statement) {
-							if len(v.Value.params) > 0 {
-								g.Id("opts").Op("*").Id(v.Key + "Opts")
-							}
-						},
-					),
-				).Params(
-					Id("res").Op("*").Id(responseStruct), Err().Error(),
-				)
-			}
-			g.Id("ErrorHandler").Params(
-				Id("w").Qual(netHttpPkg, "ResponseWriter"), Id("r").Op("*").Qual(netHttpPkg, "Request"), Err().Error(),
-			)
-			g.Id("WriteErrorHandler").Params(
-				Id("w").Qual(netHttpPkg, "ResponseWriter"), Id("r").Op("*").Qual(netHttpPkg, "Request"), Err().Error(),
-			)
-		},
-	)
+func (c *CodeGen) renderAPIInterface() {
+	for _, a := range c.apis {
+		af := c.getFile(a)
+		af.Type().Id(a).InterfaceFunc(
+			func(g *Group) {
+				for _, v := range utils.Filter(
+					utils.MapSortedByKey(c.funcs, utils.MapSortedByKeyString),
+					func(v utils.SortedMapEntries[string, *APIFunc]) bool {
+						return v.Value.api == a
+					},
+				) {
+					g.Id(v.Key).Params(
+						Id("ctx").Qual("context", "Context"), Do(
+							func(g *Statement) {
+								if len(v.Value.params) > 0 {
+									g.Id("opts").Op("*").Id(v.Key + "Opts")
+								}
+							},
+						),
+					).Params(
+						Id("res").Op("*").Id(responseStruct), Err().Error(),
+					)
+				}
+			},
+		)
+	}
 }
 
-func (c *CodeGen) renderResponse(f *File) {
+func (c *CodeGen) renderResponse() {
+	f := c.getFile("response")
 	f.Type().Id(responseStruct).StructFunc(
 		func(g *Group) {
 			g.Id("Code").Int()
@@ -253,7 +263,7 @@ func (c *CodeGen) renderAPIFuncPathParam(v *APIFunc, p *APIFuncParam, g *Group) 
 			).Call(Id("vars").Index(Lit(p.wireName))), Err().Op("!=").Nil(),
 		).BlockFunc(
 			func(g *Group) {
-				g.Id("h").Dot("service").Dot("ErrorHandler").Call(
+				g.Id("h").Dot("errors").Dot("ErrorHandler").Call(
 					Id("w"), Id("r"),
 					Qual(errorsPkg, "WithStack").Call(Id("NewPathParamError").Call(Lit(p.name), Err())),
 				)
@@ -278,8 +288,9 @@ func (c *CodeGen) renderAPIFuncParam(v *APIFunc, p *APIFuncParam, g *Group) {
 	}
 }
 
-func (c *CodeGen) renderAPIFunc(f *File, v *APIFunc) *Statement {
-	return f.Func().Params(Id("h").Op("*").Id(apiHandlerStruct)).Id(v.name).Params(
+func (c *CodeGen) renderAPIFunc(v *APIFunc) *Statement {
+	f := c.getFile(v.api)
+	return f.Func().Params(Id("h").Op("*").Id(v.api+"Handler")).Id(v.name).Params(
 		Id("w").Qual(netHttpPkg, "ResponseWriter"),
 		Id("r").Op("*").Qual(netHttpPkg, "Request"),
 	).BlockFunc(
@@ -302,17 +313,17 @@ func (c *CodeGen) renderAPIFunc(f *File, v *APIFunc) *Statement {
 				Err().Op("!=").Nil(),
 			).BlockFunc(
 				func(g *Group) {
-					g.Id("h").Dot("service").Dot("ErrorHandler").Call(Id("w"), Id("r"), Err())
+					g.Id("h").Dot("errors").Dot("ErrorHandler").Call(Id("w"), Id("r"), Err())
 				},
 			).Else().If(Id("res").Op("==").Nil()).BlockFunc(
 				func(g *Group) {
-					g.Id("h").Dot("service").Dot("ErrorHandler").Call(
+					g.Id("h").Dot("errors").Dot("ErrorHandler").Call(
 						Id("w"), Id("r"), Qual(errorsPkg, "Errorf").Call(Lit("no response returned")),
 					)
 				},
 			).Else().If(Err().Op("=").Id("res").Dot("Write").Call(Id("r"), Id("w")), Err().Op("!=").Nil()).BlockFunc(
 				func(g *Group) {
-					g.Id("h").Dot("service").Dot("WriteErrorHandler").Call(Id("w"), Id("r"), Err())
+					g.Id("h").Dot("errors").Dot("WriteErrorHandler").Call(Id("w"), Id("r"), Err())
 				},
 			)
 		},
@@ -383,7 +394,7 @@ func (c *CodeGen) renderAPIFuncHeaderParam(p *APIFuncParam) func(*Group) {
 				).Call(Id("v").Index(Lit(0))), Err().Op("!=").Nil(),
 			).BlockFunc(
 				func(g *Group) {
-					g.Id("h").Dot("service").Dot("ErrorHandler").Call(
+					g.Id("h").Dot("errors").Dot("ErrorHandler").Call(
 						Id("w"), Id("r"),
 						Qual(errorsPkg, "WithStack").Call(
 							Id("NewQueryParamError").Call(
@@ -405,7 +416,7 @@ func (c *CodeGen) renderAPIFuncHeaderParam(p *APIFuncParam) func(*Group) {
 				).Call(Qual("time", "RFC1123"), Id("v").Index(Lit(0))), Err().Op("!=").Nil(),
 			).BlockFunc(
 				func(g *Group) {
-					g.Id("h").Dot("service").Dot("ErrorHandler").Call(
+					g.Id("h").Dot("errors").Dot("ErrorHandler").Call(
 						Id("w"), Id("r"),
 						Qual(errorsPkg, "WithStack").Call(
 							Id("NewQueryParamError").Call(
@@ -460,7 +471,7 @@ func (c *CodeGen) renderAPIFuncQueryParam(p *APIFuncParam) func(g *Group) {
 				).Call(Id("v").Index(Lit(0))), Err().Op("!=").Nil(),
 			).BlockFunc(
 				func(g *Group) {
-					g.Id("h").Dot("service").Dot("ErrorHandler").Call(
+					g.Id("h").Dot("errors").Dot("ErrorHandler").Call(
 						Id("w"), Id("r"),
 						Qual(errorsPkg, "WithStack").Call(
 							Id("NewQueryParamError").Call(
@@ -482,7 +493,7 @@ func (c *CodeGen) renderAPIFuncQueryParam(p *APIFuncParam) func(g *Group) {
 				Err().Op("!=").Nil(),
 			).BlockFunc(
 				func(g *Group) {
-					g.Id("h").Dot("service").Dot("ErrorHandler").Call(
+					g.Id("h").Dot("errors").Dot("ErrorHandler").Call(
 						Id("w"), Id("r"), Qual(errorsPkg, "WithStack").Call(Id("NewQueryParamError").Call(Lit(p.wireName), Err())),
 					)
 					g.Return()
@@ -494,49 +505,54 @@ func (c *CodeGen) renderAPIFuncQueryParam(p *APIFuncParam) func(g *Group) {
 	}
 }
 
-func (c *CodeGen) renderRouter(f *File) *Statement {
-	return f.Func().Id("NewRouter").Params(Id("service").Id("API")).Params(
-		Id("router").Op("*").Qual(
-			muxPkg, "Router",
-		),
-	).BlockFunc(
-		func(g *Group) {
-			g.Id("router").Op("=").Qual(muxPkg, "NewRouter").Call().Dot("StrictSlash").Call(True())
-			g.Id("handler").Op(":=").Op("&").Id(apiHandlerStruct).Values(
-				Dict{
-					Id("service"): Id("service"),
-				},
-			)
-			for _, v := range c.funcOrder {
-				g.Id("router").
-					Dot("Methods").Call(Lit(strings.ToUpper(v.method))).
-					Dot("Path").Call(Lit(v.path)).
-					Dot("Name").Call(Lit(v.name)).
-					Dot("HandlerFunc").Call(Id("handler").Dot(v.name))
-			}
-			g.Return()
-		},
-	)
+func (c *CodeGen) renderRouter() {
+	for _, api := range c.apis {
+		f := c.getFile(api)
+		f.Func().Id("Attach"+api).Call(
+			Id("service").Id(api), Id("errors").Id("ErrorHandler"), Id("router").Op("*").Qual(muxPkg, "Router"),
+		).BlockFunc(
+			func(g *Group) {
+				g.Id("handler").Op(":=").Op("&").Id(api + "Handler").Values(
+					Dict{
+						Id("service"): Id("service"),
+						Id("errors"):  Id("errors"),
+					},
+				)
+				for _, v := range c.funcOrder {
+					if v.api == api {
+						g.Id("router").
+							Dot("Methods").Call(Qual(netHttpPkg, "Method"+utils.UCFirst(v.method))).
+							Dot("Path").Call(Lit(v.muxPath())).
+							Dot("Name").Call(Lit(v.name)).
+							Dot("HandlerFunc").Call(Id("handler").Dot(v.name))
+					}
+				}
+			},
+		)
+	}
 }
 
-func (c *CodeGen) renderHandler(f *File) {
-	f.Type().Id(apiHandlerStruct).StructFunc(
-		func(g *Group) {
-			g.Id("service").Id("API")
-		},
-	)
+func (c *CodeGen) renderHandler() {
+	for _, a := range c.apis {
+		f := c.getFile(a)
+		f.Type().Id(a + "Handler").StructFunc(
+			func(g *Group) {
+				g.Id("service").Id(a)
+				g.Id("errors").Id("ErrorHandler")
+			},
+		)
+	}
 	for _, v := range c.funcOrder {
-		c.renderAPIFunc(f, v)
+		c.renderAPIFunc(v)
 	}
 }
 
 func (c *CodeGen) renderAPI() (err error) {
-	f := c.newFile("api")
-	c.renderOptsStructs(f)
-	c.renderAPIInterface(f)
-	c.renderResponse(f)
-	c.renderHandler(f)
-	c.renderRouter(f)
+	c.renderAPIInterface()
+	c.renderOptsStructs()
+	c.renderResponse()
+	c.renderHandler()
+	c.renderRouter()
 	return nil
 }
 
@@ -620,7 +636,7 @@ func (c *CodeGen) renderAPIFuncBodyParam(v *APIFunc, p *APIFuncParam, g *Group) 
 		), Err().Op("!=").Nil(),
 	).BlockFunc(
 		func(g *Group) {
-			g.Id("h").Dot("service").Dot("ErrorHandler").Call(
+			g.Id("h").Dot("errors").Dot("ErrorHandler").Call(
 				Id("w"), Id("r"),
 				Qual(errorsPkg, "WithStack").Call(
 					Id("NewBodyParamError").Call(Err()),
@@ -631,7 +647,7 @@ func (c *CodeGen) renderAPIFuncBodyParam(v *APIFunc, p *APIFuncParam, g *Group) 
 	)
 	g.If(Id("decoder").Dot("More").Call()).BlockFunc(
 		func(g *Group) {
-			g.Id("h").Dot("service").Dot("ErrorHandler").Call(
+			g.Id("h").Dot("errors").Dot("ErrorHandler").Call(
 				Id("w"), Id("r"),
 				Qual(errorsPkg, "WithStack").Call(
 					Id("NewBodyParamError").Call(
@@ -645,7 +661,18 @@ func (c *CodeGen) renderAPIFuncBodyParam(v *APIFunc, p *APIFuncParam, g *Group) 
 }
 
 func (c *CodeGen) renderErrors() {
-	f := c.newFile("errors")
+	f := c.getFile("errors")
+
+	f.Type().Id("ErrorHandler").InterfaceFunc(
+		func(g *Group) {
+			g.Id("ErrorHandler").Params(
+				Id("w").Qual(netHttpPkg, "ResponseWriter"), Id("r").Op("*").Qual(netHttpPkg, "Request"), Err().Error(),
+			)
+			g.Id("WriteErrorHandler").Params(
+				Id("w").Qual(netHttpPkg, "ResponseWriter"), Id("r").Op("*").Qual(netHttpPkg, "Request"), Err().Error(),
+			)
+		},
+	)
 
 	f.Type().Id("PathParamError").StructFunc(
 		func(g *Group) {
@@ -745,7 +772,7 @@ func (c *CodeGen) renderErrors() {
 
 func (c *CodeGen) isGeneratedFile(path string) (ok bool, err error) {
 	var f *os.File
-	if f, err = os.Open(path); err == nil {
+	if f, err = os.Open(path); err != nil {
 		return
 	}
 	defer f.Close()
@@ -768,12 +795,15 @@ func (c *CodeGen) removeOldFiles(ctx context.Context, path string, files map[str
 		}
 		if _, ok := files[entry.Name()]; !ok {
 			if ok, err = c.isGeneratedFile(filepath.Join(path, entry.Name())); err != nil {
+				logger.Error(ctx).Err(err).Msgf("Failed to check file %s", entry.Name())
 				return
 			} else if ok {
 				logger.Info(ctx).Msgf("Removing file %s", entry.Name())
 				if err = os.Remove(filepath.Join(path, entry.Name())); err != nil {
 					return errors.Wrap(err, "failed to remove file")
 				}
+			} else {
+				logger.Debug(ctx).Msgf("Not deleting extra file %s, not generated", entry.Name())
 			}
 		}
 	}
