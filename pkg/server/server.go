@@ -34,16 +34,23 @@ import (
 )
 
 type Server struct {
-	httpServer *http.Server
-	router     *mux.Router
-	service    *service.Service
-	config     *config.Config
-	db         *mongo.Client
-	store      sessions.Store
-	auth       *auth.Auth
-	otel       *otelServer
-	client     *modal.DBClient
-	cache      cache.Pool
+	httpServer          *http.Server
+	router              *mux.Router
+	config              *config.Config
+	db                  *mongo.Client
+	store               sessions.Store
+	auth                *auth.Auth
+	otel                *otelServer
+	client              *modal.DBClient
+	cache               cache.Pool
+	deviceService       *service.DeviceService
+	deviceTypeService   *service.DeviceTypeService
+	locationService     *service.LocationService
+	manufacturerService *service.ManufacturerService
+	siteService         *service.SiteService
+	statsService        *service.StatsService
+	userService         *service.UserService
+	errorHandler        *openapi.ErrorConverter
 }
 
 func NewServer(cfg *config.Config) *Server {
@@ -124,7 +131,14 @@ func accessLogMiddleware(handler http.Handler) http.Handler {
 }
 
 func (s *Server) setupRouter(ctx context.Context) error {
-	s.service = service.NewService(ctx, s.client, s.auth, s.cache)
+	s.errorHandler = &openapi.ErrorConverter{}
+	s.deviceService = service.NewDeviceService(s.client)
+	s.deviceTypeService = service.NewDeviceTypeService(s.client)
+	s.locationService = service.NewLocationService(s.client)
+	s.manufacturerService = service.NewManufacturerService(s.client)
+	s.siteService = service.NewSiteService(s.client)
+	s.statsService = service.NewStatsService(s.client, s.cache)
+	s.userService = service.NewUserService(s.client, s.auth)
 	router := mux.NewRouter()
 	router.Use(handlers.RecoveryHandler(handlers.PrintRecoveryStack(true)))
 	router.Use(handlers.ProxyHeaders)
@@ -137,13 +151,13 @@ func (s *Server) setupRouter(ctx context.Context) error {
 	router.Use(accessLogMiddleware)
 	s.auth.AddRoutes(router)
 	router.Methods(http.MethodGet).Path("/api/openapi.yaml").HandlerFunc(s.openapiSpec).Name("OpenAPI")
-	openapi.AttachDeviceTypeAPI(s.service, s.service, router)
-	openapi.AttachDeviceAPI(s.service, s.service, router)
-	openapi.AttachLocationAPI(s.service, s.service, router)
-	openapi.AttachManufacturerAPI(s.service, s.service, router)
-	openapi.AttachSiteAPI(s.service, s.service, router)
-	openapi.AttachStatsAPI(s.service, s.service, router)
-	openapi.AttachUserAPI(s.service, s.service, router)
+	openapi.AttachDeviceTypeAPI(s.deviceTypeService, s.errorHandler, router)
+	openapi.AttachDeviceAPI(s.deviceService, s.errorHandler, router)
+	openapi.AttachLocationAPI(s.locationService, s.errorHandler, router)
+	openapi.AttachManufacturerAPI(s.manufacturerService, s.errorHandler, router)
+	openapi.AttachSiteAPI(s.siteService, s.errorHandler, router)
+	openapi.AttachStatsAPI(s.statsService, s.errorHandler, router)
+	openapi.AttachUserAPI(s.userService, s.errorHandler, router)
 	router.PathPrefix("/ui/").Handler(web.NewUI().GetRouter())
 	router.Methods(http.MethodGet).Path("/metrics").Handler(promhttp.Handler())
 	_ = router.Walk(
@@ -221,7 +235,7 @@ func (s *Server) setupAuth(ctx context.Context) (err error) {
 	); err != nil {
 		return errors.WithMessage(err, "failed to create session store")
 	}
-	s.auth = auth.NewAuth(s.store, s.config, s.client, s.service.ErrorHandler)
+	s.auth = auth.NewAuth(s.store, s.config, s.client, s.errorHandler.ErrorHandler)
 	if err = s.auth.Init(); err != nil {
 		return errors.WithMessage(err, "failed to initialize authentication")
 	}

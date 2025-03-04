@@ -12,7 +12,15 @@ import (
 	"net/http"
 )
 
-func (s *Service) CreateLocation(ctx context.Context, opts *openapi.CreateLocationOpts) (
+type LocationService struct {
+	db *modal.DBClient
+}
+
+func NewLocationService(db *modal.DBClient) *LocationService {
+	return &LocationService{db: db}
+}
+
+func (s *LocationService) CreateLocation(ctx context.Context, opts *openapi.CreateLocationOpts) (
 	res *openapi.Response, err error,
 ) {
 	if err = auth.RequirePerm(ctx, auth.PermissionWrite); err != nil {
@@ -34,7 +42,7 @@ func (s *Service) CreateLocation(ctx context.Context, opts *openapi.CreateLocati
 	return
 }
 
-func (s *Service) UpdateLocation(ctx context.Context, opts *openapi.UpdateLocationOpts) (
+func (s *LocationService) UpdateLocation(ctx context.Context, opts *openapi.UpdateLocationOpts) (
 	res *openapi.Response, err error,
 ) {
 	if err = auth.RequirePerm(ctx, auth.PermissionWrite); err != nil {
@@ -60,7 +68,9 @@ func (s *Service) UpdateLocation(ctx context.Context, opts *openapi.UpdateLocati
 	return
 }
 
-func (s *Service) GetLocation(ctx context.Context, opts *openapi.GetLocationOpts) (res *openapi.Response, err error) {
+func (s *LocationService) GetLocation(ctx context.Context, opts *openapi.GetLocationOpts) (
+	res *openapi.Response, err error,
+) {
 	if err = auth.RequirePerm(ctx, auth.PermissionRead); err != nil {
 		return
 	}
@@ -70,7 +80,7 @@ func (s *Service) GetLocation(ctx context.Context, opts *openapi.GetLocationOpts
 		return
 	}
 	res = &openapi.Response{}
-	if err = s.checkIfModified(opts.IfNoneMatch, opts.IfModifiedSince, d.Version, d.Updated, res); err != nil {
+	if err = checkIfModified(opts.IfNoneMatch, opts.IfModifiedSince, d.Version, d.Updated, res); err != nil {
 		return
 	}
 	if res.Object, err = c.LocationToOpenAPI(ctx, d); err != nil {
@@ -80,7 +90,7 @@ func (s *Service) GetLocation(ctx context.Context, opts *openapi.GetLocationOpts
 	return
 }
 
-func (s *Service) ListLocations(ctx context.Context, opts *openapi.ListLocationsOpts) (
+func (s *LocationService) ListLocations(ctx context.Context, opts *openapi.ListLocationsOpts) (
 	res *openapi.Response, err error,
 ) {
 	if err = auth.RequirePerm(ctx, auth.PermissionRead); err != nil {
@@ -99,7 +109,7 @@ func (s *Service) ListLocations(ctx context.Context, opts *openapi.ListLocations
 	search.equalsUUID("site", opts.Body.Site)
 	var locations []*modal.Location
 	findOpts := options.Find().SetLimit(size + 1).SetSkip(page * size)
-	if findOpts, err = s.setProjection(
+	if findOpts, err = setProjection(
 		opts.Body.Fields, []string{"name", "location_type", "status"}, findOpts,
 	); err != nil {
 		return
@@ -123,7 +133,7 @@ func (s *Service) ListLocations(ctx context.Context, opts *openapi.ListLocations
 	return
 }
 
-func (s *Service) DeleteLocation(ctx context.Context, opts *openapi.DeleteLocationOpts) (
+func (s *LocationService) DeleteLocation(ctx context.Context, opts *openapi.DeleteLocationOpts) (
 	res *openapi.Response, err error,
 ) {
 	if err = auth.RequirePerm(ctx, auth.PermissionWrite); err != nil {

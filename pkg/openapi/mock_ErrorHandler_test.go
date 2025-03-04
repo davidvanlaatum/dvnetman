@@ -56,41 +56,6 @@ func (_c *MockErrorHandler_ErrorHandler_Call) RunAndReturn(run func(http.Respons
 	return _c
 }
 
-// WriteErrorHandler provides a mock function with given fields: w, r, err
-func (_m *MockErrorHandler) WriteErrorHandler(w http.ResponseWriter, r *http.Request, err error) {
-	_m.Called(w, r, err)
-}
-
-// MockErrorHandler_WriteErrorHandler_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'WriteErrorHandler'
-type MockErrorHandler_WriteErrorHandler_Call struct {
-	*mock.Call
-}
-
-// WriteErrorHandler is a helper method to define mock.On call
-//   - w http.ResponseWriter
-//   - r *http.Request
-//   - err error
-func (_e *MockErrorHandler_Expecter) WriteErrorHandler(w interface{}, r interface{}, err interface{}) *MockErrorHandler_WriteErrorHandler_Call {
-	return &MockErrorHandler_WriteErrorHandler_Call{Call: _e.mock.On("WriteErrorHandler", w, r, err)}
-}
-
-func (_c *MockErrorHandler_WriteErrorHandler_Call) Run(run func(w http.ResponseWriter, r *http.Request, err error)) *MockErrorHandler_WriteErrorHandler_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(http.ResponseWriter), args[1].(*http.Request), args[2].(error))
-	})
-	return _c
-}
-
-func (_c *MockErrorHandler_WriteErrorHandler_Call) Return() *MockErrorHandler_WriteErrorHandler_Call {
-	_c.Call.Return()
-	return _c
-}
-
-func (_c *MockErrorHandler_WriteErrorHandler_Call) RunAndReturn(run func(http.ResponseWriter, *http.Request, error)) *MockErrorHandler_WriteErrorHandler_Call {
-	_c.Run(run)
-	return _c
-}
-
 // NewMockErrorHandler creates a new instance of MockErrorHandler. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewMockErrorHandler(t interface {

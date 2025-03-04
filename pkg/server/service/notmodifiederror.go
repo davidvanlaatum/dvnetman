@@ -16,7 +16,7 @@ func (n *notModifiedError) Error() string {
 }
 
 func init() {
-	RegisterErrorConverter(
+	openapi.RegisterErrorConverter(
 		func(err error) *openapi.Response {
 			var e *notModifiedError
 			if errors.As(err, &e) {

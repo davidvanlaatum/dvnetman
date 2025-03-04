@@ -12,7 +12,16 @@ import (
 	"net/http"
 )
 
-func (s *Service) CreateUser(ctx context.Context, opts *openapi.CreateUserOpts) (res *openapi.Response, err error) {
+type UserService struct {
+	db   *modal.DBClient
+	auth *auth.Auth
+}
+
+func NewUserService(db *modal.DBClient, auth *auth.Auth) *UserService {
+	return &UserService{db: db, auth: auth}
+}
+
+func (s *UserService) CreateUser(ctx context.Context, opts *openapi.CreateUserOpts) (res *openapi.Response, err error) {
 	if err = auth.RequirePerm(ctx, auth.PermissionWrite); err != nil {
 		return
 	}
@@ -32,7 +41,7 @@ func (s *Service) CreateUser(ctx context.Context, opts *openapi.CreateUserOpts) 
 	return
 }
 
-func (s *Service) UpdateUser(ctx context.Context, opts *openapi.UpdateUserOpts) (res *openapi.Response, err error) {
+func (s *UserService) UpdateUser(ctx context.Context, opts *openapi.UpdateUserOpts) (res *openapi.Response, err error) {
 	if err = auth.RequirePerm(ctx, auth.PermissionWrite); err != nil {
 		return
 	}
@@ -55,7 +64,7 @@ func (s *Service) UpdateUser(ctx context.Context, opts *openapi.UpdateUserOpts) 
 	return
 }
 
-func (s *Service) DeleteUser(ctx context.Context, opts *openapi.DeleteUserOpts) (res *openapi.Response, err error) {
+func (s *UserService) DeleteUser(ctx context.Context, opts *openapi.DeleteUserOpts) (res *openapi.Response, err error) {
 	if err = auth.RequirePerm(ctx, auth.PermissionWrite); err != nil {
 		return
 	}
@@ -70,7 +79,7 @@ func (s *Service) DeleteUser(ctx context.Context, opts *openapi.DeleteUserOpts) 
 	return
 }
 
-func (s *Service) GetUser(ctx context.Context, opts *openapi.GetUserOpts) (res *openapi.Response, err error) {
+func (s *UserService) GetUser(ctx context.Context, opts *openapi.GetUserOpts) (res *openapi.Response, err error) {
 	if err = auth.RequirePerm(ctx, auth.PermissionRead); err != nil {
 		return
 	}
@@ -80,7 +89,7 @@ func (s *Service) GetUser(ctx context.Context, opts *openapi.GetUserOpts) (res *
 		return
 	}
 	res = &openapi.Response{}
-	if err = s.checkIfModified(opts.IfNoneMatch, opts.IfModifiedSince, d.Version, d.Updated, res); err != nil {
+	if err = checkIfModified(opts.IfNoneMatch, opts.IfModifiedSince, d.Version, d.Updated, res); err != nil {
 		return
 	}
 	if res.Object, err = c.UserToOpenAPI(ctx, d); err != nil {
@@ -90,7 +99,7 @@ func (s *Service) GetUser(ctx context.Context, opts *openapi.GetUserOpts) (res *
 	return
 }
 
-func (s *Service) GetCurrentUser(ctx context.Context) (res *openapi.Response, err error) {
+func (s *UserService) GetCurrentUser(ctx context.Context) (res *openapi.Response, err error) {
 	res = &openapi.Response{
 		Code: http.StatusOK,
 		Object: &openapi.CurrentUser{
@@ -115,7 +124,7 @@ func convertProvider(provider auth.Provider) *openapi.UserProvider {
 	}
 }
 
-func (s *Service) GetUserProviders(ctx context.Context) (res *openapi.Response, err error) {
+func (s *UserService) GetUserProviders(ctx context.Context) (res *openapi.Response, err error) {
 	res = &openapi.Response{
 		Code:   http.StatusOK,
 		Object: utils.MapTo(s.auth.AuthProviders(), convertProvider),
@@ -123,7 +132,7 @@ func (s *Service) GetUserProviders(ctx context.Context) (res *openapi.Response, 
 	return
 }
 
-func (s *Service) ListUsers(ctx context.Context, opts *openapi.ListUsersOpts) (res *openapi.Response, err error) {
+func (s *UserService) ListUsers(ctx context.Context, opts *openapi.ListUsersOpts) (res *openapi.Response, err error) {
 	if err = auth.RequirePerm(ctx, auth.PermissionRead); err != nil {
 		return
 	}
@@ -142,7 +151,7 @@ func (s *Service) ListUsers(ctx context.Context, opts *openapi.ListUsersOpts) (r
 	search.equalsStr("display_name", opts.Body.DisplayName)
 	search.regex("display_name_regex", opts.Body.DisplayNameRegex, "i")
 	findOpts := options.Find().SetLimit(size + 1).SetSkip(page * size)
-	if findOpts, err = s.setProjection(opts.Body.Fields, []string{"model", "manufacturer"}, findOpts); err != nil {
+	if findOpts, err = setProjection(opts.Body.Fields, []string{"model", "manufacturer"}, findOpts); err != nil {
 		return
 	}
 	var Users []*modal.User

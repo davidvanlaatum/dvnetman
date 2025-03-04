@@ -12,7 +12,15 @@ import (
 	"net/http"
 )
 
-func (s *Service) CreateSite(ctx context.Context, opts *openapi.CreateSiteOpts) (
+type SiteService struct {
+	db *modal.DBClient
+}
+
+func NewSiteService(db *modal.DBClient) *SiteService {
+	return &SiteService{db: db}
+}
+
+func (s *SiteService) CreateSite(ctx context.Context, opts *openapi.CreateSiteOpts) (
 	res *openapi.Response, err error,
 ) {
 	if err = auth.RequirePerm(ctx, auth.PermissionWrite); err != nil {
@@ -34,7 +42,7 @@ func (s *Service) CreateSite(ctx context.Context, opts *openapi.CreateSiteOpts) 
 	return
 }
 
-func (s *Service) UpdateSite(ctx context.Context, opts *openapi.UpdateSiteOpts) (
+func (s *SiteService) UpdateSite(ctx context.Context, opts *openapi.UpdateSiteOpts) (
 	res *openapi.Response, err error,
 ) {
 	if err = auth.RequirePerm(ctx, auth.PermissionWrite); err != nil {
@@ -60,7 +68,7 @@ func (s *Service) UpdateSite(ctx context.Context, opts *openapi.UpdateSiteOpts) 
 	return
 }
 
-func (s *Service) GetSite(ctx context.Context, opts *openapi.GetSiteOpts) (res *openapi.Response, err error) {
+func (s *SiteService) GetSite(ctx context.Context, opts *openapi.GetSiteOpts) (res *openapi.Response, err error) {
 	if err = auth.RequirePerm(ctx, auth.PermissionRead); err != nil {
 		return
 	}
@@ -70,7 +78,7 @@ func (s *Service) GetSite(ctx context.Context, opts *openapi.GetSiteOpts) (res *
 		return
 	}
 	res = &openapi.Response{}
-	if err = s.checkIfModified(opts.IfNoneMatch, opts.IfModifiedSince, d.Version, d.Updated, res); err != nil {
+	if err = checkIfModified(opts.IfNoneMatch, opts.IfModifiedSince, d.Version, d.Updated, res); err != nil {
 		return
 	}
 	if res.Object, err = c.SiteToOpenAPI(ctx, d); err != nil {
@@ -80,7 +88,7 @@ func (s *Service) GetSite(ctx context.Context, opts *openapi.GetSiteOpts) (res *
 	return
 }
 
-func (s *Service) ListSites(ctx context.Context, opts *openapi.ListSitesOpts) (
+func (s *SiteService) ListSites(ctx context.Context, opts *openapi.ListSitesOpts) (
 	res *openapi.Response, err error,
 ) {
 	if err = auth.RequirePerm(ctx, auth.PermissionRead); err != nil {
@@ -97,7 +105,7 @@ func (s *Service) ListSites(ctx context.Context, opts *openapi.ListSitesOpts) (
 	search.regex("name", opts.Body.NameRegex, "i")
 	var sites []*modal.Site
 	findOpts := options.Find().SetLimit(size + 1).SetSkip(page * size)
-	if findOpts, err = s.setProjection(
+	if findOpts, err = setProjection(
 		opts.Body.Fields, []string{"name", "site_type", "status"}, findOpts,
 	); err != nil {
 		return
@@ -121,7 +129,7 @@ func (s *Service) ListSites(ctx context.Context, opts *openapi.ListSitesOpts) (
 	return
 }
 
-func (s *Service) DeleteSite(ctx context.Context, opts *openapi.DeleteSiteOpts) (
+func (s *SiteService) DeleteSite(ctx context.Context, opts *openapi.DeleteSiteOpts) (
 	res *openapi.Response, err error,
 ) {
 	if err = auth.RequirePerm(ctx, auth.PermissionWrite); err != nil {

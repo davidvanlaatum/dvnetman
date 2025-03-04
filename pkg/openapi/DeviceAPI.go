@@ -4,6 +4,7 @@ package openapi
 
 import (
 	"context"
+	logger "dvnetman/pkg/logger"
 	utils "dvnetman/pkg/utils"
 	"encoding/json"
 	uuid "github.com/google/uuid"
@@ -66,7 +67,7 @@ func (h *DeviceAPIHandler) CreateDevice(w http.ResponseWriter, r *http.Request) 
 	} else if res == nil {
 		h.errors.ErrorHandler(w, r, errors.Errorf("no response returned"))
 	} else if err = res.Write(r, w); err != nil {
-		h.errors.WriteErrorHandler(w, r, err)
+		logger.Info(r.Context()).Err(err).Msg("error writing response")
 	}
 }
 func (h *DeviceAPIHandler) ListDevices(w http.ResponseWriter, r *http.Request) {
@@ -108,7 +109,7 @@ func (h *DeviceAPIHandler) ListDevices(w http.ResponseWriter, r *http.Request) {
 	} else if res == nil {
 		h.errors.ErrorHandler(w, r, errors.Errorf("no response returned"))
 	} else if err = res.Write(r, w); err != nil {
-		h.errors.WriteErrorHandler(w, r, err)
+		logger.Info(r.Context()).Err(err).Msg("error writing response")
 	}
 }
 func (h *DeviceAPIHandler) DeleteDevice(w http.ResponseWriter, r *http.Request) {
@@ -125,7 +126,7 @@ func (h *DeviceAPIHandler) DeleteDevice(w http.ResponseWriter, r *http.Request) 
 	} else if res == nil {
 		h.errors.ErrorHandler(w, r, errors.Errorf("no response returned"))
 	} else if err = res.Write(r, w); err != nil {
-		h.errors.WriteErrorHandler(w, r, err)
+		logger.Info(r.Context()).Err(err).Msg("error writing response")
 	}
 }
 func (h *DeviceAPIHandler) GetDevice(w http.ResponseWriter, r *http.Request) {
@@ -155,7 +156,7 @@ func (h *DeviceAPIHandler) GetDevice(w http.ResponseWriter, r *http.Request) {
 	} else if res == nil {
 		h.errors.ErrorHandler(w, r, errors.Errorf("no response returned"))
 	} else if err = res.Write(r, w); err != nil {
-		h.errors.WriteErrorHandler(w, r, err)
+		logger.Info(r.Context()).Err(err).Msg("error writing response")
 	}
 }
 func (h *DeviceAPIHandler) UpdateDevice(w http.ResponseWriter, r *http.Request) {
@@ -182,7 +183,7 @@ func (h *DeviceAPIHandler) UpdateDevice(w http.ResponseWriter, r *http.Request) 
 	} else if res == nil {
 		h.errors.ErrorHandler(w, r, errors.Errorf("no response returned"))
 	} else if err = res.Write(r, w); err != nil {
-		h.errors.WriteErrorHandler(w, r, err)
+		logger.Info(r.Context()).Err(err).Msg("error writing response")
 	}
 }
 func AttachDeviceAPI(service DeviceAPI, errors ErrorHandler, router *mux.Router) {

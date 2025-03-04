@@ -4,6 +4,7 @@ package openapi
 
 import (
 	"context"
+	logger "dvnetman/pkg/logger"
 	mux "github.com/gorilla/mux"
 	errors "github.com/pkg/errors"
 	"net/http"
@@ -25,7 +26,7 @@ func (h *StatsAPIHandler) GetStats(w http.ResponseWriter, r *http.Request) {
 	} else if res == nil {
 		h.errors.ErrorHandler(w, r, errors.Errorf("no response returned"))
 	} else if err = res.Write(r, w); err != nil {
-		h.errors.WriteErrorHandler(w, r, err)
+		logger.Info(r.Context()).Err(err).Msg("error writing response")
 	}
 }
 func AttachStatsAPI(service StatsAPI, errors ErrorHandler, router *mux.Router) {

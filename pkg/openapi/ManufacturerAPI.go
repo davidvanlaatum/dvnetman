@@ -4,6 +4,7 @@ package openapi
 
 import (
 	"context"
+	logger "dvnetman/pkg/logger"
 	utils "dvnetman/pkg/utils"
 	"encoding/json"
 	uuid "github.com/google/uuid"
@@ -66,7 +67,7 @@ func (h *ManufacturerAPIHandler) CreateManufacturer(w http.ResponseWriter, r *ht
 	} else if res == nil {
 		h.errors.ErrorHandler(w, r, errors.Errorf("no response returned"))
 	} else if err = res.Write(r, w); err != nil {
-		h.errors.WriteErrorHandler(w, r, err)
+		logger.Info(r.Context()).Err(err).Msg("error writing response")
 	}
 }
 func (h *ManufacturerAPIHandler) ListManufacturers(w http.ResponseWriter, r *http.Request) {
@@ -108,7 +109,7 @@ func (h *ManufacturerAPIHandler) ListManufacturers(w http.ResponseWriter, r *htt
 	} else if res == nil {
 		h.errors.ErrorHandler(w, r, errors.Errorf("no response returned"))
 	} else if err = res.Write(r, w); err != nil {
-		h.errors.WriteErrorHandler(w, r, err)
+		logger.Info(r.Context()).Err(err).Msg("error writing response")
 	}
 }
 func (h *ManufacturerAPIHandler) DeleteManufacturer(w http.ResponseWriter, r *http.Request) {
@@ -125,7 +126,7 @@ func (h *ManufacturerAPIHandler) DeleteManufacturer(w http.ResponseWriter, r *ht
 	} else if res == nil {
 		h.errors.ErrorHandler(w, r, errors.Errorf("no response returned"))
 	} else if err = res.Write(r, w); err != nil {
-		h.errors.WriteErrorHandler(w, r, err)
+		logger.Info(r.Context()).Err(err).Msg("error writing response")
 	}
 }
 func (h *ManufacturerAPIHandler) GetManufacturer(w http.ResponseWriter, r *http.Request) {
@@ -155,7 +156,7 @@ func (h *ManufacturerAPIHandler) GetManufacturer(w http.ResponseWriter, r *http.
 	} else if res == nil {
 		h.errors.ErrorHandler(w, r, errors.Errorf("no response returned"))
 	} else if err = res.Write(r, w); err != nil {
-		h.errors.WriteErrorHandler(w, r, err)
+		logger.Info(r.Context()).Err(err).Msg("error writing response")
 	}
 }
 func (h *ManufacturerAPIHandler) UpdateManufacturer(w http.ResponseWriter, r *http.Request) {
@@ -182,7 +183,7 @@ func (h *ManufacturerAPIHandler) UpdateManufacturer(w http.ResponseWriter, r *ht
 	} else if res == nil {
 		h.errors.ErrorHandler(w, r, errors.Errorf("no response returned"))
 	} else if err = res.Write(r, w); err != nil {
-		h.errors.WriteErrorHandler(w, r, err)
+		logger.Info(r.Context()).Err(err).Msg("error writing response")
 	}
 }
 func AttachManufacturerAPI(service ManufacturerAPI, errors ErrorHandler, router *mux.Router) {

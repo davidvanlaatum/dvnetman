@@ -5,12 +5,14 @@ import (
 	"context"
 	"dvnetman/pkg/logger"
 	"dvnetman/pkg/mongo/adapt"
+	"dvnetman/pkg/openapi"
 	"dvnetman/pkg/utils"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
+	"net/http"
 	"time"
 )
 
@@ -26,6 +28,39 @@ func register(c *CollectionInfo) {
 }
 
 var OptimisticLockError = errors.New("optimistic lock error")
+
+func init() {
+	openapi.RegisterErrorConverter(
+		func(err error) *openapi.Response {
+			if errors.Is(err, OptimisticLockError) {
+				return &openapi.Response{
+					Code: http.StatusConflict,
+					Object: openapi.APIErrorModal{
+						Errors: []*openapi.ErrorMessage{
+							{Code: "OPTIMISTIC_LOCK_ERROR", Message: "Optimistic lock error"},
+						},
+					},
+				}
+			}
+			return nil
+		},
+	)
+	openapi.RegisterErrorConverter(
+		func(err error) *openapi.Response {
+			if ok := errors.Is(err, mongo.ErrNoDocuments); ok {
+				return &openapi.Response{
+					Code: http.StatusNotFound,
+					Object: openapi.APIErrorModal{
+						Errors: []*openapi.ErrorMessage{
+							{Code: "NOT_FOUND", Message: err.Error()},
+						},
+					},
+				}
+			}
+			return nil
+		},
+	)
+}
 
 type DBClient struct {
 	db      mongoadapt.MongoDatabase

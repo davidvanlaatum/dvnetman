@@ -4,6 +4,7 @@ package openapi
 
 import (
 	"context"
+	logger "dvnetman/pkg/logger"
 	utils "dvnetman/pkg/utils"
 	"encoding/json"
 	uuid "github.com/google/uuid"
@@ -66,7 +67,7 @@ func (h *LocationAPIHandler) CreateLocation(w http.ResponseWriter, r *http.Reque
 	} else if res == nil {
 		h.errors.ErrorHandler(w, r, errors.Errorf("no response returned"))
 	} else if err = res.Write(r, w); err != nil {
-		h.errors.WriteErrorHandler(w, r, err)
+		logger.Info(r.Context()).Err(err).Msg("error writing response")
 	}
 }
 func (h *LocationAPIHandler) ListLocations(w http.ResponseWriter, r *http.Request) {
@@ -108,7 +109,7 @@ func (h *LocationAPIHandler) ListLocations(w http.ResponseWriter, r *http.Reques
 	} else if res == nil {
 		h.errors.ErrorHandler(w, r, errors.Errorf("no response returned"))
 	} else if err = res.Write(r, w); err != nil {
-		h.errors.WriteErrorHandler(w, r, err)
+		logger.Info(r.Context()).Err(err).Msg("error writing response")
 	}
 }
 func (h *LocationAPIHandler) DeleteLocation(w http.ResponseWriter, r *http.Request) {
@@ -125,7 +126,7 @@ func (h *LocationAPIHandler) DeleteLocation(w http.ResponseWriter, r *http.Reque
 	} else if res == nil {
 		h.errors.ErrorHandler(w, r, errors.Errorf("no response returned"))
 	} else if err = res.Write(r, w); err != nil {
-		h.errors.WriteErrorHandler(w, r, err)
+		logger.Info(r.Context()).Err(err).Msg("error writing response")
 	}
 }
 func (h *LocationAPIHandler) GetLocation(w http.ResponseWriter, r *http.Request) {
@@ -155,7 +156,7 @@ func (h *LocationAPIHandler) GetLocation(w http.ResponseWriter, r *http.Request)
 	} else if res == nil {
 		h.errors.ErrorHandler(w, r, errors.Errorf("no response returned"))
 	} else if err = res.Write(r, w); err != nil {
-		h.errors.WriteErrorHandler(w, r, err)
+		logger.Info(r.Context()).Err(err).Msg("error writing response")
 	}
 }
 func (h *LocationAPIHandler) UpdateLocation(w http.ResponseWriter, r *http.Request) {
@@ -182,7 +183,7 @@ func (h *LocationAPIHandler) UpdateLocation(w http.ResponseWriter, r *http.Reque
 	} else if res == nil {
 		h.errors.ErrorHandler(w, r, errors.Errorf("no response returned"))
 	} else if err = res.Write(r, w); err != nil {
-		h.errors.WriteErrorHandler(w, r, err)
+		logger.Info(r.Context()).Err(err).Msg("error writing response")
 	}
 }
 func AttachLocationAPI(service LocationAPI, errors ErrorHandler, router *mux.Router) {

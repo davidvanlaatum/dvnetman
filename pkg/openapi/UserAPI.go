@@ -4,6 +4,7 @@ package openapi
 
 import (
 	"context"
+	logger "dvnetman/pkg/logger"
 	utils "dvnetman/pkg/utils"
 	"encoding/json"
 	uuid "github.com/google/uuid"
@@ -68,7 +69,7 @@ func (h *UserAPIHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	} else if res == nil {
 		h.errors.ErrorHandler(w, r, errors.Errorf("no response returned"))
 	} else if err = res.Write(r, w); err != nil {
-		h.errors.WriteErrorHandler(w, r, err)
+		logger.Info(r.Context()).Err(err).Msg("error writing response")
 	}
 }
 func (h *UserAPIHandler) GetCurrentUser(w http.ResponseWriter, r *http.Request) {
@@ -79,7 +80,7 @@ func (h *UserAPIHandler) GetCurrentUser(w http.ResponseWriter, r *http.Request) 
 	} else if res == nil {
 		h.errors.ErrorHandler(w, r, errors.Errorf("no response returned"))
 	} else if err = res.Write(r, w); err != nil {
-		h.errors.WriteErrorHandler(w, r, err)
+		logger.Info(r.Context()).Err(err).Msg("error writing response")
 	}
 }
 func (h *UserAPIHandler) GetUserProviders(w http.ResponseWriter, r *http.Request) {
@@ -90,7 +91,7 @@ func (h *UserAPIHandler) GetUserProviders(w http.ResponseWriter, r *http.Request
 	} else if res == nil {
 		h.errors.ErrorHandler(w, r, errors.Errorf("no response returned"))
 	} else if err = res.Write(r, w); err != nil {
-		h.errors.WriteErrorHandler(w, r, err)
+		logger.Info(r.Context()).Err(err).Msg("error writing response")
 	}
 }
 func (h *UserAPIHandler) ListUsers(w http.ResponseWriter, r *http.Request) {
@@ -132,7 +133,7 @@ func (h *UserAPIHandler) ListUsers(w http.ResponseWriter, r *http.Request) {
 	} else if res == nil {
 		h.errors.ErrorHandler(w, r, errors.Errorf("no response returned"))
 	} else if err = res.Write(r, w); err != nil {
-		h.errors.WriteErrorHandler(w, r, err)
+		logger.Info(r.Context()).Err(err).Msg("error writing response")
 	}
 }
 func (h *UserAPIHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
@@ -149,7 +150,7 @@ func (h *UserAPIHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	} else if res == nil {
 		h.errors.ErrorHandler(w, r, errors.Errorf("no response returned"))
 	} else if err = res.Write(r, w); err != nil {
-		h.errors.WriteErrorHandler(w, r, err)
+		logger.Info(r.Context()).Err(err).Msg("error writing response")
 	}
 }
 func (h *UserAPIHandler) GetUser(w http.ResponseWriter, r *http.Request) {
@@ -179,7 +180,7 @@ func (h *UserAPIHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 	} else if res == nil {
 		h.errors.ErrorHandler(w, r, errors.Errorf("no response returned"))
 	} else if err = res.Write(r, w); err != nil {
-		h.errors.WriteErrorHandler(w, r, err)
+		logger.Info(r.Context()).Err(err).Msg("error writing response")
 	}
 }
 func (h *UserAPIHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
@@ -206,7 +207,7 @@ func (h *UserAPIHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	} else if res == nil {
 		h.errors.ErrorHandler(w, r, errors.Errorf("no response returned"))
 	} else if err = res.Write(r, w); err != nil {
-		h.errors.WriteErrorHandler(w, r, err)
+		logger.Info(r.Context()).Err(err).Msg("error writing response")
 	}
 }
 func AttachUserAPI(service UserAPI, errors ErrorHandler, router *mux.Router) {

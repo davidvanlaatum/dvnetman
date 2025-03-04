@@ -12,7 +12,15 @@ import (
 	"net/http"
 )
 
-func (s *Service) CreateDeviceType(ctx context.Context, opts *openapi.CreateDeviceTypeOpts) (
+type DeviceTypeService struct {
+	db *modal.DBClient
+}
+
+func NewDeviceTypeService(db *modal.DBClient) *DeviceTypeService {
+	return &DeviceTypeService{db: db}
+}
+
+func (s *DeviceTypeService) CreateDeviceType(ctx context.Context, opts *openapi.CreateDeviceTypeOpts) (
 	res *openapi.Response, err error,
 ) {
 	if err = auth.RequirePerm(ctx, auth.PermissionWrite); err != nil {
@@ -34,7 +42,7 @@ func (s *Service) CreateDeviceType(ctx context.Context, opts *openapi.CreateDevi
 	return
 }
 
-func (s *Service) UpdateDeviceType(ctx context.Context, opts *openapi.UpdateDeviceTypeOpts) (
+func (s *DeviceTypeService) UpdateDeviceType(ctx context.Context, opts *openapi.UpdateDeviceTypeOpts) (
 	res *openapi.Response, err error,
 ) {
 	if err = auth.RequirePerm(ctx, auth.PermissionWrite); err != nil {
@@ -59,7 +67,7 @@ func (s *Service) UpdateDeviceType(ctx context.Context, opts *openapi.UpdateDevi
 	return
 }
 
-func (s *Service) GetDeviceType(ctx context.Context, opts *openapi.GetDeviceTypeOpts) (
+func (s *DeviceTypeService) GetDeviceType(ctx context.Context, opts *openapi.GetDeviceTypeOpts) (
 	res *openapi.Response, err error,
 ) {
 	if err = auth.RequirePerm(ctx, auth.PermissionRead); err != nil {
@@ -71,7 +79,7 @@ func (s *Service) GetDeviceType(ctx context.Context, opts *openapi.GetDeviceType
 		return
 	}
 	res = &openapi.Response{}
-	if err = s.checkIfModified(opts.IfNoneMatch, opts.IfModifiedSince, d.Version, d.Updated, res); err != nil {
+	if err = checkIfModified(opts.IfNoneMatch, opts.IfModifiedSince, d.Version, d.Updated, res); err != nil {
 		return
 	}
 	if res.Object, err = c.DeviceTypeToOpenAPI(ctx, d); err != nil {
@@ -81,7 +89,7 @@ func (s *Service) GetDeviceType(ctx context.Context, opts *openapi.GetDeviceType
 	return
 }
 
-func (s *Service) ListDeviceTypes(ctx context.Context, opts *openapi.ListDeviceTypesOpts) (
+func (s *DeviceTypeService) ListDeviceTypes(ctx context.Context, opts *openapi.ListDeviceTypesOpts) (
 	res *openapi.Response, err error,
 ) {
 	if err = auth.RequirePerm(ctx, auth.PermissionRead); err != nil {
@@ -98,7 +106,7 @@ func (s *Service) ListDeviceTypes(ctx context.Context, opts *openapi.ListDeviceT
 	search.inUUID("id", utils.MapTo(opts.Body.Ids, modal.ConvertUUID))
 	search.inUUID("manufacturer", utils.MapTo(opts.Body.Manufacturer, modal.ConvertUUID))
 	findOpts := options.Find().SetLimit(size + 1).SetSkip(page * size)
-	if findOpts, err = s.setProjection(opts.Body.Fields, []string{"model", "manufacturer"}, findOpts); err != nil {
+	if findOpts, err = setProjection(opts.Body.Fields, []string{"model", "manufacturer"}, findOpts); err != nil {
 		return
 	}
 	var DeviceTypes []*modal.DeviceType
@@ -121,7 +129,7 @@ func (s *Service) ListDeviceTypes(ctx context.Context, opts *openapi.ListDeviceT
 	return
 }
 
-func (s *Service) DeleteDeviceType(ctx context.Context, opts *openapi.DeleteDeviceTypeOpts) (
+func (s *DeviceTypeService) DeleteDeviceType(ctx context.Context, opts *openapi.DeleteDeviceTypeOpts) (
 	res *openapi.Response, err error,
 ) {
 	if err = auth.RequirePerm(ctx, auth.PermissionWrite); err != nil {

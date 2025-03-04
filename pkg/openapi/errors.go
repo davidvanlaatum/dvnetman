@@ -3,13 +3,38 @@
 package openapi
 
 import (
+	logger "dvnetman/pkg/logger"
 	"fmt"
+	errors "github.com/pkg/errors"
 	"net/http"
 )
 
+type ErrorConverterFunc func(error) *Response
+
+var errorConverters []ErrorConverterFunc
+
+func RegisterErrorConverter(ec ErrorConverterFunc) {
+	errorConverters = append(errorConverters, ec)
+}
+
+type ErrorConverter struct{}
+
+func (ec *ErrorConverter) ErrorHandler(w http.ResponseWriter, r *http.Request, err error) {
+	for _, converter := range errorConverters {
+		if res := converter(err); res != nil {
+			if err := res.Write(r, w); err != nil {
+				logger.Error(r.Context()).Err(err).Msg("error writing error response")
+				return
+			}
+			return
+		}
+	}
+	logger.Error(r.Context()).Msg("no error converter found")
+	http.Error(w, err.Error(), http.StatusInternalServerError)
+}
+
 type ErrorHandler interface {
 	ErrorHandler(w http.ResponseWriter, r *http.Request, err error)
-	WriteErrorHandler(w http.ResponseWriter, r *http.Request, err error)
 }
 type PathParamError struct {
 	name string
@@ -24,6 +49,21 @@ func NewPathParamError(name string, err error) error {
 		err:  err,
 		name: name,
 	}
+}
+func init() {
+	RegisterErrorConverter(func(err error) *Response {
+		var pathParamError *PathParamError
+		if ok := errors.As(err, pathParamError); ok {
+			return &Response{
+				Code: http.StatusBadRequest,
+				Object: APIErrorModal{Errors: []*ErrorMessage{{
+					Code:    "invalid_path_param",
+					Message: err.Error(),
+				}}},
+			}
+		}
+		return nil
+	})
 }
 
 type QueryParamError struct {
@@ -40,6 +80,21 @@ func NewQueryParamError(name string, err error) error {
 		name: name,
 	}
 }
+func init() {
+	RegisterErrorConverter(func(err error) *Response {
+		var queryParamError *QueryParamError
+		if ok := errors.As(err, queryParamError); ok {
+			return &Response{
+				Code: http.StatusBadRequest,
+				Object: APIErrorModal{Errors: []*ErrorMessage{{
+					Code:    "invalid_query_param",
+					Message: err.Error(),
+				}}},
+			}
+		}
+		return nil
+	})
+}
 
 type BodyParamError struct {
 	err error
@@ -50,4 +105,19 @@ func (e BodyParamError) Error() string {
 }
 func NewBodyParamError(err error) error {
 	return &BodyParamError{err: err}
+}
+func init() {
+	RegisterErrorConverter(func(err error) *Response {
+		var bodyParamError *BodyParamError
+		if ok := errors.As(err, bodyParamError); ok {
+			return &Response{
+				Code: http.StatusBadRequest,
+				Object: APIErrorModal{Errors: []*ErrorMessage{{
+					Code:    "invalid_body_param",
+					Message: err.Error(),
+				}}},
+			}
+		}
+		return nil
+	})
 }

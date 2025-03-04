@@ -5,12 +5,22 @@ import (
 	"dvnetman/pkg/auth"
 	"dvnetman/pkg/cache"
 	"dvnetman/pkg/logger"
+	"dvnetman/pkg/mongo/modal"
 	"dvnetman/pkg/openapi"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"net/http"
 )
 
-func (s *Service) GetStats(ctx context.Context) (res *openapi.Response, err error) {
+type StatsService struct {
+	db    *modal.DBClient
+	cache cache.Pool
+}
+
+func NewStatsService(db *modal.DBClient, cache cache.Pool) *StatsService {
+	return &StatsService{db: db, cache: cache}
+}
+
+func (s *StatsService) GetStats(ctx context.Context) (res *openapi.Response, err error) {
 	if err = auth.RequirePerm(ctx, auth.PermissionRead); err != nil {
 		return
 	}

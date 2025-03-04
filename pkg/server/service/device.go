@@ -12,7 +12,17 @@ import (
 	"net/http"
 )
 
-func (s *Service) CreateDevice(ctx context.Context, opts *openapi.CreateDeviceOpts) (res *openapi.Response, err error) {
+type DeviceService struct {
+	db *modal.DBClient
+}
+
+func NewDeviceService(db *modal.DBClient) *DeviceService {
+	return &DeviceService{db: db}
+}
+
+func (s *DeviceService) CreateDevice(ctx context.Context, opts *openapi.CreateDeviceOpts) (
+	res *openapi.Response, err error,
+) {
 	if err = auth.RequirePerm(ctx, auth.PermissionWrite); err != nil {
 		return
 	}
@@ -32,7 +42,9 @@ func (s *Service) CreateDevice(ctx context.Context, opts *openapi.CreateDeviceOp
 	return
 }
 
-func (s *Service) UpdateDevice(ctx context.Context, opts *openapi.UpdateDeviceOpts) (res *openapi.Response, err error) {
+func (s *DeviceService) UpdateDevice(ctx context.Context, opts *openapi.UpdateDeviceOpts) (
+	res *openapi.Response, err error,
+) {
 	if err = auth.RequirePerm(ctx, auth.PermissionWrite); err != nil {
 		return
 	}
@@ -56,7 +68,7 @@ func (s *Service) UpdateDevice(ctx context.Context, opts *openapi.UpdateDeviceOp
 	return
 }
 
-func (s *Service) GetDevice(ctx context.Context, opts *openapi.GetDeviceOpts) (res *openapi.Response, err error) {
+func (s *DeviceService) GetDevice(ctx context.Context, opts *openapi.GetDeviceOpts) (res *openapi.Response, err error) {
 	if err = auth.RequirePerm(ctx, auth.PermissionRead); err != nil {
 		return
 	}
@@ -66,7 +78,7 @@ func (s *Service) GetDevice(ctx context.Context, opts *openapi.GetDeviceOpts) (r
 		return
 	}
 	res = &openapi.Response{}
-	if err = s.checkIfModified(opts.IfNoneMatch, opts.IfModifiedSince, d.Version, d.Updated, res); err != nil {
+	if err = checkIfModified(opts.IfNoneMatch, opts.IfModifiedSince, d.Version, d.Updated, res); err != nil {
 		return
 	}
 	if res.Object, err = c.DeviceToOpenAPI(ctx, d); err != nil {
@@ -76,7 +88,9 @@ func (s *Service) GetDevice(ctx context.Context, opts *openapi.GetDeviceOpts) (r
 	return
 }
 
-func (s *Service) ListDevices(ctx context.Context, opts *openapi.ListDevicesOpts) (res *openapi.Response, err error) {
+func (s *DeviceService) ListDevices(ctx context.Context, opts *openapi.ListDevicesOpts) (
+	res *openapi.Response, err error,
+) {
 	if err = auth.RequirePerm(ctx, auth.PermissionRead); err != nil {
 		return
 	}
@@ -97,7 +111,7 @@ func (s *Service) ListDevices(ctx context.Context, opts *openapi.ListDevicesOpts
 	search.regex("asset_tag", opts.Body.AssetTagRegex, "i")
 	var devices []*modal.Device
 	findOpts := options.Find().SetLimit(size + 1).SetSkip(page * size)
-	if findOpts, err = s.setProjection(
+	if findOpts, err = setProjection(
 		opts.Body.Fields, []string{"name", "device_type", "status"}, findOpts,
 	); err != nil {
 		return
@@ -121,7 +135,9 @@ func (s *Service) ListDevices(ctx context.Context, opts *openapi.ListDevicesOpts
 	return
 }
 
-func (s *Service) DeleteDevice(ctx context.Context, opts *openapi.DeleteDeviceOpts) (res *openapi.Response, err error) {
+func (s *DeviceService) DeleteDevice(ctx context.Context, opts *openapi.DeleteDeviceOpts) (
+	res *openapi.Response, err error,
+) {
 	if err = auth.RequirePerm(ctx, auth.PermissionWrite); err != nil {
 		return
 	}

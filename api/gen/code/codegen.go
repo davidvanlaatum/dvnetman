@@ -22,6 +22,7 @@ const muxPkg = "github.com/gorilla/mux"
 const uuidPkg = "github.com/google/uuid"
 const errorsPkg = "github.com/pkg/errors"
 const utilsPkg = "dvnetman/pkg/utils"
+const loggerPkg = "dvnetman/pkg/logger"
 const responseStruct = "Response"
 
 type CodeGen struct {
@@ -67,6 +68,7 @@ func (c *CodeGen) Generate(ctx context.Context, api *openapi.OpenAPI) (err error
 	if err = c.renderAPI(); err != nil {
 		return
 	}
+	c.renderErrorConverter()
 	c.renderErrors()
 	return nil
 }
@@ -323,7 +325,9 @@ func (c *CodeGen) renderAPIFunc(v *APIFunc) *Statement {
 				},
 			).Else().If(Err().Op("=").Id("res").Dot("Write").Call(Id("r"), Id("w")), Err().Op("!=").Nil()).BlockFunc(
 				func(g *Group) {
-					g.Id("h").Dot("errors").Dot("WriteErrorHandler").Call(Id("w"), Id("r"), Err())
+					g.Qual(
+						loggerPkg, "Info",
+					).Call(Id("r").Dot("Context").Call()).Dot("Err").Call(Err()).Dot("Msg").Call(Lit("error writing response"))
 				},
 			)
 		},
@@ -660,15 +664,93 @@ func (c *CodeGen) renderAPIFuncBodyParam(v *APIFunc, p *APIFuncParam, g *Group) 
 	)
 }
 
+func (c *CodeGen) renderErrorConverter() {
+	f := c.getFile("errors")
+	f.Type().Id("ErrorConverterFunc").Func().Params(Error()).Op("*").Id("Response")
+	f.Var().Id("errorConverters").Index().Id("ErrorConverterFunc")
+	f.Func().Id("RegisterErrorConverter").Params(Id("ec").Id("ErrorConverterFunc")).BlockFunc(
+		func(g *Group) {
+			g.Id("errorConverters").Op("=").Append(Id("errorConverters"), Id("ec"))
+		},
+	)
+	f.Type().Id("ErrorConverter").Struct()
+	f.Func().Params(Id("ec").Op("*").Id("ErrorConverter")).Id("ErrorHandler").Params(
+		Id("w").Qual(netHttpPkg, "ResponseWriter"), Id("r").Op("*").Qual(netHttpPkg, "Request"), Err().Error(),
+	).BlockFunc(
+		func(g *Group) {
+			g.For(List(Id("_"), Id("converter"))).Op(":=").Range().Id("errorConverters").BlockFunc(
+				func(g *Group) {
+					g.If(Id("res").Op(":=").Id("converter").Call(Err()), Id("res").Op("!=").Nil()).BlockFunc(
+						func(g *Group) {
+							g.If(
+								Err().Op(":=").Id("res").Dot("Write").Call(Id("r"), Id("w")), Err().Op("!=").Nil(),
+							).BlockFunc(
+								func(g *Group) {
+									g.Qual(
+										loggerPkg, "Error",
+									).Call(Id("r").Dot("Context").Call()).Dot("Err").Call(Err()).Dot("Msg").Call(Lit("error writing error response"))
+									g.Return()
+								},
+							)
+							g.Return()
+						},
+					)
+				},
+			)
+			g.Qual(loggerPkg, "Error").Call(Id("r").Dot("Context").Call()).Dot("Msg").Call(Lit("no error converter found"))
+			g.Qual(netHttpPkg, "Error").Call(
+				Id("w"),
+				Err().Dot("Error").Call(), Qual(netHttpPkg, "StatusInternalServerError"),
+			)
+		},
+	)
+}
+
+func (c *CodeGen) registerErrorHandler(f *File, errorType string, statusCode string, code string) {
+	varName := utils.LCFirst(errorType)
+	f.Func().Id("init").Params().BlockFunc(
+		func(g *Group) {
+			g.Id("RegisterErrorConverter").Call(
+				Func().Params(Err().Error()).Params(Op("*").Id("Response")).BlockFunc(
+					func(g *Group) {
+						g.Var().Id(varName).Op("*").Id(errorType)
+						g.If(Id("ok").Op(":=").Qual(errorsPkg, "As").Call(Err(), Id(varName)), Id("ok")).BlockFunc(
+							func(g *Group) {
+								g.Return(
+									Op("&").Id("Response").Values(
+										Dict{
+											Id("Code"): Qual(netHttpPkg, statusCode),
+											Id("Object"): Id("APIErrorModal").Values(
+												Dict{
+													Id("Errors"): Index().Op("*").Id("ErrorMessage").Values(
+														Values(
+															Dict{
+																Id("Code"):    Lit(code),
+																Id("Message"): Err().Dot("Error").Call(),
+															},
+														),
+													),
+												},
+											),
+										},
+									),
+								)
+							},
+						)
+						g.Return(Nil())
+					},
+				),
+			)
+		},
+	)
+}
+
 func (c *CodeGen) renderErrors() {
 	f := c.getFile("errors")
 
 	f.Type().Id("ErrorHandler").InterfaceFunc(
 		func(g *Group) {
 			g.Id("ErrorHandler").Params(
-				Id("w").Qual(netHttpPkg, "ResponseWriter"), Id("r").Op("*").Qual(netHttpPkg, "Request"), Err().Error(),
-			)
-			g.Id("WriteErrorHandler").Params(
 				Id("w").Qual(netHttpPkg, "ResponseWriter"), Id("r").Op("*").Qual(netHttpPkg, "Request"), Err().Error(),
 			)
 		},
@@ -706,6 +788,9 @@ func (c *CodeGen) renderErrors() {
 			)
 		},
 	)
+
+	c.registerErrorHandler(f, "PathParamError", "StatusBadRequest", "invalid_path_param")
+
 	f.Type().Id("QueryParamError").StructFunc(
 		func(g *Group) {
 			g.Id("name").String()
@@ -739,6 +824,8 @@ func (c *CodeGen) renderErrors() {
 		},
 	)
 
+	c.registerErrorHandler(f, "QueryParamError", "StatusBadRequest", "invalid_query_param")
+
 	f.Type().Id("BodyParamError").StructFunc(
 		func(g *Group) {
 			g.Err().Error()
@@ -768,6 +855,8 @@ func (c *CodeGen) renderErrors() {
 			)
 		},
 	)
+
+	c.registerErrorHandler(f, "BodyParamError", "StatusBadRequest", "invalid_body_param")
 }
 
 func (c *CodeGen) isGeneratedFile(path string) (ok bool, err error) {

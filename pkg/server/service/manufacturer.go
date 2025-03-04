@@ -12,7 +12,15 @@ import (
 	"net/http"
 )
 
-func (s *Service) CreateManufacturer(ctx context.Context, opts *openapi.CreateManufacturerOpts) (
+type ManufacturerService struct {
+	db *modal.DBClient
+}
+
+func NewManufacturerService(db *modal.DBClient) *ManufacturerService {
+	return &ManufacturerService{db: db}
+}
+
+func (s *ManufacturerService) CreateManufacturer(ctx context.Context, opts *openapi.CreateManufacturerOpts) (
 	res *openapi.Response, err error,
 ) {
 	if err = auth.RequirePerm(ctx, auth.PermissionWrite); err != nil {
@@ -34,7 +42,7 @@ func (s *Service) CreateManufacturer(ctx context.Context, opts *openapi.CreateMa
 	return
 }
 
-func (s *Service) UpdateManufacturer(ctx context.Context, opts *openapi.UpdateManufacturerOpts) (
+func (s *ManufacturerService) UpdateManufacturer(ctx context.Context, opts *openapi.UpdateManufacturerOpts) (
 	res *openapi.Response, err error,
 ) {
 	if err = auth.RequirePerm(ctx, auth.PermissionWrite); err != nil {
@@ -59,7 +67,7 @@ func (s *Service) UpdateManufacturer(ctx context.Context, opts *openapi.UpdateMa
 	return
 }
 
-func (s *Service) GetManufacturer(ctx context.Context, opts *openapi.GetManufacturerOpts) (
+func (s *ManufacturerService) GetManufacturer(ctx context.Context, opts *openapi.GetManufacturerOpts) (
 	res *openapi.Response, err error,
 ) {
 	if err = auth.RequirePerm(ctx, auth.PermissionRead); err != nil {
@@ -71,7 +79,7 @@ func (s *Service) GetManufacturer(ctx context.Context, opts *openapi.GetManufact
 		return
 	}
 	res = &openapi.Response{}
-	if err = s.checkIfModified(opts.IfNoneMatch, opts.IfModifiedSince, d.Version, d.Updated, res); err != nil {
+	if err = checkIfModified(opts.IfNoneMatch, opts.IfModifiedSince, d.Version, d.Updated, res); err != nil {
 		return
 	}
 	if res.Object, err = c.ManufacturerToOpenAPI(ctx, d); err != nil {
@@ -81,7 +89,7 @@ func (s *Service) GetManufacturer(ctx context.Context, opts *openapi.GetManufact
 	return
 }
 
-func (s *Service) ListManufacturers(ctx context.Context, opts *openapi.ListManufacturersOpts) (
+func (s *ManufacturerService) ListManufacturers(ctx context.Context, opts *openapi.ListManufacturersOpts) (
 	res *openapi.Response, err error,
 ) {
 	if err = auth.RequirePerm(ctx, auth.PermissionRead); err != nil {
@@ -114,7 +122,7 @@ func (s *Service) ListManufacturers(ctx context.Context, opts *openapi.ListManuf
 	return
 }
 
-func (s *Service) DeleteManufacturer(ctx context.Context, opts *openapi.DeleteManufacturerOpts) (
+func (s *ManufacturerService) DeleteManufacturer(ctx context.Context, opts *openapi.DeleteManufacturerOpts) (
 	res *openapi.Response, err error,
 ) {
 	if err = auth.RequirePerm(ctx, auth.PermissionWrite); err != nil {
