@@ -713,7 +713,7 @@ func (c *CodeGen) registerErrorHandler(f *File, errorType string, statusCode str
 			g.Id("RegisterErrorConverter").Call(
 				Func().Params(Err().Error()).Params(Op("*").Id("Response")).BlockFunc(
 					func(g *Group) {
-						g.Var().Id(varName).Op("*").Id(errorType)
+						g.Id(varName).Op(":=").Op("&").Id(errorType).Values()
 						g.If(Id("ok").Op(":=").Qual(errorsPkg, "As").Call(Err(), Id(varName)), Id("ok")).BlockFunc(
 							func(g *Group) {
 								g.Return(

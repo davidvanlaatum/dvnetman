@@ -90,6 +90,7 @@ func TestSession(t *testing.T) {
 				http.HandlerFunc(
 					func(w http.ResponseWriter, req *http.Request) {
 						session, err := s.Get(req, "test")
+						session.Values["test"] = "test"
 						r.NoError(err)
 						w.WriteHeader(http.StatusOK)
 						sessionId = session.ID

@@ -52,7 +52,7 @@ func NewPathParamError(name string, err error) error {
 }
 func init() {
 	RegisterErrorConverter(func(err error) *Response {
-		var pathParamError *PathParamError
+		pathParamError := &PathParamError{}
 		if ok := errors.As(err, pathParamError); ok {
 			return &Response{
 				Code: http.StatusBadRequest,
@@ -82,7 +82,7 @@ func NewQueryParamError(name string, err error) error {
 }
 func init() {
 	RegisterErrorConverter(func(err error) *Response {
-		var queryParamError *QueryParamError
+		queryParamError := &QueryParamError{}
 		if ok := errors.As(err, queryParamError); ok {
 			return &Response{
 				Code: http.StatusBadRequest,
@@ -108,7 +108,7 @@ func NewBodyParamError(err error) error {
 }
 func init() {
 	RegisterErrorConverter(func(err error) *Response {
-		var bodyParamError *BodyParamError
+		bodyParamError := &BodyParamError{}
 		if ok := errors.As(err, bodyParamError); ok {
 			return &Response{
 				Code: http.StatusBadRequest,

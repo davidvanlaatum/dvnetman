@@ -126,6 +126,10 @@ func (m *MongoStore) Save(r *http.Request, w http.ResponseWriter, s *sessions.Se
 		Key("name", s.Name()).
 		Msg("saving session")
 	if s.IsNew && s.Options.MaxAge > 0 {
+		if len(s.Values) == 0 {
+			l.Trace(ctx).Msg("session is new and empty, not saving")
+			return
+		}
 		l.Trace(ctx).Msg("insert")
 		err = m.insert(ctx, s)
 	} else if !s.IsNew && s.Options.MaxAge > 0 {

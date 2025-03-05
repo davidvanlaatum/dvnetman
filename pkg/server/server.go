@@ -16,7 +16,6 @@ import (
 	"dvnetman/pkg/ymlutil"
 	"dvnetman/web"
 	"encoding/base64"
-	"github.com/felixge/httpsnoop"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/securecookie"
@@ -117,19 +116,6 @@ func (s *Server) disconnectFromMongo(ctx context.Context) {
 	}
 }
 
-func accessLogMiddleware(handler http.Handler) http.Handler {
-	return http.HandlerFunc(
-		func(w http.ResponseWriter, r *http.Request) {
-			m := httpsnoop.CaptureMetrics(handler, w, r)
-			logger.Info(r.Context()).
-				Key("code", m.Code).
-				Key("duration", m.Duration).
-				Key("written", m.Written).
-				Msg("request")
-		},
-	)
-}
-
 func (s *Server) setupRouter(ctx context.Context) error {
 	s.errorHandler = &openapi.ErrorConverter{}
 	s.deviceService = service.NewDeviceService(s.client)
@@ -140,15 +126,26 @@ func (s *Server) setupRouter(ctx context.Context) error {
 	s.statsService = service.NewStatsService(s.client, s.cache)
 	s.userService = service.NewUserService(s.client, s.auth)
 	router := mux.NewRouter()
-	router.Use(handlers.RecoveryHandler(handlers.PrintRecoveryStack(true)))
-	router.Use(handlers.ProxyHeaders)
-	router.Use(otelhttp.NewMiddleware("http"))
-	router.Use(traceIDHeaderMiddleware)
-	router.Use(logContextMiddleware)
-	router.Use(mongosession.Middleware())
-	router.Use(s.auth.AuthMiddleware)
-	router.Use(handlers.CORS(handlers.AllowedOrigins([]string{"*"})))
-	router.Use(accessLogMiddleware)
+	middleWare := []mux.MiddlewareFunc{
+		recoveryMiddleware,
+		handlers.ProxyHeaders,
+		otelhttp.NewMiddleware("http"),
+		traceIDHeaderMiddleware,
+		logContextMiddleware,
+		mongosession.Middleware(),
+		s.auth.AuthMiddleware,
+		handlers.CORS(handlers.AllowedOrigins([]string{"*"})),
+		accessLogMiddleware,
+	}
+	for _, m := range middleWare {
+		router.Use(m)
+	}
+	notFound := http.HandlerFunc(s.notFound)
+	methodNotAllowed := http.HandlerFunc(s.methodNotAllowed)
+	for i := len(middleWare) - 1; i >= 0; i-- {
+		notFound = middleWare[i](notFound).ServeHTTP
+		methodNotAllowed = middleWare[i](methodNotAllowed).ServeHTTP
+	}
 	s.auth.AddRoutes(router)
 	router.Methods(http.MethodGet).Path("/api/openapi.yaml").HandlerFunc(s.openapiSpec).Name("OpenAPI")
 	openapi.AttachDeviceTypeAPI(s.deviceTypeService, s.errorHandler, router)
@@ -173,8 +170,8 @@ func (s *Server) setupRouter(ctx context.Context) error {
 				l.Key("path", path)
 			}
 			l.Msg("Route")
-			router.NotFoundHandler = http.HandlerFunc(s.notFound)
-			router.MethodNotAllowedHandler = http.HandlerFunc(s.methodNotAllowed)
+			router.NotFoundHandler = notFound
+			router.MethodNotAllowedHandler = methodNotAllowed
 			return nil
 		},
 	)
