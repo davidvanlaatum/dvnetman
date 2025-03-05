@@ -29,8 +29,11 @@ type DeviceType struct {
 	Description  string `bson:"description,omitempty"`
 	Height       int    `bson:"height,omitempty"`
 	FullDepth    bool   `bson:"full_depth,omitempty"`
+	Virtual      bool   `bson:"virtual,omitempty"`
 	PartNumber   string `bson:"part_number,omitempty"`
 	Comments     string `bson:"comments,omitempty"`
+	FrontImage   *UUID  `bson:"front_image,omitempty"`
+	RearImage    *UUID  `bson:"rear_image,omitempty"`
 
 	Ports []DeviceTypePort `bson:"ports,omitempty"`
 }

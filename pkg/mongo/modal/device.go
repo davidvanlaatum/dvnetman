@@ -5,6 +5,7 @@ import (
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
+	"time"
 )
 
 type PoEMode string
@@ -108,6 +109,12 @@ const (
 	RackFaceBack  RackFace = "back"
 )
 
+type Slot struct {
+	Id   string `bson:"id,minsize:36"`
+	Name string `bson:"name"`
+	Type string `bson:"type,omitempty"`
+}
+
 type Device struct {
 	Base         `bson:",inline"`
 	Name         *string       `bson:"name,omitempty"`
@@ -121,7 +128,10 @@ type Device struct {
 	DeviceType   *UUID         `bson:"device_type,omitempty"`
 	Serial       *string       `bson:"serial,omitempty"`
 	AssetTag     *string       `bson:"asset_tag,omitempty"`
-	Ports        []DevicePort  `bson:"ports,omitempty"`
+	InstallDate  *time.Time    `bson:"install_date,omitempty"`
+
+	Ports []DevicePort `bson:"ports,omitempty"`
+	Slots []Slot       `bson:"slots,omitempty"`
 }
 
 func init() {
